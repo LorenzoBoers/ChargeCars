@@ -1,5 +1,7 @@
 import React from 'react';
-import { withAuth, useAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
+import { useProtectedRoute } from '../hooks/useProtectedRoute';
+import ThemeToggle from '../components/ThemeToggle';
 import {
   Card,
   CardBody,
@@ -20,48 +22,68 @@ import OrderManagement from '../components/OrderManagement';
 
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const { isReady } = useProtectedRoute();
 
-  return (
-    <div className="min-h-screen bg-black">
+  // Show loading state while checking auth
+  if (!isReady) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mx-auto mb-4">
+            <BoltIcon className="h-7 w-7 text-white animate-pulse" />
+          </div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+      return (
+      <div className="min-h-screen bg-background transition-colors duration-200">
       {/* Header */}
-      <div className="bg-content1 border-b border-gray-800 p-4">
+      <div className="bg-content1 border-b border-divider p-4 transition-colors duration-200">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-              <BoltIcon className="h-6 w-6 text-white" />
+            <div className="flex items-center justify-center">
+              <img 
+                src="/svg/chargecars-logo.svg" 
+                alt="ChargeCars" 
+                className="h-10 w-auto"
+              />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">ChargeCars V2</h1>
-              <p className="text-xs text-gray-400">Order Management System</p>
+              <h1 className="text-xl font-bold text-foreground">ChargeCars V2</h1>
+              <p className="text-xs text-default-500">Order Management System</p>
             </div>
           </div>
 
-          {/* User Profile */}
+          {/* User Profile & Controls */}
           <div className="flex items-center gap-4">
-            <Card className="bg-content2 border-gray-700">
+            <ThemeToggle size="sm" />
+            <Card className="bg-content2 border-divider">
               <CardBody className="p-3">
                 <div className="flex items-center gap-3">
                   <Avatar
                     size="sm"
-                    name={(user?.first_name || user?.email || 'User').charAt(0).toUpperCase()}
+                    name={(user?.contact?.first_name || user?.email || 'User').charAt(0).toUpperCase()}
                     className="bg-primary text-white"
                   />
                   <div className="flex flex-col">
-                    <p className="text-sm font-medium text-white">
-                      {user?.first_name && user?.last_name 
-                        ? `${user.first_name} ${user.last_name}`
+                    <p className="text-sm font-medium text-foreground">
+                      {user?.contact?.first_name && user?.contact?.last_name 
+                        ? `${user.contact.first_name} ${user.contact.last_name}`
                         : user?.email || 'User'
                       }
                     </p>
-                    <p className="text-xs text-gray-400">{user?.email || 'No email available'}</p>
+                    <p className="text-xs text-default-500">{user?.email || 'No email available'}</p>
                   </div>
                   <Chip
                     size="sm"
                     variant="flat"
-                    color={user?.is_active ? "success" : "danger"}
+                    color="primary"
                   >
-                    {user?.is_active ? "Active" : "Inactive"}
+                    Active
                   </Chip>
                 </div>
               </CardBody>
@@ -72,7 +94,7 @@ const Dashboard: React.FC = () => {
               size="sm"
               startContent={<ArrowRightOnRectangleIcon className="h-4 w-4" />}
               onPress={logout}
-              className="text-gray-400 hover:text-red-400"
+              className="text-default-500 hover:text-danger"
             >
               Logout
             </Button>
@@ -84,114 +106,81 @@ const Dashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto p-6">
         {/* Welcome Section */}
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-white mb-2">
-            Welcome back, {user?.first_name || user?.email?.split('@')[0] || 'User'}!
-          </h2>
-          <p className="text-gray-400">
-            Manage your orders and track installations from your dashboard.
-          </p>
+          <h2 className="text-2xl font-bold text-foreground mb-2">
+            Welcome back, {user?.contact?.first_name || user?.email?.split('@')[0] || 'User'}!
+                      </h2>
+            <p className="text-default-500">
+              Manage your orders and track installations from your dashboard.
+            </p>
         </div>
 
         {/* User Info Card */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-content1 border-gray-800">
+          <Card className="bg-content1 border-divider">
             <CardHeader>
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                 <UserIcon className="h-5 w-5" />
                 User Profile
               </h3>
             </CardHeader>
             <CardBody className="space-y-3">
               <div className="flex justify-between">
-                <span className="text-gray-400">Name:</span>
-                <span className="text-white">
-                  {user?.first_name && user?.last_name 
-                    ? `${user.first_name} ${user.last_name}`
+                <span className="text-default-500">Name:</span>
+                <span className="text-foreground">
+                  {user?.contact?.first_name && user?.contact?.last_name 
+                    ? `${user.contact.first_name} ${user.contact.last_name}`
                     : user?.email || 'Not available'
                   }
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Email:</span>
-                <span className="text-white">{user?.email || 'Not available'}</span>
+                <span className="text-default-500">Email:</span>
+                <span className="text-foreground">{user?.email || 'Not available'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">User ID:</span>
-                <span className="text-white font-mono text-xs">{user?.id}</span>
+                <span className="text-default-500">User ID:</span>
+                <span className="text-foreground font-mono text-xs">{user?.id}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Contact ID:</span>
-                <span className="text-white font-mono text-xs">{user?.contact_id}</span>
+                <span className="text-default-500">Contact ID:</span>
+                <span className="text-foreground font-mono text-xs">{user?.contact?.id}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Noloco ID:</span>
-                <span className="text-white">{user?.noloco_id}</span>
+                <span className="text-default-500">Role ID:</span>
+                <span className="text-foreground font-mono text-xs">{user?.role_id}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Contact Type:</span>
-                <span className="text-white capitalize">{user?.contact_type || 'N/A'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Access Level:</span>
-                <span className="text-white capitalize">{user?.access_level || 'N/A'}</span>
+                <span className="text-default-500">Organization:</span>
+                <span className="text-foreground">{user?.organization?.name || 'N/A'}</span>
               </div>
             </CardBody>
           </Card>
 
-          <Card className="bg-content1 border-gray-800">
+          <Card className="bg-content1 border-divider">
             <CardHeader>
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
                 <BuildingOfficeIcon className="h-5 w-5" />
                 Account Status
               </h3>
             </CardHeader>
             <CardBody className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Account Status:</span>
+                <span className="text-default-500">Account Status:</span>
                 <Chip 
-                  color={user?.is_active ? "success" : "danger"}
+                  color="success"
                   variant="flat"
                   size="sm"
                 >
-                  {user?.is_active ? "Active" : "Inactive"}
+                  Active
                 </Chip>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Email Verified:</span>
-                <Chip 
-                  color={user?.email_verified ? "success" : "warning"}
-                  variant="flat"
-                  size="sm"
-                >
-                  {user?.email_verified ? "Verified" : "Pending"}
-                </Chip>
+                <span className="text-default-500">Organization Type:</span>
+                <span className="text-foreground capitalize">{user?.organization?.type || 'Unknown'}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-400">Last Login:</span>
-                <span className="text-white text-sm">
-                  {user?.last_login 
-                    ? new Date(user.last_login).toLocaleDateString() + ' ' + new Date(user.last_login).toLocaleTimeString()
-                    : 'Never'
-                  }
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Login Attempts:</span>
-                <span className="text-white">{user?.login_attempts || 0}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">2FA Enabled:</span>
-                <Chip 
-                  color={user?.two_factor_enabled ? "success" : "warning"}
-                  variant="flat"
-                  size="sm"
-                >
-                  {user?.two_factor_enabled ? "Yes" : "No"}
-                </Chip>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Role ID:</span>
-                <span className="text-white font-mono text-xs">{user?.role_id}</span>
+                <span className="text-default-500">Login Session:</span>
+                <span className="text-foreground text-sm">Active</span>
               </div>
             </CardBody>
           </Card>
@@ -229,4 +218,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default withAuth(Dashboard); 
+export default Dashboard; 

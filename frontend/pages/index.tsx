@@ -1,9 +1,12 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
+import { useTheme } from '../contexts/ThemeContext'
+import ThemeToggle from '../components/ThemeToggle'
 
 export default function HomePage() {
   const router = useRouter()
+  const { isDark } = useTheme()
 
   useEffect(() => {
     // Automatisch doorverwijzen naar dashboard
@@ -19,15 +22,21 @@ export default function HomePage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+      {/* Theme Toggle */}
+      <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 10 }}>
+        <ThemeToggle size="sm" />
+      </div>
+
       <div style={{
-        background: '#0a0a0a',
-        color: '#ffffff',
+        background: isDark ? '#0a0a0a' : '#f8fafc',
+        color: isDark ? '#ffffff' : '#1f2937',
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        fontFamily: 'Arial, sans-serif'
+        fontFamily: 'Arial, sans-serif',
+        transition: 'all 0.2s ease'
       }}>
         <div style={{
           color: '#0ea5e9',
