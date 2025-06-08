@@ -5,13 +5,13 @@
 
 ## 📊 **DATABASE OVERZICHT**
 
-### **Totaal: 58 Tabellen** (bijgewerkt per 2-6-2025) 🆔 **UUID ARCHITECTURE COMPLETE + ATTACHMENT OPTIMIZED**
-- **Organizations & Contacts**: 3 tabellen
+### **Totaal: 57 Tabellen** (bijgewerkt per 8-6-2025) 🆔 **CONTACT-CENTRIC ARCHITECTURE**
+- **Contacts (Unified Model)**: 2 tabellen (was Organizations & Contacts: 3 tabellen)
 - **Products & Inventory**: 2 tabellen  
 - **Intake & Forms System**: 6 tabellen
-- **Sales & Project Management**: 3 tabellen (order_status_history vervangen door universal status system)
+- **Sales & Project Management**: 3 tabellen (multi-contact order support)
 - **Operations & Installation**: 8 tabellen (inclusief nieuwe dynamic team management)
-- **Financial & Commissions**: 4 tabellen (inclusief nieuwe invoices/payments)
+- **Financial & Commissions**: 4 tabellen (channel commission support)
 - **Customer Experience**: 1 tabel (customer feedback/NPS)
 - **Communication System**: 5 tabellen (🆕 multichannel communication hub)
 - **Infrastructure & Support**: 13 tabellen (🆕 addresses, inventory, audit, unified attachments, API logging, monitoring)
@@ -77,57 +77,52 @@
 
 ---
 
-## 🏢 **ORGANIZATION & CONTACT** (3 tabellen)
+## 🏢 **CONTACT-CENTRIC ARCHITECTURE** (2 tabellen)
 
-### **organization** (ID: 35) 🆕 **ENHANCED WITH ADDRESS REFERENCES**
-**Primaire business entiteiten: klanten, partners, suppliers**
+### **contact** (ID: 36) 🆕 **UNIFIED CONTACT & ORGANIZATION MODEL**
+**Personen EN organisaties in één tabel met hiërarchische relaties**
 ```sql
 - id (UUID, Primary Key)
-- name (VARCHAR) - Organisatie naam
-- organization_type (ENUM) - customer_individual, customer_business, partner_automotive, etc.
-- parent_organization_id (UUID) - Hiërarchische relaties
+- contact_type (ENUM) - 'person', 'organization'
+- contact_subtype (ENUM) - 'Customer', 'Partner'
+- first_name, last_name (VARCHAR) - Voor personen OF organisatie naam delen
+- email (VARCHAR)
+- display_name (VARCHAR) - Weergave naam
 
--- 🆕 ADDRESS NORMALIZATION:
-- primary_address_id (UUID, FK → address) - Hoofdvestiging
-- billing_address_id (UUID, FK → address) - Factuuradres (als afwijkend)
-- shipping_address_id (UUID, FK → address) - Standaard leveradres
+-- 🆕 HIERARCHICAL CHANNELING:
+- parent_organization_id (UUID, FK → contact) - Parent organisatie voor oneindig channelen
+  - Voor personen: hun organisatie
+  - Voor organisaties: hun parent/dealer/conglomeraat
 
--- 🆕 COMPLETE BUSINESS DATA:
-- vat_number (TEXT) - BTW nummer
-- chamber_of_commerce (TEXT) - KvK nummer  
-- iban (TEXT) - Bank rekening
-- payment_terms (ENUM) - immediate, net_14, net_30, net_60, net_90
-- credit_limit (DECIMAL) - Kredietlimiet
-- preferred_payment_method (ENUM) - bank_transfer, credit_card, ideal, mollie, invoice
+-- CONTACT CLASSIFICATION:
+- is_primary (BOOLEAN) - Primair contact
+- is_billing_contact (BOOLEAN) - Facturatie contact
+- is_technical_contact (BOOLEAN) - Technisch contact
 
-- business_entity (ENUM) - chargecars, laderthuis, meterkastthuis, zaptecshop, ratioshop
-- partner_tier (ENUM) - platinum, gold, silver, bronze, starter
-- commission_rate (DECIMAL) - Partner commissie percentage
-```
-
-### **contact** (ID: 36) 🆕 **ENHANCED FOR TECHNICIAN SKILLS & PROFESSIONAL FIELDS**
-**Personen binnen organisaties met toegangsrechten en technician capabilities**
-```sql
-- id (UUID, Primary Key)
-- organization_id (UUID, FK → organization)
-- first_name, last_name, email (VARCHAR)
-- contact_type (ENUM) - customer, partner_manager, internal_sales, internal_technical, etc.
-- access_level (ENUM) - global_admin, partner_admin, sales_agent, read_only
-- has_portal_access (BOOLEAN)
-- portal_role (ENUM) - partner_manager, dealer_manager, view_only
-
--- 🆕 PROFESSIONAL FIELDS:
+-- PROFESSIONAL FIELDS (voor personen):
 - job_title (TEXT) - Functietitel
 - department (TEXT) - Afdeling/divisie
-- employee_number (TEXT) - Personeelsnummer
-- manager_contact_id (UUID, FK → contact) - Manager relatie
-- cost_center (TEXT) - Kostenplaats voor facturatie
+- whatsapp (VARCHAR) - WhatsApp nummer
 
--- 🆕 TECHNICIAN-SPECIFIC FIELDS:
+-- ORGANIZATION FIELDS (opgeslagen in custom fields/metadata):
+- VAT, KvK, IBAN → Gebruik partner_metadata in orders
+- Of maak custom fields in contact tabel
+
+-- PREFERENCES:
+- preferred_communication (ENUM) - email, phone, whatsapp, portal
+- communication_preferences (JSON) - Gedetailleerde voorkeuren
+
+-- TECHNICIAN-SPECIFIC FIELDS (voor personen):
 - technician_skills (JSON) - Individual skills and certifications
 - certification_level (ENUM) - apprentice, junior_technician, senior_technician, master_technician, team_leader
 - hire_date (DATE) - Employee start date for seniority tracking
 - emergency_contact (JSON) - Emergency contact information
+
+-- SYSTEM FIELDS:
+- is_active (BOOLEAN)
+- deleted (BOOLEAN) - Soft delete
+- created_at, updated_at (TIMESTAMP)
+- created_by, last_updated_by (UUID, FK → contact)
 ```
 
 ### **user_accounts** (ID: 49)
@@ -263,26 +258,38 @@
 
 ## 📊 **SALES & PROJECT MANAGEMENT** (3 tabellen)
 
-### **order** (ID: 37) 🆕 **ENHANCED WITH ADDRESS NORMALIZATION**
-**Klant orders en project management - HOOFDTABEL**
+### **order** (ID: 37) 🆕 **MULTI-CONTACT CHANNEL SUPPORT**
+**Orders met flexibele contact relaties voor channel structuur**
 ```sql
 - id (UUID, Primary Key)
 - order_number (VARCHAR, UNIQUE)
-- customer_organization_id (UUID, FK → organization)
-- partner_organization_id (UUID, FK → organization)
-- primary_contact_id (UUID, FK → contact)
-- order_type (ENUM) - installation, service, consultation
-- business_entity (ENUM)
-- order_status (ENUM) - draft, quoted, approved, scheduled, in_progress, completed
+- order_type (ENUM) - installation, maintenance, webshop, etc.
+- business_entity_id (UUID, FK → business_entity)
+- status (VARCHAR) - Flexible status managed by status engine
 
--- 🆕 ADDRESS NORMALIZATION (CRITICAL FIX):
-- installation_address (JSONB) - Legacy field (being phased out)
+-- 🆕 CONTACT RELATIONSHIPS (Channel Support):
+- account_contact_id (UUID, FK → contact) - Root contact voor order configuratie
+  - Dit kan een organisatie of persoon zijn
+  - Bepaalt prijzen, commissies, toegang
+  
+- end_customer_contact_id (UUID, FK → contact) - Eindklant
+  - De uiteindelijke gebruiker/eigenaar
+  - Kan dezelfde zijn als account_contact_id
+  
+- channel_contact_ids (UUID[], FK → contact) - Channel partners
+  - Array van tussenpartijen (dealers, conglomeraten)
+  - Voor commissie verdeling en communicatie
+
+-- ADDRESS REFERENCES:
 - installation_address_id (UUID, FK → address) - Normalized installatie adres
 - billing_address_id (UUID, FK → address) - Afwijkend factuuradres
 - shipping_address_id (UUID, FK → address) - Afwijkend leveringsadres
 
-- total_amount, total_cost (DECIMAL)
-- planned_start_date, planned_completion_date (DATE)
+-- PLANNING & METADATA:
+- requested_date, planned_completion_date, actual_completion_date (DATE)
+- priority_level (ENUM) - low, normal, high, urgent
+- partner_metadata (JSON) - External partner references
+- notes (TEXT)
 ```
 
 ### **quote** (ID: 39)
@@ -475,16 +482,19 @@
 
 ## 💰 **FINANCIAL & COMMISSIONS** (4 tabellen)
 
-### **partner_commission** (ID: 54)
-**Partner commissie tracking en payments**
+### **partner_commission** (ID: 54) 🆕 **CHANNEL COMMISSION SUPPORT**
+**Commissie tracking voor channel partners in hiërarchie**
 ```sql
 - id (UUID, Primary Key)
-- partner_organization_id (UUID, FK → organization)
 - order_id (UUID, FK → order)
+- beneficiary_contact_id (UUID, FK → contact) - Wie krijgt commissie
 - commission_amount (DECIMAL)
 - commission_rate (DECIMAL)
+- commission_level (INTEGER) - Position in channel hierarchy (1, 2, 3, etc.)
 - commission_status (ENUM) - pending, approved, paid
 - payment_date (DATE)
+- calculation_method (ENUM) - percentage, fixed, tiered
+- parent_commission_id (UUID, FK → partner_commission) - Voor cascade tracking
 ```
 
 ### **invoice** (ID: 61) 🆕
