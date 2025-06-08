@@ -1,0 +1,16 @@
+{
+  "test_timestamp": "2025-05-27T20:05:32.459982",
+  "api_documentation": "https://www.fillout.com/help/fillout-rest-api",
+  "api_key": "fill_633a8...0028502ee2",
+  "base_url": "https://api.fillout.com",
+  "successful_calls": [],
+  "failed_calls": [
+    {
+      "endpoint": "/v1/api/forms",
+      "url": "https://api.fillout.com/v1/api/forms",
+      "status": 400,
+      "error": "{\"statusCode\":400,\"error\":\"Bad Request\",\"message\":\"Incorrectly formatted API key was passed\"}"
+    }
+  ],
+  "errors": []
+}

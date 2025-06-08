@@ -1,0 +1,808 @@
+{
+  "generated_at": "2025-05-31T19:04:48.004545",
+  "overview": {
+    "xano_tables_count": 26,
+    "smartsuite_tables_count": 82,
+    "mapped_tables": [
+      {
+        "smartsuite": "Eindklanten",
+        "xano": "organizations (customer_individual)",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Organisaties",
+        "xano": "organizations (various types)",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Medewerkers",
+        "xano": "contacts (employee)",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Members",
+        "xano": "contacts (team_member)",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Producten",
+        "xano": "articles",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Artikelen",
+        "xano": "articles",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Line items",
+        "xano": "line_items",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Configuration line items",
+        "xano": "line_items (configured)",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Orders",
+        "xano": "orders",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Offertes",
+        "xano": "quotes",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Bezoeken",
+        "xano": "visits",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Werkbonnen",
+        "xano": "work_orders",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Teams",
+        "xano": "installation_teams",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Dag teams",
+        "xano": "installation_teams",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Bussen",
+        "xano": "vehicles",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Auto's",
+        "xano": "vehicles",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Intake formulieren",
+        "xano": "intake_forms",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Intake media",
+        "xano": "submission_files",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Machtigingen",
+        "xano": "sign_offs",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Akkoorden",
+        "xano": "sign_offs",
+        "implemented": true
+      },
+      {
+        "smartsuite": "Facturen",
+        "xano": "Not implemented yet",
+        "implemented": false
+      },
+      {
+        "smartsuite": "Betalingen",
+        "xano": "Not implemented yet",
+        "implemented": false
+      },
+      {
+        "smartsuite": "Postcodegebieden",
+        "xano": "service_regions",
+        "implemented": true
+      },
+      {
+        "smartsuite": "API clients",
+        "xano": "Not implemented - API management",
+        "implemented": false
+      },
+      {
+        "smartsuite": "Tokens",
+        "xano": "Not implemented - API management",
+        "implemented": false
+      }
+    ],
+    "missing_in_xano": [
+      "NPS formulieren",
+      "Correspondentie",
+      "Administraties",
+      "Links",
+      "Actieve gebruikers",
+      "Magazijnlabels",
+      "Incidenten",
+      "Taak types",
+      "Bezoek types",
+      "Sprints",
+      "Pickstatusses",
+      "Algemene agenda items",
+      "Adreslabels",
+      "Aanvraag types",
+      "Primaire wensen",
+      "Werkbon onderdelen",
+      "Zegels",
+      "Statusupdates",
+      "VVE project",
+      "Bezoekopties",
+      "calculation form preset",
+      "Draaiboek items",
+      "Annuleringsredenen",
+      "Eneco job creation",
+      "Kabel registraties",
+      "Project Taken",
+      "Monteurspassen",
+      "NL comments",
+      "Order forms",
+      "Uitgaande mails",
+      "Verwachtingen",
+      "Te verwerken in draaiboek",
+      "Vragen en acties",
+      "API endpoints",
+      "Tickets",
+      "Taken",
+      "Offerte info regels",
+      "Protocollen",
+      "Weekdagen",
+      "Roadmap items",
+      "Leads",
+      "Artikel type",
+      "Urenschatting",
+      "Laadstation registraties",
+      "Agenda records",
+      "Projecten",
+      "Verlofopgave",
+      "Dagen",
+      "Tijdsblokken",
+      "Externe artikelnummers",
+      "Bestanden",
+      "Proces (SOP)",
+      "Dealer selections",
+      "Beslissingen"
+    ],
+    "xano_only": [],
+    "mapping_coverage": 31.645569620253166
+  },
+  "categories": {
+    "Core Business": [
+      "Members",
+      "Organisaties",
+      "Eindklanten",
+      "Medewerkers"
+    ],
+    "Orders & Projects": [
+      "Orders",
+      "Offertes",
+      "Projecten"
+    ],
+    "Operations": [
+      "Teams",
+      "Bezoeken",
+      "Bussen",
+      "Dag teams",
+      "Werkbonnen 2022 - Juli 2023",
+      "Werkbonnen",
+      "Auto's"
+    ],
+    "Forms & Intake": [
+      "Intake formulieren",
+      "Intake media",
+      "NPS formulieren"
+    ],
+    "Financial": [
+      "Facturen",
+      "Betalingen"
+    ],
+    "System & Admin": [
+      "API clients",
+      "Tokens",
+      "API endpoints"
+    ],
+    "Archive/Concept": [
+      "Agenda tot 2023"
+    ],
+    "Unmapped": [
+      "Actieve gebruikers",
+      "Agenda records",
+      "Tijdsblokken",
+      "Administraties",
+      "Draaiboek items",
+      "Bestanden",
+      "Links",
+      "Algemene agenda items",
+      "Bezoek types",
+      "Aanvraag types",
+      "Statusupdates",
+      "Postcodegebieden",
+      "Artikelen",
+      "Verlofopgave",
+      "Offerte info regels",
+      "Producten",
+      "Artikel type",
+      "Externe artikelnummers",
+      "Line items",
+      "Configuration line items",
+      "Machtigingen",
+      "Werkbon onderdelen",
+      "Zegels",
+      "Laadstation registraties",
+      "Kabel registraties",
+      "Sprints",
+      "Primaire wensen",
+      "Verwachtingen",
+      "Proces (SOP)",
+      "Project Taken",
+      "Beslissingen",
+      "Akkoorden",
+      "Annuleringsredenen",
+      "Correspondentie",
+      "Urenschatting",
+      "Leads",
+      "calculation form preset",
+      "Pickstatusses",
+      "Protocollen",
+      "Vragen en acties",
+      "Dealer selections",
+      "Te verwerken in draaiboek",
+      "Magazijnlabels",
+      "Taken",
+      "Taak types",
+      "NL comments",
+      "Roadmap items",
+      "Tickets",
+      "Monteurspassen",
+      "Adreslabels",
+      "Incidenten",
+      "Uitgaande mails",
+      "Bestanden",
+      "Dagen",
+      "Weekdagen",
+      "Bezoekopties",
+      "VVE project",
+      "Order forms",
+      "Eneco job creation"
+    ]
+  },
+  "priorities": [
+    {
+      "table": "NPS formulieren",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Correspondentie",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Administraties",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Links",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Actieve gebruikers",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Magazijnlabels",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Incidenten",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Taak types",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Bezoek types",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Sprints",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Pickstatusses",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Algemene agenda items",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Adreslabels",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Aanvraag types",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Primaire wensen",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Werkbon onderdelen",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Zegels",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Statusupdates",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "VVE project",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Bezoekopties",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "calculation form preset",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Draaiboek items",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Annuleringsredenen",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Eneco job creation",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Kabel registraties",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Project Taken",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Monteurspassen",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "NL comments",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Order forms",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Uitgaande mails",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Verwachtingen",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Te verwerken in draaiboek",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Vragen en acties",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "API endpoints",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Tickets",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Taken",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Offerte info regels",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Protocollen",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Weekdagen",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Roadmap items",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Leads",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Artikel type",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Urenschatting",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Laadstation registraties",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Agenda records",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Projecten",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Verlofopgave",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Dagen",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Tijdsblokken",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Externe artikelnummers",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Bestanden",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Proces (SOP)",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Dealer selections",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    },
+    {
+      "table": "Beslissingen",
+      "priority": "LOW",
+      "reason": "Supporting functionality",
+      "suggested_xano_table": "To be determined"
+    }
+  ],
+  "xano_tables": {
+    "article_components": {
+      "id": 41,
+      "description": "Package contents and component relationships"
+    },
+    "articles": {
+      "id": 38,
+      "description": "Products, services, and packages"
+    },
+    "contacts": {
+      "id": 36,
+      "description": "Contacts belonging to organizations with hierarchical access control"
+    },
+    "form_analytics": {
+      "id": 56,
+      "description": "Form performance and user behavior tracking"
+    },
+    "form_field_templates": {
+      "id": 55,
+      "description": "Reusable field templates for form builder"
+    },
+    "form_submissions": {
+      "id": 43,
+      "description": "Customer form submissions with custom field data"
+    },
+    "installation_performance": {
+      "id": 53,
+      "description": "AI/ML data for installation time predictions and learning"
+    },
+    "installation_teams": {
+      "id": 51,
+      "description": "Installation teams with skills and availability tracking"
+    },
+    "intake_forms": {
+      "id": 42,
+      "description": "Configurable intake forms with custom fields"
+    },
+    "line_items": {
+      "id": 40,
+      "description": "Individual line items for quotes and orders with flexible billing"
+    },
+    "order_status_history": {
+      "id": 52,
+      "description": "Order status transitions with timestamps for KPI tracking"
+    },
+    "orders": {
+      "id": 37,
+      "description": "Customer orders and projects (dossiers)"
+    },
+    "organizations": {
+      "id": 35,
+      "description": "HubSpot-style organizations for customers, partners, and internal entities"
+    },
+    "partner_commissions": {
+      "id": 54,
+      "description": "Partner commission tracking and payments"
+    },
+    "quotes": {
+      "id": 39,
+      "description": "Quotes and offers for orders"
+    },
+    "service_regions": {
+      "id": 50,
+      "description": "Geographic service regions for team dispatch optimization"
+    },
+    "sign_off_line_items": {
+      "id": 48,
+      "description": "Junction table linking sign-offs to multiple line items"
+    },
+    "sign_offs": {
+      "id": 47,
+      "description": "Digital signatures and approvals for orders"
+    },
+    "submission_files": {
+      "id": 45,
+      "description": "Files uploaded through intake forms with categorization"
+    },
+    "submission_line_items": {
+      "id": 44,
+      "description": "Line items from intake forms for order conversion"
+    },
+    "team_vehicle_assignments": {
+      "id": 59,
+      "description": "Dynamic assignment of teams to vehicles with history tracking"
+    },
+    "user_accounts": {
+      "id": 49,
+      "description": "User authentication accounts linked to contacts"
+    },
+    "vehicle_tracking": {
+      "id": 58,
+      "description": "Real-time GPS tracking data from vehicle blackboxes"
+    },
+    "vehicles": {
+      "id": 57,
+      "description": "Fleet vehicles with equipment and tracking capabilities"
+    },
+    "visits": {
+      "id": 46,
+      "description": "Installation and service visits"
+    },
+    "work_orders": {
+      "id": 60,
+      "description": "Unified work orders with LMRA assessment as integrated phase"
+    }
+  },
+  "smartsuite_tables": [
+    "Teams",
+    "Bezoeken",
+    "Members",
+    "Actieve gebruikers",
+    "Bussen",
+    "Agenda records",
+    "Dag teams",
+    "Tijdsblokken",
+    "Administraties",
+    "Organisaties",
+    "Eindklanten",
+    "Orders",
+    "Agenda tot 2023",
+    "Werkbonnen 2022 - Juli 2023",
+    "Draaiboek items",
+    "Bestanden",
+    "Links",
+    "Offertes",
+    "Algemene agenda items",
+    "Bezoek types",
+    "Aanvraag types",
+    "API clients",
+    "Tokens",
+    "API endpoints",
+    "Statusupdates",
+    "Postcodegebieden",
+    "Artikelen",
+    "Verlofopgave",
+    "Offerte info regels",
+    "Producten",
+    "Artikel type",
+    "Externe artikelnummers",
+    "Line items",
+    "Configuration line items",
+    "Intake formulieren",
+    "Intake media",
+    "Machtigingen",
+    "Facturen",
+    "Werkbonnen",
+    "Werkbon onderdelen",
+    "Zegels",
+    "Laadstation registraties",
+    "Kabel registraties",
+    "Sprints",
+    "Primaire wensen",
+    "Verwachtingen",
+    "Proces (SOP)",
+    "Projecten",
+    "Project Taken",
+    "Beslissingen",
+    "Akkoorden",
+    "Betalingen",
+    "NPS formulieren",
+    "Annuleringsredenen",
+    "Correspondentie",
+    "Medewerkers",
+    "Urenschatting",
+    "Auto's",
+    "Leads",
+    "calculation form preset",
+    "Pickstatusses",
+    "Protocollen",
+    "Vragen en acties",
+    "Dealer selections",
+    "Te verwerken in draaiboek",
+    "Magazijnlabels",
+    "Taken",
+    "Taak types",
+    "NL comments",
+    "Roadmap items",
+    "Tickets",
+    "Monteurspassen",
+    "Adreslabels",
+    "Incidenten",
+    "Uitgaande mails",
+    "Bestanden",
+    "Dagen",
+    "Weekdagen",
+    "Bezoekopties",
+    "VVE project",
+    "Order forms",
+    "Eneco job creation"
+  ]
+}

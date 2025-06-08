@@ -1,0 +1,63 @@
+{
+  "test_timestamp": "2025-05-27T20:07:09.723334",
+  "original_key": "fill_633a84f5e6a1be0028502ee2",
+  "endpoint_tested": "/v1/api/forms",
+  "test_results": [
+    {
+      "key_format": "fill_633a84f5e6a1be0028502ee2",
+      "status": 400,
+      "response": "{\"statusCode\":400,\"error\":\"Bad Request\",\"message\":\"Incorrectly formatted API key was passed\"}"
+    },
+    {
+      "key_format": "633a84f5_e6a1be0028502ee2",
+      "status": 400,
+      "response": "{\"statusCode\":400,\"error\":\"Bad Request\",\"message\":\"Incorrectly formatted API key was passed\"}"
+    },
+    {
+      "key_format": "633a84f5e6a1be_0028502ee2",
+      "status": 400,
+      "response": "{\"statusCode\":400,\"error\":\"Bad Request\",\"message\":\"Incorrectly formatted API key was passed\"}"
+    },
+    {
+      "key_format": "633a84f5e6a1be0028_502ee2",
+      "status": 400,
+      "response": "{\"statusCode\":400,\"error\":\"Bad Request\",\"message\":\"Incorrectly formatted API key was passed\"}"
+    },
+    {
+      "key_format": "633a84f5e6a1be0028502e_e2",
+      "status": 400,
+      "response": "{\"statusCode\":400,\"error\":\"Bad Request\",\"message\":\"Incorrectly formatted API key was passed\"}"
+    },
+    {
+      "key_format": "api_633a84f5e6a1be0028502ee2",
+      "status": 400,
+      "response": "{\"statusCode\":400,\"error\":\"Bad Request\",\"message\":\"Incorrectly formatted API key was passed\"}"
+    },
+    {
+      "key_format": "key_633a84f5e6a1be0028502ee2",
+      "status": 400,
+      "response": "{\"statusCode\":400,\"error\":\"Bad Request\",\"message\":\"Incorrectly formatted API key was passed\"}"
+    },
+    {
+      "key_format": "fill633a84f5e6a1be0028502ee2_",
+      "status": 400,
+      "response": "{\"statusCode\":400,\"error\":\"Bad Request\",\"message\":\"invalid input syntax for type integer: \\\"\\\"\"}"
+    },
+    {
+      "key_format": "_fill_633a84f5e6a1be0028502ee2",
+      "status": 400,
+      "response": "{\"statusCode\":400,\"error\":\"Bad Request\",\"message\":\"Incorrectly formatted API key was passed\"}"
+    },
+    {
+      "key_format": "633a84f5_e6a1be0028502ee2_fill",
+      "status": 400,
+      "response": "{\"statusCode\":400,\"error\":\"Bad Request\",\"message\":\"Incorrectly formatted API key was passed\"}"
+    },
+    {
+      "key_format": "fill_633a84f5_e6a1be0028502ee2",
+      "status": 400,
+      "response": "{\"statusCode\":400,\"error\":\"Bad Request\",\"message\":\"Incorrectly formatted API key was passed\"}"
+    }
+  ],
+  "successful_format": null
+}

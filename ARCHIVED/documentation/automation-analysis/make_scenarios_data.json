@@ -1,0 +1,548 @@
+[
+  {
+    "url": "/204073/scenarios/2731430/edit",
+    "id": "2731430",
+    "title": "2.0 leadgen offerte generation - redirect url",
+    "operations": 972,
+    "creation_date": "12\n                            sep. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+27",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2779702/edit",
+    "id": "2779702",
+    "title": "50five input naar clickup",
+    "operations": 96,
+    "creation_date": "4\n                            okt. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+4",
+    "connected_apps": [
+      "Webhooks",
+      "Google Maps",
+      "Flow Control"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2318003/edit",
+    "id": "2318003",
+    "title": "50five job aanmelden form",
+    "folder": "50five",
+    "operations": 0,
+    "creation_date": "10\n                            mrt. 2024",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2871245/edit",
+    "id": "2871245",
+    "title": "Add images via comments on order",
+    "operations": 0,
+    "creation_date": "14\n                            nov. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+3",
+    "connected_apps": [
+      "Webhooks",
+      "Noloco (dev)",
+      "Flow Control"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2220221/edit",
+    "id": "2220221",
+    "title": "Adres validatie + geolocatie",
+    "folder": "Address\n                            validation",
+    "operations": 12449,
+    "creation_date": "30\n                            jan. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+9",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "Google Maps"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/3178415/edit",
+    "id": "3178415",
+    "title": "Alva charging email parsing",
+    "operations": 4848,
+    "creation_date": "2\n                            apr. 2025",
+    "creator": "Chargecars",
+    "additional_apps": "+12",
+    "connected_apps": [
+      "Microsoft 365 Email (Outlook)",
+      "OpenAI (ChatGPT, Whisper, DALL-E)",
+      "Scenarios"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2318626/edit",
+    "id": "2318626",
+    "title": "Bedrijfslogo URL generatie",
+    "operations": 0,
+    "creation_date": "10\n                            mrt. 2024",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/3136436/edit",
+    "id": "3136436",
+    "title": "Bezoekopties voorstellen",
+    "folder": "Planning",
+    "operations": 0,
+    "creation_date": "14\n                            mrt. 2025",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2569419/edit",
+    "id": "2569419",
+    "title": "Calculatie intake offerte aanvragen",
+    "operations": 0,
+    "creation_date": "27\n                            jun. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+10",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "Flow Control"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2228121/edit",
+    "id": "2228121",
+    "title": "CC access_token validation",
+    "folder": "Authorization\n                            server",
+    "operations": 1310,
+    "creation_date": "1\n                            feb. 2024",
+    "additional_apps": "+10",
+    "connected_apps": [
+      "Webhooks",
+      "Tools",
+      "SmartSuite"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2230733/edit",
+    "id": "2230733",
+    "title": "CC new token endpoint",
+    "folder": "Authorization\n                            server",
+    "operations": 582,
+    "creation_date": "2\n                            feb. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+8",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2303132/edit",
+    "id": "2303132",
+    "title": "Clickup generate werkbon URL",
+    "operations": 2816,
+    "creation_date": "4\n                            mrt. 2024",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "HTTP",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/3068748/edit",
+    "id": "3068748",
+    "title": "Email handtekening redirect",
+    "operations": 292,
+    "creation_date": "13\n                            feb. 2025",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/3234211/edit",
+    "id": "3234211",
+    "title": "Eneco job creation from fillout",
+    "operations": 1156,
+    "creation_date": "28\n                            apr. 2025",
+    "creator": "Chargecars",
+    "additional_apps": "+9",
+    "connected_apps": [
+      "Webhooks",
+      "HTTP",
+      "OpenAI (ChatGPT, Whisper, DALL-E)"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2670715/edit",
+    "id": "2670715",
+    "title": "Essent flow 2.0",
+    "operations": 1447,
+    "creation_date": "14\n                            aug. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+32",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "Flow Control"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2400252/edit",
+    "id": "2400252",
+    "title": "EVC opdracht aanlevering",
+    "operations": 45,
+    "creation_date": "15\n                            apr. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+4",
+    "connected_apps": [
+      "Webhooks",
+      "Text parser",
+      "ClickUp"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2596964/edit",
+    "id": "2596964",
+    "title": "Factuur pdf genereren",
+    "operations": 0,
+    "creation_date": "10\n                            jul. 2024",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "PDF.co"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2563570/edit",
+    "id": "2563570",
+    "title": "Fillout calculation form redirect",
+    "operations": 620,
+    "creation_date": "25\n                            jun. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+5",
+    "connected_apps": [
+      "Webhooks",
+      "Flow Control",
+      "Tools"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/3223214/edit",
+    "id": "3223214",
+    "title": "Find / create contact",
+    "operations": 432,
+    "creation_date": "23\n                            apr. 2025",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "SmartSuite",
+      "Scenarios"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2984582/edit",
+    "id": "2984582",
+    "title": "Ford naw > situatie form redirect/ mail",
+    "operations": 228,
+    "creation_date": "10\n                            jan. 2025",
+    "creator": "Chargecars",
+    "additional_apps": "+7",
+    "connected_apps": [
+      "Webhooks",
+      "Tools",
+      "SmartSuite"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2230754/edit",
+    "id": "2230754",
+    "title": "Generate client_secret",
+    "folder": "ChargeCars\n                            API",
+    "operations": 0,
+    "creation_date": "2\n                            feb. 2024",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "HTTP",
+      "SmartSuite",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2257670/edit",
+    "id": "2257670",
+    "title": "Generate dagmonteurs",
+    "folder": "SS users",
+    "operations": 306,
+    "creation_date": "14\n                            feb. 2024",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "SmartSuite",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2627074/edit",
+    "id": "2627074",
+    "title": "Generate handtekening URL actieve gebruiker",
+    "operations": 0,
+    "creation_date": "24\n                            jul. 2024",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/3066746/edit",
+    "id": "3066746",
+    "title": "Generate image url",
+    "folder": "Algemene\n                            afbeeldingen",
+    "operations": 0,
+    "creation_date": "12\n                            feb. 2025",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2782257/edit",
+    "id": "2782257",
+    "title": "Generate label barcode",
+    "operations": 0,
+    "creation_date": "5\n                            okt. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+2",
+    "connected_apps": [
+      "Webhooks",
+      "Barcodes",
+      "WordPress"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2571029/edit",
+    "id": "2571029",
+    "title": "Generate offerte info regel file url",
+    "operations": 0,
+    "creation_date": "27\n                            jun. 2024",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2304168/edit",
+    "id": "2304168",
+    "title": "Generate offerte pdf URL",
+    "folder": "SS -\n                            Offertes",
+    "operations": 0,
+    "creation_date": "4 mrt. 2024",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2230720/edit",
+    "id": "2230720",
+    "title": "Generate random token",
+    "folder": "Authorization\n                            server",
+    "operations": 3686,
+    "creation_date": "2\n                            feb. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+4",
+    "connected_apps": [
+      "Webhooks",
+      "Tools",
+      "Flow Control"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2303877/edit",
+    "id": "2303877",
+    "title": "Generate thumbnail URL",
+    "folder": "SS -\n                            Auto's",
+    "operations": 0,
+    "creation_date": "4\n                            mrt. 2024",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2629968/edit",
+    "id": "2629968",
+    "title": "Gepland contact moment verlopen herinnering",
+    "operations": 0,
+    "creation_date": "25\n                            jul. 2024",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "JSON",
+      "HTTP"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2334896/edit",
+    "id": "2334896",
+    "title": "Get offerte info chargecars site",
+    "folder": "SS -\n                            Offertes",
+    "operations": 0,
+    "creation_date": "17\n                            mrt. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+6",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "Flow Control"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2227978/edit",
+    "id": "2227978",
+    "title": "Groendus > ChargeCars klant + order +\n                    intake",
+    "folder": "Groendus\n                            api",
+    "operations": 3254,
+    "creation_date": "1\n                            feb. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+32",
+    "connected_apps": [
+      "Webhooks",
+      "JSON",
+      "HTTP"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/3033947/edit",
+    "id": "3033947",
+    "title": "Hubspot contacts > Smartsuite",
+    "operations": 8203,
+    "creation_date": "30\n                            jan. 2025",
+    "creator": "Chargecars",
+    "additional_apps": "+6",
+    "connected_apps": [
+      "Webhooks",
+      "Flow Control",
+      "HubSpot CRM"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/3206840/edit",
+    "id": "3206840",
+    "title": "Intake compleet statusupdate",
+    "operations": 369,
+    "creation_date": "15\n                            apr. 2025",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2226691/edit",
+    "id": "2226691",
+    "title": "Intakeformulier versturen",
+    "folder": "SS -\n                            Intakes",
+    "operations": 1363,
+    "creation_date": "1\n                            feb. 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+23",
+    "connected_apps": [
+      "Webhooks",
+      "SmartSuite"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/3223446/edit",
+    "id": "3223446",
+    "title": "Integration Webhooks, OpenAI (ChatGPT,\n                    Whisper, DALL-E)",
+    "operations": 0,
+    "creation_date": "23\n                            apr. 2025",
+    "creator": "Chargecars",
+    "connected_apps": [
+      "Webhooks",
+      "HTTP",
+      "OpenAI (ChatGPT, Whisper, DALL-E)",
+      "null"
+    ],
+    "status": "active"
+  },
+  {
+    "url": "/204073/scenarios/2437730/edit",
+    "id": "2437730",
+    "title": "Kia aanvragen",
+    "operations": 650,
+    "creation_date": "2\n                            mei 2024",
+    "creator": "Chargecars",
+    "additional_apps": "+17",
+    "connected_apps": [
+      "Webhooks",
+      "Flow Control",
+      "Microsoft 365 Email (Outlook)"
+    ],
+    "status": "active"
+  }
+]

@@ -1,0 +1,122 @@
+{
+  "test_timestamp": "2025-05-27T20:00:16.543055",
+  "api_documentation": "https://developers.make.com/api-documentation/",
+  "token_type": "Potentially webhook token (may need API token)",
+  "base_url": "https://eu2.make.com/api/v2",
+  "successful_calls": [],
+  "failed_calls": [
+    {
+      "endpoint": "/users/me",
+      "url": "https://eu2.make.com/api/v2/users/me",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/users/api-tokens",
+      "url": "https://eu2.make.com/api/v2/users/api-tokens",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/organizations",
+      "url": "https://eu2.make.com/api/v2/organizations",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/organizations/current",
+      "url": "https://eu2.make.com/api/v2/organizations/current",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/teams",
+      "url": "https://eu2.make.com/api/v2/teams",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/scenarios",
+      "url": "https://eu2.make.com/api/v2/scenarios",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/scenarios/folders",
+      "url": "https://eu2.make.com/api/v2/scenarios/folders",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/templates",
+      "url": "https://eu2.make.com/api/v2/templates",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/templates/public",
+      "url": "https://eu2.make.com/api/v2/templates/public",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/connections",
+      "url": "https://eu2.make.com/api/v2/connections",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/hooks",
+      "url": "https://eu2.make.com/api/v2/hooks",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/data-stores",
+      "url": "https://eu2.make.com/api/v2/data-stores",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/general",
+      "url": "https://eu2.make.com/api/v2/general",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    },
+    {
+      "endpoint": "/enums",
+      "url": "https://eu2.make.com/api/v2/enums",
+      "status": 401,
+      "error_detail": "Not authorized.",
+      "error_message": "Access denied",
+      "error_code": "SC401"
+    }
+  ],
+  "errors": []
+}

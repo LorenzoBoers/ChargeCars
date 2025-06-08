@@ -1,0 +1,74 @@
+{
+  "summary_timestamp": "2025-05-27T20:09:37.957207",
+  "api_key_tested": "fill_633a84f5e6a1be0028502ee2",
+  "testing_approach": "Comprehensive multi-format testing",
+  "total_tests_performed": 119,
+  "findings": {
+    "authentication_status": "Failed - All attempts unsuccessful",
+    "error_patterns": [
+      "Incorrectly formatted API key",
+      "API key missing underscore",
+      "404 Not Found errors",
+      "400 Bad Request errors"
+    ],
+    "endpoints_tested": [
+      "https://api.fillout.com (US)",
+      "https://eu-api.fillout.com (EU)",
+      "Various endpoint variations"
+    ],
+    "key_formats_tested": [
+      "Original: fill_633a84f5e6a1be0028502ee2",
+      "Without prefix: 633a84f5e6a1be0028502ee2",
+      "Various underscore positions",
+      "Different prefix attempts"
+    ],
+    "regions_tested": [
+      "US",
+      "EU"
+    ],
+    "authentication_methods": [
+      "Bearer token",
+      "API-Key header",
+      "Various auth headers"
+    ]
+  },
+  "recommendations": [
+    {
+      "priority": "High",
+      "action": "Verify API key validity",
+      "description": "Check if current key is valid for REST API access",
+      "location": "Fillout Dashboard > Settings > Developer > API"
+    },
+    {
+      "priority": "High",
+      "action": "Generate new API key",
+      "description": "Create fresh API key specifically for REST API usage",
+      "location": "Fillout Dashboard > Settings > API Keys"
+    },
+    {
+      "priority": "Medium",
+      "action": "Confirm account region",
+      "description": "Verify if account is EU or US based for correct endpoint",
+      "location": "Account settings or contact support"
+    },
+    {
+      "priority": "Medium",
+      "action": "Check API access permissions",
+      "description": "Ensure account has API access enabled",
+      "location": "Account subscription/permissions"
+    },
+    {
+      "priority": "Low",
+      "action": "Contact Fillout support",
+      "description": "Get clarification on API key format if issues persist",
+      "location": "Fillout support channels"
+    }
+  ],
+  "next_steps": [
+    "Manual API key verification in Fillout dashboard",
+    "Generate new API key if current is invalid",
+    "Test new key with both EU and US endpoints",
+    "Document working configuration for future use",
+    "Proceed with alternative data collection if API remains inaccessible"
+  ]
+}
