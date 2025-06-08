@@ -15,6 +15,13 @@ out/
 .nuxt/
 .cache/
 
+# Frontend specific build artifacts
+**/out/
+**/.next/
+**/next-env.d.ts
+**/.vercel/
+**/storybook-static/
+
 # Environment files
 .env
 .env.local
@@ -111,7 +118,7 @@ ARCHIVED/smartsuite_*.json
 xano_workspace_backup/
 *.xano-backup
 
-# Project specific
+# Project specific - ignore structured directories (contains duplicates)
 01-backend/
 02-documentation/
 03-frontend/
@@ -120,23 +127,39 @@ xano_workspace_backup/
 test_rules.md
 migration_*.log
 
-# Keep these directories but ignore old structure
+# Keep active development directories
 !backend/
 !frontend/
 !docs/
 !tools/
 !tests/
 
+# But still ignore build artifacts in kept directories
+backend/node_modules/
+frontend/node_modules/
+frontend/out/
+frontend/.next/
+frontend/next-env.d.ts
+
 # TypeScript
 *.tsbuildinfo
-next-env.d.ts
+**/next-env.d.ts
+*.d.ts.map
 
-# Vercel
+# Deployment platforms
 .vercel
+.netlify/
+**/.vercel/
+**/.netlify/
 
-# PWA files
+# PWA files  
 public/sw.js
 public/workbox-*.js
+
+# Hostinger deployment files (keep source, ignore build)
+public_html/
+htdocs/
+www/
 
 # Storybook
 storybook-static/

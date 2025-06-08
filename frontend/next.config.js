@@ -32,9 +32,10 @@ const nextConfig = {
   compress: true,
   
   // Performance optimizations
-  experimental: {
-    optimizeCss: true,
-  }
+  // Disabled optimizeCss to avoid critters dependency issue
+  // experimental: {
+  //   optimizeCss: true,
+  // }
 }
 
 module.exports = nextConfig 
