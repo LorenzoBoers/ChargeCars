@@ -598,99 +598,66 @@ const QuoteDetailPage: React.FC = () => {
             </CardHeader>
             <CardBody className="p-0">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-divider bg-content2/30">
-                      <th className="text-left py-2 px-3 font-medium text-xs text-foreground-600 min-w-[80px]">Visit</th>
-                      <th className="text-left py-2 px-3 font-medium text-xs text-foreground-600 min-w-[120px]">Contact</th>
-                      <th className="text-left py-2 px-3 font-medium text-xs text-foreground-600 min-w-[300px]">Beschrijving</th>
-                      <th className="text-center py-2 px-3 font-medium text-xs text-foreground-600 min-w-[60px]">Aantal</th>
-                      <th className="text-right py-2 px-3 font-medium text-xs text-foreground-600 min-w-[80px]">Prijs</th>
-                      <th className="text-right py-2 px-3 font-medium text-xs text-foreground-600 min-w-[80px]">Totaal</th>
-                      <th className="text-center py-2 px-3 font-medium text-xs text-foreground-600 min-w-[100px]">Acties</th>
+                <table className="w-full">
+                  <thead className="bg-content2 border-b border-divider">
+                    <tr>
+                      <th className="text-left py-3 px-4 font-semibold text-sm text-foreground min-w-[120px]">Visit</th>
+                      <th className="text-left py-3 px-4 font-semibold text-sm text-foreground min-w-[150px]">Contact</th>
+                      <th className="text-left py-3 px-4 font-semibold text-sm text-foreground min-w-[350px]">Beschrijving</th>
+                      <th className="text-center py-3 px-4 font-semibold text-sm text-foreground min-w-[80px]">Aantal</th>
+                      <th className="text-right py-3 px-4 font-semibold text-sm text-foreground min-w-[100px]">Prijs</th>
+                      <th className="text-right py-3 px-4 font-semibold text-sm text-foreground min-w-[100px]">Totaal</th>
+                      <th className="text-center py-3 px-4 font-semibold text-sm text-foreground min-w-[120px]">Acties</th>
                     </tr>
                   </thead>
                   <tbody>
                     {Object.entries(groupedItems).map(([visitId, visitData], visitIndex) => {
+                      const visitTotal = Object.values(visitData.contacts).reduce((sum, contact) => 
+                        sum + contact.items.reduce((itemSum, item) => itemSum + item.total_price, 0), 0
+                      );
+                      
                       return (
                         <React.Fragment key={visitId}>
+                          {/* Visit header row */}
+                          <tr className="bg-primary/5 border-b border-divider">
+                            <td className="py-3 px-4 font-semibold text-sm text-primary" colSpan={7}>
+                              <div className="flex items-center gap-2">
+                                <CalendarDaysIcon className="h-4 w-4" />
+                                {visitData.visit_name}
+                                <Chip size="sm" variant="flat" color="primary" className="ml-auto">
+                                  €{visitTotal.toLocaleString('nl-NL')}
+                                </Chip>
+                              </div>
+                            </td>
+                          </tr>
+                          
                           {Object.entries(visitData.contacts).map(([contactId, contactData], contactIndex) => {
                             const contactItems = contactData.items;
                             const contactTotal = contactItems.reduce((sum, item) => sum + item.total_price, 0);
                             
                             return (
                               <React.Fragment key={contactId}>
-                                {contactItems.map((item, itemIndex) => (
-                                  <tr key={item.id} className="border-b border-divider/50 hover:bg-content2/20 transition-colors">
-                                    {/* Visit column - show as vertical badge on first item */}
-                                    {contactIndex === 0 && itemIndex === 0 && (
-                                      <td 
-                                        rowSpan={Object.values(visitData.contacts).flatMap(c => c.items).length}
-                                        className="py-2 px-3 border-r border-divider bg-primary/5 align-top"
-                                      >
-                                        <div className="flex flex-col items-start gap-1">
-                                          <CalendarDaysIcon className="h-3 w-3 text-primary" />
-                                          <div className="writing-vertical text-xs font-medium text-primary transform -rotate-90 origin-left whitespace-nowrap">
-                                            {visitData.visit_name}
-                                          </div>
-                                        </div>
-                                      </td>
-                                    )}
-                                    
-                                    {/* Contact column - show on first item of each contact */}
-                                    {itemIndex === 0 && (
-                                      <td 
-                                        rowSpan={contactItems.length}
-                                        className="py-2 px-3 border-r border-divider/50 bg-content2/10 align-top"
-                                      >
-                                        <div className="space-y-1">
-                                          <p className="text-xs font-medium">{contactData.contact_name}</p>
-                                          <Chip size="sm" color={getContactColor(contactData.contact_role)} variant="flat" className="text-xs h-4">
-                                            {getContactLabel(contactData.contact_role)}
-                                          </Chip>
-                                        </div>
-                                      </td>
-                                    )}
-                                    
-                                    {/* Line item description */}
-                                    <td className="py-1.5 px-3">
+                                {/* Contact header row */}
+                                <tr className="bg-content2/20 border-b border-divider/50">
+                                  <td className="py-2 px-4"></td>
+                                  <td className="py-2 px-4" colSpan={6}>
+                                    <div className="flex items-center justify-between">
                                       <div className="flex items-center gap-2">
-                                        <div className="flex-shrink-0">{getCategoryIcon(item.category)}</div>
-                                        <div className="flex-1">
-                                          <p className="text-xs font-medium">{item.description}</p>
-                                          <div className="flex items-center gap-1 mt-0.5">
-                                            <Chip size="sm" variant="flat" color="default" className="text-xs h-4 px-1">
-                                              {item.category}
-                                            </Chip>
-                                            {item.is_customer_responsible && (
-                                              <Chip size="sm" variant="flat" color="success" className="text-xs h-4 px-1">
-                                                Klant
-                                              </Chip>
-                                            )}
-                                          </div>
-                                        </div>
+                                        <Avatar name={contactData.contact_name} size="sm" className="w-6 h-6 text-xs" />
+                                        <span className="font-medium text-sm">{contactData.contact_name}</span>
+                                        <Chip 
+                                          size="sm" 
+                                          color={getContactColor(contactData.contact_role)} 
+                                          variant="flat" 
+                                          className="text-xs"
+                                        >
+                                          {getContactLabel(contactData.contact_role)}
+                                        </Chip>
                                       </div>
-                                    </td>
-                                    
-                                    {/* Quantity */}
-                                    <td className="py-1.5 px-3 text-center">
-                                      <span className="text-xs font-medium">{item.quantity}</span>
-                                    </td>
-                                    
-                                    {/* Unit price */}
-                                    <td className="py-1.5 px-3 text-right">
-                                      <span className="text-xs font-medium">€{item.unit_price.toLocaleString('nl-NL')}</span>
-                                    </td>
-                                    
-                                    {/* Total price */}
-                                    <td className="py-1.5 px-3 text-right">
-                                      <span className="text-xs font-semibold">€{item.total_price.toLocaleString('nl-NL')}</span>
-                                    </td>
-
-                                    {/* Actions - only on last item of contact */}
-                                    <td className="py-1.5 px-3 text-center">
-                                      {itemIndex === contactItems.length - 1 && (
-                                        <div className="flex items-center justify-center gap-1">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-xs text-foreground-600">Subtotaal:</span>
+                                        <span className="font-semibold text-sm">€{contactTotal.toLocaleString('nl-NL')}</span>
+                                        <div className="flex gap-1 ml-2">
                                           <Tooltip content="Verstuur voor akkoord">
                                             <Button
                                               size="sm"
@@ -713,21 +680,56 @@ const QuoteDetailPage: React.FC = () => {
                                             </Button>
                                           </Tooltip>
                                         </div>
-                                      )}
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                                
+                                {/* Line items for this contact */}
+                                {contactItems.map((item, itemIndex) => (
+                                  <tr key={item.id} className="border-b border-divider/30 hover:bg-content2/10 transition-colors">
+                                    <td className="py-2 px-4"></td>
+                                    <td className="py-2 px-4"></td>
+                                    
+                                    {/* Line item description */}
+                                    <td className="py-2 px-4">
+                                      <div className="flex items-start gap-3">
+                                        <div className="flex-shrink-0 mt-0.5">{getCategoryIcon(item.category)}</div>
+                                        <div className="flex-1">
+                                          <p className="text-sm font-medium text-foreground">{item.description}</p>
+                                          <div className="flex items-center gap-2 mt-1">
+                                            <Chip size="sm" variant="flat" color="default" className="text-xs">
+                                              {item.category}
+                                            </Chip>
+                                            {item.is_customer_responsible && (
+                                              <Chip size="sm" variant="flat" color="success" className="text-xs">
+                                                Klant
+                                              </Chip>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
                                     </td>
+                                    
+                                    {/* Quantity */}
+                                    <td className="py-2 px-4 text-center">
+                                      <span className="text-sm font-medium">{item.quantity}</span>
+                                    </td>
+                                    
+                                    {/* Unit price */}
+                                    <td className="py-2 px-4 text-right">
+                                      <span className="text-sm font-medium">€{item.unit_price.toLocaleString('nl-NL')}</span>
+                                    </td>
+                                    
+                                    {/* Total price */}
+                                    <td className="py-2 px-4 text-right">
+                                      <span className="text-sm font-semibold">€{item.total_price.toLocaleString('nl-NL')}</span>
+                                    </td>
+
+                                    {/* Actions column - empty for line items */}
+                                    <td className="py-2 px-4"></td>
                                   </tr>
                                 ))}
-                                
-                                {/* Contact subtotal row */}
-                                <tr className="bg-content2/30 border-b border-divider">
-                                  <td className="py-1.5 px-3 text-right text-xs font-semibold" colSpan={4}>
-                                    Subtotaal {contactData.contact_name}:
-                                  </td>
-                                  <td className="py-1.5 px-3 text-right text-xs font-bold">
-                                    €{contactTotal.toLocaleString('nl-NL')}
-                                  </td>
-                                  <td></td>
-                                </tr>
                               </React.Fragment>
                             );
                           })}
@@ -737,13 +739,15 @@ const QuoteDetailPage: React.FC = () => {
                     
                     {/* Grand total row */}
                     <tr className="bg-foreground/5 border-t-2 border-foreground/20">
-                      <td className="py-3 px-3 text-right font-bold text-sm" colSpan={5}>
-                        TOTAAL OFFERTE:
+                      <td className="py-4 px-4 text-right font-bold text-base" colSpan={6}>
+                        <div className="flex items-center justify-end gap-2">
+                          <CurrencyEuroIcon className="h-5 w-5" />
+                          TOTAAL OFFERTE:
+                        </div>
                       </td>
-                      <td className="py-3 px-3 text-right font-bold text-base">
+                      <td className="py-4 px-4 text-right font-bold text-lg text-primary">
                         €{quote.total_amount.toLocaleString('nl-NL')}
                       </td>
-                      <td></td>
                     </tr>
                   </tbody>
                 </table>
