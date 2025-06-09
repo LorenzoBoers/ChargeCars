@@ -591,8 +591,7 @@ const QuoteDetailPage: React.FC = () => {
                   <h3 className="text-base font-semibold">Line Items per Bezoek</h3>
                   <Button 
                     size="sm" 
-                    color="primary" 
-                    variant="flat"
+                    variant="bordered"
                     startContent={<PencilIcon className="h-3 w-3" />}
                     onPress={() => router.push(`/quotes/${quote.id}/build`)}
                   >
@@ -624,9 +623,15 @@ const QuoteDetailPage: React.FC = () => {
                                   <div className="flex items-center gap-2">
                                     <CalendarDaysIcon className="h-4 w-4" />
                                     {visitData.visit_name}
-                                    <Chip size="sm" variant="flat" color="primary" className="ml-auto text-xs">
-                                      €{visitTotal.toLocaleString('nl-NL')}
-                                    </Chip>
+                                    <div className="flex items-center gap-2 ml-auto">
+                                      <Button size="sm" variant="flat" color="primary" className="text-xs h-6">
+                                        <CogIcon className="h-3 w-3 mr-1" />
+                                        Configureer
+                                      </Button>
+                                      <Chip size="sm" variant="flat" color="primary" className="text-xs">
+                                        €{visitTotal.toLocaleString('nl-NL')}
+                                      </Chip>
+                                    </div>
                                   </div>
                                 </td>
                               </tr>
@@ -664,16 +669,6 @@ const QuoteDetailPage: React.FC = () => {
                                         <td className="py-1.5 px-3">
                                           <div className="pl-4">
                                             <p className="text-sm font-medium text-foreground">{item.description}</p>
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                              <Chip size="sm" variant="flat" color="default" className="text-xs">
-                                                {item.category}
-                                              </Chip>
-                                              {item.is_customer_responsible && (
-                                                <Chip size="sm" variant="flat" color="success" className="text-xs">
-                                                  Klant
-                                                </Chip>
-                                              )}
-                                            </div>
                                           </div>
                                         </td>
                                         
@@ -771,12 +766,16 @@ const QuoteDetailPage: React.FC = () => {
                       <div className="space-y-1">
                         <div className="flex items-center justify-between">
                           <h4 className="font-semibold text-sm">{contact.name}</h4>
-                          <span className="font-bold text-xs">€{contactTotal.toLocaleString('nl-NL')}</span>
+                          <Chip size="sm" color={getContactColor(contact.role)} variant="flat" className="text-xs">
+                            {getContactLabel(contact.role)}
+                          </Chip>
                         </div>
                         <p className="text-xs text-foreground-600">{contact.email}</p>
-                        <Chip size="sm" color={getContactColor(contact.role)} variant="flat" className="text-xs">
-                          {getContactLabel(contact.role)}
-                        </Chip>
+                        <Divider />
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs">QUO-2024-002-1</span>
+                          <span className="font-bold text-xs">€{contactTotal.toLocaleString('nl-NL')}</span>
+                        </div>
                       </div>
 
                       <Divider />
@@ -786,13 +785,7 @@ const QuoteDetailPage: React.FC = () => {
                         <h5 className="text-xs font-medium text-foreground-600 uppercase">Documenten</h5>
                         <div className="space-y-1">
                           <div className="flex items-center justify-between p-1.5 bg-content2/30 rounded text-xs">
-                            <span>Offerte PDF</span>
-                            <Button size="sm" isIconOnly variant="light" className="h-5 w-5">
-                              <DocumentArrowDownIcon className="h-3 w-3" />
-                            </Button>
-                          </div>
-                          <div className="flex items-center justify-between p-1.5 bg-content2/30 rounded text-xs">
-                            <span>Technische specs</span>
+                            <span>Offerte PDF v1</span>
                             <Button size="sm" isIconOnly variant="light" className="h-5 w-5">
                               <DocumentArrowDownIcon className="h-3 w-3" />
                             </Button>
@@ -805,8 +798,8 @@ const QuoteDetailPage: React.FC = () => {
                         <h5 className="text-xs font-medium text-foreground-600 uppercase">Online Offerte</h5>
                         <div className="flex gap-1">
                           <Button size="sm" color="primary" variant="flat" className="flex-1 text-xs h-6">
-                            <ShareIcon className="h-3 w-3 mr-1" />
-                            Deel Link
+                            <EyeIcon className="h-3 w-3 mr-1" />
+                            Bekijk Offerte
                           </Button>
                           <Button size="sm" variant="bordered" isIconOnly className="h-6 w-6">
                             <DocumentDuplicateIcon className="h-3 w-3" />
