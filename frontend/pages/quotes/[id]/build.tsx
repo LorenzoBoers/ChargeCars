@@ -572,199 +572,223 @@ const QuoteBuildPage: React.FC = () => {
                 Item Toevoegen
               </Button>
             </CardHeader>
-            <CardBody className="p-4">
-              <DragDropContext onDragEnd={onDragEnd}>
-                <div className="space-y-6">
-                  {groupedItems.map(({ visit, contactGroups }) => (
-                    <div key={visit.id} className="border border-divider/50 rounded-lg p-4 bg-content1">
-                      <div className="flex items-center gap-3 mb-4">
-                        <CalendarDaysIcon className="h-5 w-5 text-primary" />
-                        <div>
-                          <h4 className="font-semibold text-sm">{visit.visit_type}</h4>
-                          <p className="text-xs text-foreground-500">{visit.planned_date} • {visit.technician}</p>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="light"
-                          startContent={<PlusIcon className="h-3 w-3" />}
-                          onPress={() => {
-                            setSelectedVisitForNewItem(visit.id);
-                            onAddItemOpen();
-                          }}
-                        >
-                          Item
-                        </Button>
-                      </div>
-
-                      <div className="space-y-4">
-                        {contactGroups.map(({ contact, items }) => {
-                          const contactTotal = items.reduce((sum, item) => sum + item.total_price, 0);
-                          
-                          return (
-                            <div key={contact.id} className="bg-content2/30 rounded-lg p-3">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                  <Avatar name={contact.name} size="sm" className="w-6 h-6" />
-                                  <div>
-                                    <p className="text-xs font-medium">{contact.name}</p>
-                                    <Chip size="sm" color={getContactColor(contact.role)} variant="flat" className="text-xs h-4">
-                                      {getContactLabel(contact.role)}
-                                    </Chip>
-                                  </div>
-                                </div>
-                                <div className="text-right">
-                                  <p className="text-xs font-semibold">€{contactTotal.toLocaleString('nl-NL')}</p>
-                                  <p className="text-xs text-foreground-500">{items.length} items</p>
+            <CardBody className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-content2 border-b border-divider">
+                    <tr>
+                      <th className="text-left py-2 px-3 font-semibold text-sm text-foreground min-w-[50px]"></th>
+                      <th className="text-left py-2 px-3 font-semibold text-sm text-foreground min-w-[350px]">Beschrijving</th>
+                      <th className="text-left py-2 px-3 font-semibold text-sm text-foreground min-w-[80px]">Aantal</th>
+                      <th className="text-right py-2 px-3 font-semibold text-sm text-foreground min-w-[100px]">Prijs</th>
+                      <th className="text-right py-2 px-3 font-semibold text-sm text-foreground min-w-[100px]">Totaal</th>
+                      <th className="text-center py-2 px-3 font-semibold text-sm text-foreground min-w-[100px]">Acties</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <DragDropContext onDragEnd={onDragEnd}>
+                      {groupedItems.map(({ visit, contactGroups }) => (
+                        <React.Fragment key={visit.id}>
+                          {/* Visit header row */}
+                          <tr className="bg-primary/10 border-b border-divider">
+                            <td className="py-2 px-3 font-semibold text-sm text-primary" colSpan={6}>
+                              <div className="flex items-center gap-2">
+                                <CalendarDaysIcon className="h-4 w-4" />
+                                {visit.visit_type}
+                                <span className="text-xs text-foreground-600">({visit.planned_date})</span>
+                                <div className="flex items-center gap-2 ml-auto">
+                                  <Button
+                                    size="sm"
+                                    variant="flat"
+                                    color="primary"
+                                    className="text-xs h-6"
+                                    onPress={() => {
+                                      setSelectedVisitForNewItem(visit.id);
+                                      onAddItemOpen();
+                                    }}
+                                  >
+                                    <PlusIcon className="h-3 w-3 mr-1" />
+                                    Item
+                                  </Button>
                                 </div>
                               </div>
-
-                              <Droppable droppableId={`visit-${visit.id}-contact-${contact.id}`}>
-                                {(provided, snapshot) => (
-                                  <div
-                                    ref={provided.innerRef}
-                                    {...provided.droppableProps}
-                                    className={`space-y-2 min-h-[50px] p-2 rounded border-2 border-dashed transition-colors ${
-                                      snapshot.isDraggingOver 
-                                        ? 'border-primary bg-primary/5' 
-                                        : 'border-transparent'
-                                    }`}
-                                  >
-                                    {items.map((item, index) => (
-                                      <Draggable key={item.id} draggableId={item.id} index={index}>
-                                        {(provided, snapshot) => (
-                                          <div
-                                            ref={provided.innerRef}
-                                            {...provided.draggableProps}
-                                            className={`bg-content1 border border-divider rounded-lg p-3 transition-all ${
-                                              snapshot.isDragging ? 'shadow-lg scale-105 bg-primary/5' : 'hover:bg-content3'
-                                            }`}
-                                          >
-                                            <div className="flex items-center gap-3">
-                                              <div
-                                                {...provided.dragHandleProps}
-                                                className="cursor-grab hover:cursor-grabbing text-foreground-400"
-                                              >
-                                                <Bars3Icon className="h-4 w-4" />
-                                              </div>
+                            </td>
+                          </tr>
+                          
+                          {contactGroups.map(({ contact, items }) => {
+                            const contactTotal = items.reduce((sum, item) => sum + item.total_price, 0);
+                            
+                            return (
+                              <React.Fragment key={contact.id}>
+                                {/* Contact header row */}
+                                <tr className="bg-content2/40 border-b border-divider border-l-4 border-l-primary/30">
+                                  <td className="py-1.5 px-3" colSpan={6}>
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-medium text-sm">{contact.name}</span>
+                                        <Chip 
+                                          size="sm" 
+                                          color={getContactColor(contact.role)} 
+                                          variant="flat" 
+                                          className="text-xs"
+                                        >
+                                          {getContactLabel(contact.role)}
+                                        </Chip>
+                                      </div>
+                                      <span className="text-xs text-foreground-600 font-medium">€{contactTotal.toLocaleString('nl-NL')}</span>
+                                    </div>
+                                  </td>
+                                </tr>
+                                
+                                {/* Line items for this contact */}
+                                <Droppable droppableId={`visit-${visit.id}-contact-${contact.id}`}>
+                                  {(provided, snapshot) => (
+                                    <tbody
+                                      ref={provided.innerRef}
+                                      {...provided.droppableProps}
+                                      className={snapshot.isDraggingOver ? 'bg-primary/5' : ''}
+                                    >
+                                      {items.map((item, index) => (
+                                        <Draggable key={item.id} draggableId={item.id} index={index}>
+                                          {(provided, snapshot) => (
+                                            <tr
+                                              ref={provided.innerRef}
+                                              {...provided.draggableProps}
+                                              className={`border-b border-divider/30 hover:bg-content2/10 transition-colors ${
+                                                snapshot.isDragging ? 'shadow-lg bg-primary/5' : ''
+                                              }`}
+                                            >
+                                              {/* Drag handle */}
+                                              <td className="py-1.5 px-3 text-center">
+                                                <div
+                                                  {...provided.dragHandleProps}
+                                                  className="cursor-grab hover:cursor-grabbing text-foreground-400"
+                                                >
+                                                  <Bars3Icon className="h-4 w-4" />
+                                                </div>
+                                              </td>
                                               
-                                              <div className="flex-shrink-0">{getCategoryIcon(item.category)}</div>
-                                              
-                                              <div className="flex-1 grid grid-cols-1 md:grid-cols-5 gap-2 items-center">
-                                                {editingItem === item.id ? (
-                                                  <>
+                                              {/* Description */}
+                                              <td className="py-1.5 px-3">
+                                                <div className="pl-4">
+                                                  {editingItem === item.id ? (
                                                     <Input
                                                       size="sm"
                                                       value={item.description}
                                                       onValueChange={(value) => updateLineItem(item.id, { description: value })}
-                                                      className="md:col-span-2 text-xs"
-                                                    />
-                                                    <Input
-                                                      size="sm"
-                                                      type="number"
-                                                      value={item.quantity.toString()}
-                                                      onValueChange={(value) => updateLineItem(item.id, { quantity: Number(value) })}
                                                       className="text-xs"
                                                     />
-                                                    <Input
-                                                      size="sm"
-                                                      type="number"
-                                                      step="0.01"
-                                                      value={item.unit_price.toString()}
-                                                      onValueChange={(value) => updateLineItem(item.id, { unit_price: Number(value) })}
-                                                      startContent="€"
-                                                      className="text-xs"
-                                                    />
-                                                    <div className="flex items-center justify-between">
-                                                      <span className="text-xs font-semibold">€{item.total_price.toLocaleString('nl-NL')}</span>
-                                                      <div className="flex gap-1">
-                                                        <Button
-                                                          size="sm"
-                                                          isIconOnly
-                                                          color="success"
-                                                          variant="light"
-                                                          onPress={() => setEditingItem(null)}
-                                                          className="h-6 w-6 min-w-6"
-                                                        >
-                                                          <CheckCircleIcon className="h-3 w-3" />
-                                                        </Button>
-                                                        <Button
-                                                          size="sm"
-                                                          isIconOnly
-                                                          color="danger"
-                                                          variant="light"
-                                                          onPress={() => setEditingItem(null)}
-                                                          className="h-6 w-6 min-w-6"
-                                                        >
-                                                          <XMarkIcon className="h-3 w-3" />
-                                                        </Button>
-                                                      </div>
-                                                    </div>
-                                                  </>
+                                                  ) : (
+                                                    <p className="text-sm font-medium text-foreground">{item.description}</p>
+                                                  )}
+                                                </div>
+                                              </td>
+                                              
+                                              {/* Quantity */}
+                                              <td className="py-1.5 px-3 text-left">
+                                                {editingItem === item.id ? (
+                                                  <Input
+                                                    size="sm"
+                                                    type="number"
+                                                    value={item.quantity.toString()}
+                                                    onValueChange={(value) => updateLineItem(item.id, { quantity: Number(value) })}
+                                                    className="text-xs w-20"
+                                                  />
                                                 ) : (
-                                                  <>
-                                                    <div className="md:col-span-2">
-                                                      <p className="text-xs font-medium">{item.description}</p>
-                                                      <div className="flex items-center gap-1 mt-1">
-                                                        <Chip size="sm" variant="flat" color="default" className="text-xs h-4 px-1">
-                                                          {item.category}
-                                                        </Chip>
-                                                        {item.is_customer_responsible && (
-                                                          <Chip size="sm" variant="flat" color="success" className="text-xs h-4 px-1">
-                                                            Klant
-                                                          </Chip>
-                                                        )}
-                                                      </div>
-                                                    </div>
-                                                    <div className="text-center">
-                                                      <p className="text-xs font-medium">{item.quantity}x</p>
-                                                    </div>
-                                                    <div className="text-center">
-                                                      <p className="text-xs font-medium">€{item.unit_price.toLocaleString('nl-NL')}</p>
-                                                    </div>
-                                                    <div className="flex items-center justify-between">
-                                                      <span className="text-xs font-semibold">€{item.total_price.toLocaleString('nl-NL')}</span>
-                                                      <div className="flex gap-1">
-                                                        <Button
-                                                          size="sm"
-                                                          isIconOnly
-                                                          variant="light"
-                                                          onPress={() => setEditingItem(item.id)}
-                                                          className="h-6 w-6 min-w-6"
-                                                        >
-                                                          <PencilIcon className="h-3 w-3" />
-                                                        </Button>
-                                                        <Button
-                                                          size="sm"
-                                                          isIconOnly
-                                                          color="danger"
-                                                          variant="light"
-                                                          onPress={() => removeLineItem(item.id)}
-                                                          className="h-6 w-6 min-w-6"
-                                                        >
-                                                          <TrashIcon className="h-3 w-3" />
-                                                        </Button>
-                                                      </div>
-                                                    </div>
-                                                  </>
+                                                  <span className="text-sm font-medium">{item.quantity}x</span>
                                                 )}
-                                              </div>
-                                            </div>
-                                          </div>
-                                        )}
-                                      </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                  </div>
-                                )}
-                              </Droppable>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </DragDropContext>
+                                              </td>
+                                              
+                                              {/* Unit price */}
+                                              <td className="py-1.5 px-3 text-right">
+                                                {editingItem === item.id ? (
+                                                  <Input
+                                                    size="sm"
+                                                    type="number"
+                                                    step="0.01"
+                                                    value={item.unit_price.toString()}
+                                                    onValueChange={(value) => updateLineItem(item.id, { unit_price: Number(value) })}
+                                                    startContent="€"
+                                                    className="text-xs w-24"
+                                                  />
+                                                ) : (
+                                                  <span className="text-sm font-medium">€{item.unit_price.toLocaleString('nl-NL')}</span>
+                                                )}
+                                              </td>
+                                              
+                                              {/* Total price */}
+                                              <td className="py-1.5 px-3 text-right">
+                                                <span className="text-sm font-semibold">€{item.total_price.toLocaleString('nl-NL')}</span>
+                                              </td>
+                                              
+                                              {/* Actions */}
+                                              <td className="py-1.5 px-3 text-center">
+                                                <div className="flex items-center justify-center gap-1">
+                                                  {editingItem === item.id ? (
+                                                    <>
+                                                      <Button
+                                                        size="sm"
+                                                        isIconOnly
+                                                        color="success"
+                                                        variant="light"
+                                                        onPress={() => setEditingItem(null)}
+                                                        className="h-6 w-6 min-w-6"
+                                                      >
+                                                        <CheckCircleIcon className="h-3 w-3" />
+                                                      </Button>
+                                                      <Button
+                                                        size="sm"
+                                                        isIconOnly
+                                                        color="danger"
+                                                        variant="light"
+                                                        onPress={() => setEditingItem(null)}
+                                                        className="h-6 w-6 min-w-6"
+                                                      >
+                                                        <XMarkIcon className="h-3 w-3" />
+                                                      </Button>
+                                                    </>
+                                                  ) : (
+                                                    <>
+                                                      <Button
+                                                        size="sm"
+                                                        isIconOnly
+                                                        variant="light"
+                                                        onPress={() => setEditingItem(item.id)}
+                                                        className="h-6 w-6 min-w-6"
+                                                      >
+                                                        <PencilIcon className="h-3 w-3" />
+                                                      </Button>
+                                                      <Button
+                                                        size="sm"
+                                                        isIconOnly
+                                                        color="danger"
+                                                        variant="light"
+                                                        onPress={() => removeLineItem(item.id)}
+                                                        className="h-6 w-6 min-w-6"
+                                                      >
+                                                        <TrashIcon className="h-3 w-3" />
+                                                      </Button>
+                                                    </>
+                                                  )}
+                                                </div>
+                                              </td>
+                                            </tr>
+                                          )}
+                                        </Draggable>
+                                      ))}
+                                      {provided.placeholder}
+                                    </tbody>
+                                  )}
+                                </Droppable>
+                              </React.Fragment>
+                            );
+                          })}
+                        </React.Fragment>
+                      ))}
+                    </DragDropContext>
+                  </tbody>
+                </table>
+              </div>
             </CardBody>
           </Card>
 

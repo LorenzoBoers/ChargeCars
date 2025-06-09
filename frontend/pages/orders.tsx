@@ -259,6 +259,151 @@ export default function OrdersPage() {
             </div>
           </div>
 
+          {/* Key Metrics Dashboard */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+            <Card className="p-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-foreground-600">Totale Omzet</h3>
+                  <div className="w-2 h-2 rounded-full bg-success"></div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xl font-bold text-foreground">€127.450</p>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-success">+12.5%</span>
+                    <span className="text-xs text-foreground-500">vs vorige maand</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-foreground-600">Actieve Orders</h3>
+                  <div className="w-2 h-2 rounded-full bg-warning"></div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xl font-bold text-foreground">24</p>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-warning">+3</span>
+                    <span className="text-xs text-foreground-500">sinds gisteren</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-foreground-600">Conversie Rate</h3>
+                  <div className="w-2 h-2 rounded-full bg-primary"></div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xl font-bold text-foreground">78.2%</p>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-success">+2.1%</span>
+                    <span className="text-xs text-foreground-500">deze week</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-foreground-600">Gem. Deal Waarde</h3>
+                  <div className="w-2 h-2 rounded-full bg-secondary"></div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xl font-bold text-foreground">€2.847</p>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-secondary">-5.2%</span>
+                    <span className="text-xs text-foreground-500">vs Q3</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          {/* Performance Indicators */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <Card className="lg:col-span-2">
+              <CardHeader className="pb-2">
+                <h3 className="text-base font-semibold">Pipeline Overzicht</h3>
+              </CardHeader>
+              <CardBody className="pt-0">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-primary/10 rounded-lg">
+                    <p className="text-lg font-bold text-primary">€45.2K</p>
+                    <p className="text-xs text-foreground-600">Offertes Open</p>
+                    <p className="text-xs text-foreground-500">12 orders</p>
+                  </div>
+                  <div className="text-center p-3 bg-warning/10 rounded-lg">
+                    <p className="text-lg font-bold text-warning">€32.8K</p>
+                    <p className="text-xs text-foreground-600">In Behandeling</p>
+                    <p className="text-xs text-foreground-500">8 orders</p>
+                  </div>
+                  <div className="text-center p-3 bg-success/10 rounded-lg">
+                    <p className="text-lg font-bold text-success">€89.4K</p>
+                    <p className="text-xs text-foreground-600">Deze Maand</p>
+                    <p className="text-xs text-foreground-500">31 orders</p>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <h3 className="text-base font-semibold">Business Entities</h3>
+              </CardHeader>
+              <CardBody className="pt-0">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                      <span className="text-sm">ChargeCars</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">€67.2K</p>
+                      <p className="text-xs text-foreground-500">42%</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                      <span className="text-sm">LaderThuis</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">€38.1K</p>
+                      <p className="text-xs text-foreground-500">24%</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                      <span className="text-sm">MeterKastThuis</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">€22.1K</p>
+                      <p className="text-xs text-foreground-500">14%</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                      <span className="text-sm">Overig</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold">€32.0K</p>
+                      <p className="text-xs text-foreground-500">20%</p>
+                    </div>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </div>
+
           {/* Quick Filter Presets */}
           <Card>
             <CardBody className="p-3">
