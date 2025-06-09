@@ -110,20 +110,12 @@ const LoginPage: React.FC = () => {
         }`}>
           <CardHeader className="flex flex-col gap-4 px-8 pt-8 pb-0">
             {/* Logo */}
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex justify-center">
               <img 
                 src="/images/ChargeCars portal svg dark mode (1).svg" 
                 alt="ChargeCars Portal" 
                 className="h-16 w-auto"
               />
-              <div className="text-center">
-                <h1 className={`text-2xl font-bold transition-colors duration-200 ${
-                  isDark ? 'text-white' : 'text-gray-900'
-                }`}>ChargeCars Portal</h1>
-                <p className={`text-sm transition-colors duration-200 ${
-                  isDark ? 'text-gray-400' : 'text-gray-600'
-                }`}>Order Management System</p>
-              </div>
             </div>
 
             <div className="text-center">

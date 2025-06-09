@@ -17,15 +17,14 @@ import {
   WifiIcon,
   ServerIcon
 } from '@heroicons/react/24/outline';
-// Note: next-themes will be added when theme switching is implemented
-// import { useTheme } from 'next-themes';
+import { useTheme } from 'next-themes';
 
 interface TopBarProps {
   className?: string;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
-  const [isDark, setIsDark] = useState(true);
+  const { theme, setTheme } = useTheme();
   const [notificationCount, setNotificationCount] = useState(3);
 
   // Mock status data
@@ -81,7 +80,7 @@ export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
   ];
 
   return (
-    <div className={`h-14 bg-content1 border-b border-divider flex items-center justify-end px-6 gap-4 ${className}`}>
+    <div className={`h-12 bg-content1 border-b border-divider flex items-center justify-end px-6 gap-4 w-full ${className}`}>
       {/* Status Indicators */}
       <div className="flex items-center gap-3">
         {/* API Status */}
@@ -119,13 +118,13 @@ export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
       <div className="h-6 w-px bg-divider" />
 
       {/* Dark/Light Mode Toggle */}
-      <Tooltip content={isDark ? 'Schakel naar licht thema' : 'Schakel naar donker thema'}>
+      <Tooltip content={theme === 'dark' ? 'Schakel naar licht thema' : 'Schakel naar donker thema'}>
         <div className="flex items-center">
           <Switch
             size="sm"
             color="primary"
-            isSelected={isDark}
-            onValueChange={(isSelected) => setIsDark(isSelected)}
+            isSelected={theme === 'dark'}
+            onValueChange={(isSelected) => setTheme(isSelected ? 'dark' : 'light')}
             thumbIcon={({ isSelected }) =>
               isSelected ? (
                 <MoonIcon className="h-3 w-3" />

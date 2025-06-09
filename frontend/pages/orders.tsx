@@ -35,7 +35,10 @@ import {
   AdjustmentsHorizontalIcon,
   UserIcon,
   BuildingOfficeIcon,
-  CalendarIcon
+  CalendarIcon,
+  DocumentDuplicateIcon,
+  DocumentTextIcon,
+  TrashIcon
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../components/layouts/AppLayout';
 import { useAuth } from '../contexts/AuthContext';
@@ -381,6 +384,11 @@ export default function OrdersPage() {
               {/* Orders Table */}
               <Table
                 aria-label="Orders table"
+                classNames={{
+                  wrapper: "min-h-[222px]",
+                  th: "bg-default-50 text-default-900 h-10 text-xs font-medium px-3",
+                  td: "py-2 px-3 text-sm",
+                }}
                 bottomContent={
                   totalPages > 1 ? (
                     <div className="flex w-full justify-center">
@@ -398,14 +406,14 @@ export default function OrdersPage() {
                 }
               >
                 <TableHeader>
-                  <TableColumn>ORDER</TableColumn>
-                  <TableColumn>KLANT</TableColumn>
-                  <TableColumn>BUSINESS ENTITY</TableColumn>
-                  <TableColumn>TYPE</TableColumn>
-                  <TableColumn>STATUS</TableColumn>
-                  <TableColumn>BEDRAG</TableColumn>
-                  <TableColumn>DATUM</TableColumn>
-                  <TableColumn>ACTIES</TableColumn>
+                  <TableColumn className="w-32">ORDER</TableColumn>
+                  <TableColumn className="w-40">KLANT</TableColumn>
+                  <TableColumn className="w-32">ENTITY</TableColumn>
+                  <TableColumn className="w-28">TYPE</TableColumn>
+                  <TableColumn className="w-28">STATUS</TableColumn>
+                  <TableColumn className="w-24 text-right">BEDRAG</TableColumn>
+                  <TableColumn className="w-28">DATUM</TableColumn>
+                  <TableColumn className="w-20">ACTIES</TableColumn>
                 </TableHeader>
                 <TableBody
                   isLoading={isLoading}
@@ -413,16 +421,16 @@ export default function OrdersPage() {
                   emptyContent="Geen orders gevonden"
                 >
                   {paginatedOrders.map((order) => (
-                    <TableRow key={order.id}>
+                    <TableRow key={order.id} className="hover:bg-default-50">
                       <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-foreground">{order.order_number}</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="font-semibold text-foreground text-sm">{order.order_number}</span>
                           {order.priority !== 'low' && (
                             <Chip
                               size="sm"
                               color={priorityColorMap[order.priority]}
                               variant="flat"
-                              className="mt-1 w-fit"
+                              className="w-fit text-xs"
                             >
                               {order.priority === 'high' ? 'Urgent' : 'Medium'}
                             </Chip>
@@ -431,40 +439,41 @@ export default function OrdersPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Avatar name={order.customer_name} size="sm" />
-                          <span className="font-medium">{order.customer_name}</span>
+                          <Avatar name={order.customer_name} size="sm" className="w-6 h-6 text-xs" />
+                          <span className="font-medium text-sm truncate">{order.customer_name}</span>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Chip size="sm" variant="flat" color="secondary">
+                        <Chip size="sm" variant="flat" color="secondary" className="text-xs">
                           {order.business_entity}
                         </Chip>
                       </TableCell>
-                      <TableCell>{order.order_type}</TableCell>
+                      <TableCell className="text-sm">{order.order_type}</TableCell>
                       <TableCell>
                         <Chip
                           color={statusColorMap[order.status] || 'default'}
                           variant="flat"
                           size="sm"
+                          className="text-xs"
                         >
                           {order.status}
                         </Chip>
                       </TableCell>
-                      <TableCell className="font-semibold">
-                        {formatCurrency(order.amount)}
+                      <TableCell className="text-right">
+                        <span className="font-semibold text-sm">{formatCurrency(order.amount)}</span>
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-col text-sm">
-                          <span>{formatDate(order.created_at)}</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs text-foreground">{formatDate(order.created_at)}</span>
                           {order.installation_date && (
-                            <span className="text-foreground-500 text-xs">
-                              Installatie: {formatDate(order.installation_date)}
+                            <span className="text-xs text-foreground-500">
+                              Install: {formatDate(order.installation_date)}
                             </span>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                           <Tooltip content="Bekijken">
                             <Button
                               isIconOnly
@@ -487,14 +496,33 @@ export default function OrdersPage() {
                           </Tooltip>
                           <Dropdown>
                             <DropdownTrigger>
-                              <Button isIconOnly size="sm" variant="light">
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                variant="light"
+                              >
                                 <EllipsisVerticalIcon className="h-4 w-4" />
                               </Button>
                             </DropdownTrigger>
-                            <DropdownMenu>
-                              <DropdownItem key="duplicate">Dupliceren</DropdownItem>
-                              <DropdownItem key="invoice">Factuur genereren</DropdownItem>
-                              <DropdownItem key="delete" className="text-danger" color="danger">
+                            <DropdownMenu aria-label="Order acties">
+                              <DropdownItem
+                                key="duplicate"
+                                startContent={<DocumentDuplicateIcon className="h-4 w-4" />}
+                              >
+                                Dupliceren
+                              </DropdownItem>
+                              <DropdownItem
+                                key="invoice"
+                                startContent={<DocumentTextIcon className="h-4 w-4" />}
+                              >
+                                Factuur
+                              </DropdownItem>
+                              <DropdownItem
+                                key="delete"
+                                className="text-danger"
+                                color="danger"
+                                startContent={<TrashIcon className="h-4 w-4" />}
+                              >
                                 Verwijderen
                               </DropdownItem>
                             </DropdownMenu>

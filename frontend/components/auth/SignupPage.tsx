@@ -162,16 +162,12 @@ const SignupPage: React.FC = () => {
         <Card className="bg-content1/80 backdrop-blur-xl border border-gray-800 shadow-2xl">
           <CardHeader className="flex flex-col gap-4 px-8 pt-8 pb-0">
             {/* Logo */}
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex justify-center">
               <img 
                 src="/images/ChargeCars portal svg dark mode (1).svg" 
                 alt="ChargeCars Portal" 
                 className="h-16 w-auto"
               />
-              <div className="text-center">
-                <h1 className="text-2xl font-bold text-white">ChargeCars Portal</h1>
-                <p className="text-sm text-gray-400">Order Management System</p>
-              </div>
             </div>
 
             <div className="text-center">

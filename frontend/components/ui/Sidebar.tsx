@@ -6,7 +6,11 @@ import {
   Button,
   Divider,
   Avatar,
-  Chip
+  Chip,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem
 } from "@nextui-org/react";
 import {
   HomeIcon,
@@ -15,7 +19,8 @@ import {
   ChartBarIcon,
   CogIcon,
   ArrowRightOnRectangleIcon,
-  BoltIcon
+  BoltIcon,
+  UserIcon
 } from "@heroicons/react/24/outline";
 import Logo from './Logo';
 import { useAuth } from '../../contexts/AuthContext';
@@ -89,14 +94,8 @@ export function Sidebar({ className = "" }: SidebarProps) {
     <Card className={`h-screen w-64 rounded-none border-r border-divider bg-content1 ${className}`}>
       <CardBody className="p-0 flex flex-col h-full">
         {/* Logo Header */}
-        <div className="p-6 border-b border-divider">
-          <div className="flex items-center gap-3">
-            <Logo size="sm" />
-            <div>
-              <h1 className="text-lg font-bold text-foreground">ChargeCars</h1>
-              <p className="text-xs text-foreground-500">Order Management</p>
-            </div>
-          </div>
+        <div className="p-6 border-b border-divider flex justify-center">
+          <Logo size="md" />
         </div>
 
         {/* Navigation */}
@@ -137,33 +136,56 @@ export function Sidebar({ className = "" }: SidebarProps) {
 
         {/* User Info */}
         <div className="p-4 border-t border-divider">
-          <div className="flex items-center gap-3 mb-4">
-            <Avatar
-              size="sm"
-              name={user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'User'}
-              className="text-tiny"
-              color="primary"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'Gebruiker'}
-              </p>
-              <p className="text-xs text-foreground-500 truncate">
-                {user?.email || 'user@chargecars.nl'}
-              </p>
-            </div>
-          </div>
-
-          {/* Logout Button */}
-          <Button
-            variant="light"
-            color="danger"
-            className="w-full justify-start"
-            startContent={<ArrowRightOnRectangleIcon className="h-5 w-5" />}
-            onPress={handleLogout}
-          >
-            Uitloggen
-          </Button>
+          <Dropdown placement="top-start">
+            <DropdownTrigger>
+              <Button
+                variant="light"
+                className="w-full justify-start p-2 h-auto"
+              >
+                <div className="flex items-center gap-3 w-full">
+                  <Avatar
+                    size="sm"
+                    name={user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'User'}
+                    className="text-tiny"
+                    color="primary"
+                  />
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'Gebruiker'}
+                    </p>
+                    <p className="text-xs text-foreground-500 truncate">
+                      {user?.email || 'user@chargecars.nl'}
+                    </p>
+                  </div>
+                </div>
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="User menu">
+              <DropdownItem
+                key="profile"
+                startContent={<UserIcon className="h-4 w-4" />}
+                textValue="Mijn Profiel"
+              >
+                Mijn Profiel
+              </DropdownItem>
+              <DropdownItem
+                key="settings"
+                startContent={<CogIcon className="h-4 w-4" />}
+                textValue="Instellingen"
+              >
+                Instellingen
+              </DropdownItem>
+              <DropdownItem
+                key="logout"
+                color="danger"
+                startContent={<ArrowRightOnRectangleIcon className="h-4 w-4" />}
+                onPress={handleLogout}
+                textValue="Uitloggen"
+              >
+                Uitloggen
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </div>
       </CardBody>
     </Card>
