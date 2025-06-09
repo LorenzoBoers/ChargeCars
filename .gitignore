@@ -118,7 +118,7 @@ ARCHIVED/smartsuite_*.json
 xano_workspace_backup/
 *.xano-backup
 
-# Project specific - ignore structured directories (contains duplicates)
+# Project specific - ignore old numbered directories (deprecated)
 01-backend/
 02-documentation/
 03-frontend/
@@ -127,12 +127,20 @@ xano_workspace_backup/
 test_rules.md
 migration_*.log
 
-# Keep active development directories
+# Documentation and PRDs (local development only - not for hosting)
+documentation/
+prd/
+human-todo.md
+*.md
+!README.md
+!frontend/README.md
+!backend/README.md
+
+# Keep only essential app directories for hosting
 !backend/
 !frontend/
-!docs/
-!tools/
-!tests/
+!tools/scripts/
+!tests/integration/
 
 # But still ignore build artifacts in kept directories
 backend/node_modules/
