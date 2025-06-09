@@ -583,9 +583,9 @@ const QuoteDetailPage: React.FC = () => {
           </div>
 
           {/* Line Items and Contact Cards */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
             {/* Line Items Table - Left Side */}
-            <div className="xl:col-span-2">
+            <div className="xl:col-span-3">
               <Card>
                 <CardHeader className="flex justify-between items-center p-4">
                   <h3 className="text-base font-semibold">Line Items per Bezoek</h3>
@@ -604,10 +604,10 @@ const QuoteDetailPage: React.FC = () => {
                     <table className="w-full">
                       <thead className="bg-content2 border-b border-divider">
                         <tr>
-                          <th className="text-left py-3 px-4 font-semibold text-sm text-foreground min-w-[300px]">Beschrijving</th>
-                          <th className="text-center py-3 px-4 font-semibold text-sm text-foreground min-w-[60px]">Aantal</th>
-                          <th className="text-right py-3 px-4 font-semibold text-sm text-foreground min-w-[80px]">Prijs</th>
-                          <th className="text-right py-3 px-4 font-semibold text-sm text-foreground min-w-[80px]">Totaal</th>
+                          <th className="text-left py-2 px-3 font-semibold text-sm text-foreground min-w-[400px]">Beschrijving</th>
+                          <th className="text-left py-2 px-3 font-semibold text-sm text-foreground min-w-[80px]">Aantal</th>
+                          <th className="text-right py-2 px-3 font-semibold text-sm text-foreground min-w-[100px]">Prijs</th>
+                          <th className="text-right py-2 px-3 font-semibold text-sm text-foreground min-w-[100px]">Totaal</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -619,12 +619,12 @@ const QuoteDetailPage: React.FC = () => {
                           return (
                             <React.Fragment key={visitId}>
                               {/* Visit header row */}
-                              <tr className="bg-primary/5 border-b border-divider">
-                                <td className="py-3 px-4 font-semibold text-sm text-primary" colSpan={4}>
+                              <tr className="bg-primary/10 border-b border-divider">
+                                <td className="py-2 px-3 font-semibold text-sm text-primary" colSpan={4}>
                                   <div className="flex items-center gap-2">
                                     <CalendarDaysIcon className="h-4 w-4" />
                                     {visitData.visit_name}
-                                    <Chip size="sm" variant="flat" color="primary" className="ml-auto">
+                                    <Chip size="sm" variant="flat" color="primary" className="ml-auto text-xs">
                                       €{visitTotal.toLocaleString('nl-NL')}
                                     </Chip>
                                   </div>
@@ -638,20 +638,21 @@ const QuoteDetailPage: React.FC = () => {
                                 return (
                                   <React.Fragment key={contactId}>
                                     {/* Contact header row */}
-                                    <tr className="bg-content2/20 border-b border-divider/50">
-                                      <td className="py-2 px-4" colSpan={4}>
-                                        <div className="flex items-center gap-2">
-                                          <Avatar name={contactData.contact_name} size="sm" className="w-6 h-6 text-xs" />
-                                          <span className="font-medium text-sm">{contactData.contact_name}</span>
-                                          <Chip 
-                                            size="sm" 
-                                            color={getContactColor(contactData.contact_role)} 
-                                            variant="flat" 
-                                            className="text-xs"
-                                          >
-                                            {getContactLabel(contactData.contact_role)}
-                                          </Chip>
-                                          <span className="text-xs text-foreground-600 ml-auto">€{contactTotal.toLocaleString('nl-NL')}</span>
+                                    <tr className="bg-content2/40 border-b border-divider border-l-4 border-l-primary/30">
+                                      <td className="py-1.5 px-3" colSpan={4}>
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center gap-2">
+                                            <span className="font-medium text-sm">{contactData.contact_name}</span>
+                                            <Chip 
+                                              size="sm" 
+                                              color={getContactColor(contactData.contact_role)} 
+                                              variant="flat" 
+                                              className="text-xs"
+                                            >
+                                              {getContactLabel(contactData.contact_role)}
+                                            </Chip>
+                                          </div>
+                                          <span className="text-xs text-foreground-600 font-medium">€{contactTotal.toLocaleString('nl-NL')}</span>
                                         </div>
                                       </td>
                                     </tr>
@@ -660,37 +661,34 @@ const QuoteDetailPage: React.FC = () => {
                                     {contactItems.map((item, itemIndex) => (
                                       <tr key={item.id} className="border-b border-divider/30 hover:bg-content2/10 transition-colors">
                                         {/* Line item description */}
-                                        <td className="py-2 px-4">
-                                          <div className="flex items-start gap-3">
-                                            <div className="flex-shrink-0 mt-0.5">{getCategoryIcon(item.category)}</div>
-                                            <div className="flex-1">
-                                              <p className="text-sm font-medium text-foreground">{item.description}</p>
-                                              <div className="flex items-center gap-2 mt-1">
-                                                <Chip size="sm" variant="flat" color="default" className="text-xs">
-                                                  {item.category}
+                                        <td className="py-1.5 px-3">
+                                          <div className="pl-4">
+                                            <p className="text-sm font-medium text-foreground">{item.description}</p>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                              <Chip size="sm" variant="flat" color="default" className="text-xs">
+                                                {item.category}
+                                              </Chip>
+                                              {item.is_customer_responsible && (
+                                                <Chip size="sm" variant="flat" color="success" className="text-xs">
+                                                  Klant
                                                 </Chip>
-                                                {item.is_customer_responsible && (
-                                                  <Chip size="sm" variant="flat" color="success" className="text-xs">
-                                                    Klant
-                                                  </Chip>
-                                                )}
-                                              </div>
+                                              )}
                                             </div>
                                           </div>
                                         </td>
                                         
                                         {/* Quantity */}
-                                        <td className="py-2 px-4 text-center">
-                                          <span className="text-sm font-medium">{item.quantity}</span>
+                                        <td className="py-1.5 px-3 text-left">
+                                          <span className="text-sm font-medium">{item.quantity}x</span>
                                         </td>
                                         
                                         {/* Unit price */}
-                                        <td className="py-2 px-4 text-right">
+                                        <td className="py-1.5 px-3 text-right">
                                           <span className="text-sm font-medium">€{item.unit_price.toLocaleString('nl-NL')}</span>
                                         </td>
                                         
                                         {/* Total price */}
-                                        <td className="py-2 px-4 text-right">
+                                        <td className="py-1.5 px-3 text-right">
                                           <span className="text-sm font-semibold">€{item.total_price.toLocaleString('nl-NL')}</span>
                                         </td>
                                       </tr>
@@ -715,16 +713,15 @@ const QuoteDetailPage: React.FC = () => {
                 <CardBody className="pt-0">
                   <div className="space-y-3">
                     {/* Per Contact Totals */}
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <h4 className="text-sm font-medium text-foreground-600">Per Contact:</h4>
                       {quote.contacts.map(contact => {
                         const contactTotal = getContactTotal(contact.id);
                         if (contactTotal === 0) return null;
                         
                         return (
-                          <div key={contact.id} className="flex justify-between items-center py-1">
+                          <div key={contact.id} className="flex justify-between items-center py-1 px-2 bg-content2/20 rounded">
                             <div className="flex items-center gap-2">
-                              <Avatar name={contact.name} size="sm" className="w-5 h-5 text-xs" />
                               <span className="text-sm">{contact.name}</span>
                               <Chip size="sm" color={getContactColor(contact.role)} variant="flat" className="text-xs">
                                 {getContactLabel(contact.role)}
@@ -739,7 +736,7 @@ const QuoteDetailPage: React.FC = () => {
                     <Divider />
                     
                     {/* VAT Breakdown */}
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <div className="flex justify-between text-sm">
                         <span>Subtotaal (excl. BTW):</span>
                         <span className="font-medium">€{(quote.total_amount / 1.21).toLocaleString('nl-NL', { maximumFractionDigits: 2 })}</span>
@@ -760,53 +757,43 @@ const QuoteDetailPage: React.FC = () => {
             </div>
 
             {/* Contact Cards - Right Side */}
-            <div className="space-y-4">
-              <h3 className="text-base font-semibold">Contact Acties</h3>
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold">Contact Acties</h3>
               
               {quote.contacts.map(contact => {
                 const contactTotal = getContactTotal(contact.id);
                 if (contactTotal === 0) return null;
                 
                 return (
-                  <Card key={contact.id} className="p-4">
-                    <div className="space-y-3">
+                  <Card key={contact.id} className="p-3">
+                    <div className="space-y-2">
                       {/* Contact Header */}
-                      <div className="flex items-center gap-3">
-                        <Avatar name={contact.name} size="md" />
-                        <div className="flex-1">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
                           <h4 className="font-semibold text-sm">{contact.name}</h4>
-                          <p className="text-xs text-foreground-600">{contact.email}</p>
-                          <Chip size="sm" color={getContactColor(contact.role)} variant="flat" className="text-xs mt-1">
-                            {getContactLabel(contact.role)}
-                          </Chip>
+                          <span className="font-bold text-xs">€{contactTotal.toLocaleString('nl-NL')}</span>
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs text-foreground-600">Totaal:</p>
-                          <p className="font-bold text-sm">€{contactTotal.toLocaleString('nl-NL')}</p>
-                        </div>
+                        <p className="text-xs text-foreground-600">{contact.email}</p>
+                        <Chip size="sm" color={getContactColor(contact.role)} variant="flat" className="text-xs">
+                          {getContactLabel(contact.role)}
+                        </Chip>
                       </div>
 
                       <Divider />
 
                       {/* Documents */}
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <h5 className="text-xs font-medium text-foreground-600 uppercase">Documenten</h5>
                         <div className="space-y-1">
-                          <div className="flex items-center justify-between p-2 bg-content2/30 rounded-md">
-                            <div className="flex items-center gap-2">
-                              <DocumentTextIcon className="h-4 w-4 text-foreground-600" />
-                              <span className="text-xs">Offerte PDF</span>
-                            </div>
-                            <Button size="sm" isIconOnly variant="light" className="h-6 w-6">
+                          <div className="flex items-center justify-between p-1.5 bg-content2/30 rounded text-xs">
+                            <span>Offerte PDF</span>
+                            <Button size="sm" isIconOnly variant="light" className="h-5 w-5">
                               <DocumentArrowDownIcon className="h-3 w-3" />
                             </Button>
                           </div>
-                          <div className="flex items-center justify-between p-2 bg-content2/30 rounded-md">
-                            <div className="flex items-center gap-2">
-                              <DocumentTextIcon className="h-4 w-4 text-foreground-600" />
-                              <span className="text-xs">Technische specs</span>
-                            </div>
-                            <Button size="sm" isIconOnly variant="light" className="h-6 w-6">
+                          <div className="flex items-center justify-between p-1.5 bg-content2/30 rounded text-xs">
+                            <span>Technische specs</span>
+                            <Button size="sm" isIconOnly variant="light" className="h-5 w-5">
                               <DocumentArrowDownIcon className="h-3 w-3" />
                             </Button>
                           </div>
@@ -814,10 +801,10 @@ const QuoteDetailPage: React.FC = () => {
                       </div>
 
                       {/* Online Quote Link */}
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <h5 className="text-xs font-medium text-foreground-600 uppercase">Online Offerte</h5>
-                        <div className="flex gap-2">
-                          <Button size="sm" color="primary" variant="flat" className="flex-1 text-xs">
+                        <div className="flex gap-1">
+                          <Button size="sm" color="primary" variant="flat" className="flex-1 text-xs h-6">
                             <ShareIcon className="h-3 w-3 mr-1" />
                             Deel Link
                           </Button>
@@ -828,13 +815,13 @@ const QuoteDetailPage: React.FC = () => {
                       </div>
 
                       {/* Signature Status */}
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <h5 className="text-xs font-medium text-foreground-600 uppercase">Ondertekening</h5>
-                        <div className="flex items-center gap-2">
-                          <ClockIcon className="h-4 w-4 text-warning" />
-                          <span className="text-xs">Wacht op ondertekening</span>
+                        <div className="flex items-center gap-2 text-xs">
+                          <ClockIcon className="h-3 w-3 text-warning" />
+                          <span>Wacht op ondertekening</span>
                         </div>
-                        <Button size="sm" color="success" variant="flat" className="w-full text-xs">
+                        <Button size="sm" color="success" variant="flat" className="w-full text-xs h-6">
                           <PaperAirplaneIcon className="h-3 w-3 mr-1" />
                           Verstuur voor Akkoord
                         </Button>
