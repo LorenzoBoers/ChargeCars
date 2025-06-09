@@ -1,27 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import {
   Card,
-  CardBody,
   CardHeader,
+  CardBody,
   Input,
   Button,
-  Link,
+  Spacer,
   Divider,
-  Chip,
-  Spacer
+  Chip
 } from "@nextui-org/react";
 import {
   EyeIcon,
   EyeSlashIcon,
-  BoltIcon,
   EnvelopeIcon,
   LockClosedIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon
 } from "@heroicons/react/24/outline";
 import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
+import { useTheme } from 'next-themes';
 import ThemeToggle from '../ThemeToggle';
 
 interface LoginFormData {
@@ -30,23 +30,30 @@ interface LoginFormData {
 }
 
 const LoginPage: React.FC = () => {
-  const router = useRouter();
-  const { login, isLoading: authLoading, isAuthenticated, user } = useAuth();
-  const { isDark } = useTheme();
+  const { theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: ''
   });
-  const [isVisible, setIsVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const router = useRouter();
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && mounted) {
       router.push('/dashboard');
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, router, mounted]);
 
   const toggleVisibility = () => setIsVisible(!isVisible);
 
@@ -55,8 +62,8 @@ const LoginPage: React.FC = () => {
       ...prev,
       [field]: value
     }));
+    // Clear error when user starts typing
     if (error) setError(null);
-    if (success) setSuccess(null);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -66,7 +73,6 @@ const LoginPage: React.FC = () => {
 
     try {
       const result = await login(formData.email, formData.password);
-      
       if (result.success) {
         setSuccess('Login successful! Redirecting...');
         // Router push will be handled by useEffect when isAuthenticated changes
@@ -84,6 +90,23 @@ const LoginPage: React.FC = () => {
 
   const isFormValid = formData.email && formData.password;
   const isLoading = authLoading;
+
+  // Don't render theme-dependent content until mounted
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+        {/* Loading placeholder */}
+        <div className="text-center">
+          <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-6 h-6 bg-primary rounded animate-pulse" />
+          </div>
+          <p className="text-foreground-500">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const isDark = theme === 'dark';
 
   return (
     <div className={`min-h-screen flex items-center justify-center p-4 transition-colors duration-200 ${
@@ -259,25 +282,16 @@ const LoginPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className={`transition-colors duration-200 ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>Test User:</span>
-                  <span className={`transition-colors duration-200 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>lorenzo_boers@outlook.com</span>
+                  <span className={`transition-colors duration-200 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>test@example.com</span>
                 </div>
                 <div className="flex justify-between">
                   <span className={`transition-colors duration-200 ${isDark ? 'text-gray-500' : 'text-gray-600'}`}>Password:</span>
-                  <span className={`transition-colors duration-200 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>demo123 / Laadpaal2231</span>
+                  <span className={`transition-colors duration-200 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>password</span>
                 </div>
               </div>
             </div>
           </CardBody>
         </Card>
-
-        {/* Footer */}
-        <div className="text-center mt-8">
-          <p className={`text-xs transition-colors duration-200 ${
-            isDark ? 'text-gray-500' : 'text-gray-400'
-          }`}>
-            © 2025 ChargeCars. All rights reserved.
-          </p>
-        </div>
       </div>
     </div>
   );

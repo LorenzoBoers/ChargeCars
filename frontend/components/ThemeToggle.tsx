@@ -1,49 +1,63 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@nextui-org/react';
-import { SunIcon, MoonIcon } from '@heroicons/react/24/outline';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from 'next-themes';
+import { 
+  SunIcon, 
+  MoonIcon 
+} from '@heroicons/react/24/outline';
 
 interface ThemeToggleProps {
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'shadow' | 'ghost';
-  showLabel?: boolean;
+  variant?: 'flat' | 'solid' | 'light' | 'bordered' | 'ghost';
   className?: string;
 }
 
 const ThemeToggle: React.FC<ThemeToggleProps> = ({ 
   size = 'md', 
-  variant = 'ghost',
-  showLabel = false,
+  variant = 'flat',
   className = ''
 }) => {
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <Button 
+        isIconOnly 
+        size={size} 
+        variant={variant}
+        className={className}
+        isDisabled
+      >
+        <div className="w-4 h-4 bg-foreground/20 rounded animate-pulse" />
+      </Button>
+    );
+  }
+
+  const isDark = theme === 'dark';
+
+  const toggleTheme = () => {
+    setTheme(isDark ? 'light' : 'dark');
+  };
 
   return (
     <Button
-      variant={variant}
+      isIconOnly
       size={size}
+      variant={variant}
       onPress={toggleTheme}
-      startContent={
-        isDark ? (
-          <SunIcon className="h-4 w-4" />
-        ) : (
-          <MoonIcon className="h-4 w-4" />
-        )
-      }
-      className={`
-        transition-all duration-200 
-        ${isDark 
-          ? 'text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/10' 
-          : 'text-slate-600 hover:text-slate-800 hover:bg-slate-600/10'
-        }
-        ${className}
-      `}
-      aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      className={`${className} transition-all duration-200 hover:scale-105`}
+      aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
     >
-      {showLabel && (
-        <span className="hidden sm:inline">
-          {isDark ? 'Light Mode' : 'Dark Mode'}
-        </span>
+      {isDark ? (
+        <SunIcon className="h-4 w-4 text-amber-500" />
+      ) : (
+        <MoonIcon className="h-4 w-4 text-slate-600" />
       )}
     </Button>
   );
