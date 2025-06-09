@@ -19,7 +19,10 @@ import {
   DropdownMenu,
   DropdownItem,
   Tooltip,
-  Badge
+  Badge,
+  Switch,
+  Tabs,
+  Tab
 } from "@nextui-org/react";
 import {
   ArrowLeftIcon,
@@ -41,7 +44,10 @@ import {
   CurrencyEuroIcon,
   ChatBubbleLeftRightIcon,
   ClipboardDocumentListIcon,
-  PaperClipIcon
+  PaperClipIcon,
+  EyeIcon,
+  EyeSlashIcon,
+  CloudArrowUpIcon
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../../components/layouts/AppLayout';
 
@@ -50,7 +56,7 @@ interface OrderStatus {
   id: string;
   name: string;
   date: string;
-  color: 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
+  color: 'success' | 'primary' | 'secondary' | 'warning' | 'danger';
   completed: boolean;
   current: boolean;
 }
@@ -81,20 +87,15 @@ interface RelatedItem {
   amount?: number;
 }
 
-interface Comment {
+interface TimelineItem {
   id: string;
+  type: 'comment' | 'audit' | 'internal';
   author: string;
   content: string;
   timestamp: string;
   avatar?: string;
-}
-
-interface AuditLog {
-  id: string;
-  action: string;
-  user: string;
-  timestamp: string;
-  details: string;
+  isInternal?: boolean;
+  files?: { name: string; size: string; type: string }[];
 }
 
 interface OrderDetail {
@@ -113,8 +114,7 @@ interface OrderDetail {
   additionalContacts: Contact[];
   addresses: Address[];
   relatedItems: RelatedItem[];
-  comments: Comment[];
-  auditLogs: AuditLog[];
+  timeline: TimelineItem[];
 }
 
 // Mock data
@@ -130,11 +130,11 @@ const mockOrder: OrderDetail = {
   expectedDelivery: '2024-02-15',
   statuses: [
     { id: '1', name: 'Ontvangen', date: '2024-01-15', color: 'success', completed: true, current: false },
-    { id: '2', name: 'In Behandeling', date: '2024-01-16', color: 'primary', completed: true, current: false },
-    { id: '3', name: 'Technische Check', date: '2024-01-18', color: 'warning', completed: true, current: true },
-    { id: '4', name: 'Gepland', date: '', color: 'default', completed: false, current: false },
-    { id: '5', name: 'In Uitvoering', date: '', color: 'default', completed: false, current: false },
-    { id: '6', name: 'Voltooid', date: '', color: 'default', completed: false, current: false }
+    { id: '2', name: 'In Behandeling', date: '2024-01-16', color: 'warning', completed: true, current: false },
+    { id: '3', name: 'Technische Check', date: '2024-01-18', color: 'secondary', completed: true, current: false },
+    { id: '4', name: 'Gepland', date: '2024-01-20', color: 'primary', completed: false, current: true },
+    { id: '5', name: 'In Uitvoering', date: '', color: 'danger', completed: false, current: false },
+    { id: '6', name: 'Voltooid', date: '', color: 'success', completed: false, current: false }
   ],
   customer: {
     id: 'CUST-001',
@@ -177,19 +177,66 @@ const mockOrder: OrderDetail = {
   ],
   relatedItems: [
     { id: 'QUO-001', type: 'quote', title: 'Offerte Laadpaal Installatie', status: 'Verzonden', date: '2024-01-16', amount: 2850.00 },
+    { id: 'QUO-002', type: 'quote', title: 'Herziene Offerte', status: 'Concept', date: '2024-01-18', amount: 2750.00 },
     { id: 'VIS-001', type: 'visit', title: 'Locatie Inspectie', status: 'Gepland', date: '2024-01-22' },
+    { id: 'VIS-002', type: 'visit', title: 'Technische Meting', status: 'In Afwachting', date: '2024-01-25' },
     { id: 'INT-001', type: 'intake', title: 'Intake Formulier', status: 'In Afwachting', date: '2024-01-17' },
     { id: 'INV-001', type: 'invoice', title: 'Factuur #2024-001', status: 'Concept', date: '2024-01-20', amount: 2850.00 }
   ],
-  comments: [
-    { id: 'COM-001', author: 'Jan Petersma', content: 'Klant heeft aangegeven dat de installatie bij voorkeur in de ochtend plaatsvindt.', timestamp: '2024-01-18 14:30', avatar: 'JP' },
-    { id: 'COM-002', author: 'Maria Jansen', content: 'Technische check voltooid. Speciale kabel nodig voor aansluiting.', timestamp: '2024-01-18 16:45', avatar: 'MJ' }
-  ],
-  auditLogs: [
-    { id: 'LOG-001', action: 'Status Update', user: 'System', timestamp: '2024-01-18 16:45', details: 'Status gewijzigd naar: Technische Check' },
-    { id: 'LOG-002', action: 'Comment Added', user: 'Maria Jansen', timestamp: '2024-01-18 16:45', details: 'Technische check voltooid' },
-    { id: 'LOG-003', action: 'Quote Generated', user: 'Jan Petersma', timestamp: '2024-01-16 10:30', details: 'Offerte QUO-001 gegenereerd' },
-    { id: 'LOG-004', action: 'Order Created', user: 'System', timestamp: '2024-01-15 09:15', details: 'Order CHC-2024-001 aangemaakt' }
+  timeline: [
+    {
+      id: 'TL-001',
+      type: 'audit',
+      author: 'System',
+      content: 'Order CHC-2024-001 aangemaakt',
+      timestamp: '2024-01-15T09:15:00',
+      avatar: 'SY'
+    },
+    {
+      id: 'TL-002',
+      type: 'comment',
+      author: 'Jan Petersma',
+      content: 'Klant heeft aangegeven dat de installatie bij voorkeur in de ochtend plaatsvindt.',
+      timestamp: '2024-01-18T14:30:00',
+      avatar: 'JP'
+    },
+    {
+      id: 'TL-003',
+      type: 'internal',
+      author: 'Maria Jansen',
+      content: 'Let op: klant heeft beperkte parkeergelegenheid. Mogelijk extra transport nodig.',
+      timestamp: '2024-01-18T15:45:00',
+      avatar: 'MJ',
+      isInternal: true
+    },
+    {
+      id: 'TL-004',
+      type: 'audit',
+      author: 'Maria Jansen',
+      content: 'Status gewijzigd naar: Technische Check',
+      timestamp: '2024-01-18T16:45:00',
+      avatar: 'MJ'
+    },
+    {
+      id: 'TL-005',
+      type: 'comment',
+      author: 'Maria Jansen',
+      content: 'Technische check voltooid. Speciale kabel nodig voor aansluiting.',
+      timestamp: '2024-01-18T16:45:00',
+      avatar: 'MJ',
+      files: [
+        { name: 'technische_specificaties.pdf', size: '2.4 MB', type: 'pdf' },
+        { name: 'locatie_foto.jpg', size: '1.1 MB', type: 'image' }
+      ]
+    },
+    {
+      id: 'TL-006',
+      type: 'audit',
+      author: 'Jan Petersma',
+      content: 'Offerte QUO-001 gegenereerd',
+      timestamp: '2024-01-16T10:30:00',
+      avatar: 'JP'
+    }
   ]
 };
 
@@ -197,7 +244,10 @@ const OrderDetailPage: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
   const [newComment, setNewComment] = useState('');
+  const [isInternal, setIsInternal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showInternalNotes, setShowInternalNotes] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // Mock loading state
   if (!id) {
@@ -222,8 +272,19 @@ const OrderDetailPage: React.FC = () => {
     // Mock API call
     setTimeout(() => {
       setNewComment('');
+      setSelectedFiles([]);
+      setIsInternal(false);
       setIsLoading(false);
     }, 1000);
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+    setSelectedFiles(prev => [...prev, ...files]);
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const getRelatedItemIcon = (type: string) => {
@@ -244,6 +305,54 @@ const OrderDetailPage: React.FC = () => {
       case 'in afwachting':
       case 'concept': return 'warning';
       default: return 'default';
+    }
+  };
+
+  const getFileIcon = (type: string) => {
+    if (type.includes('image')) return '🖼️';
+    if (type.includes('pdf')) return '📄';
+    if (type.includes('word')) return '📝';
+    if (type.includes('excel')) return '📊';
+    return '📎';
+  };
+
+  // Group related items by type
+  const groupedRelatedItems = order.relatedItems.reduce((acc, item) => {
+    if (!acc[item.type]) {
+      acc[item.type] = [];
+    }
+    acc[item.type].push(item);
+    return acc;
+  }, {} as Record<string, RelatedItem[]>);
+
+  const getGroupTitle = (type: string) => {
+    switch (type) {
+      case 'quote': return 'Offertes';
+      case 'visit': return 'Bezoeken';
+      case 'intake': return 'Intake Formulieren';
+      case 'invoice': return 'Facturen';
+      default: return type;
+    }
+  };
+
+  // Sort timeline by timestamp (newest first for chat-like display)
+  const sortedTimeline = [...order.timeline]
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .filter(item => !item.isInternal || showInternalNotes);
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffHours < 24) {
+      return `${diffHours}u geleden`;
+    } else if (diffDays < 7) {
+      return `${diffDays}d geleden`;
+    } else {
+      return date.toLocaleDateString('nl-NL');
     }
   };
 
@@ -320,14 +429,14 @@ const OrderDetailPage: React.FC = () => {
                         {status.completed ? (
                           <CheckCircleIcon className="h-6 w-6" />
                         ) : status.current ? (
-                          <ClockIcon className="h-6 w-6" />
+                          <div className="w-4 h-4 rounded-full bg-primary" />
                         ) : (
                           <div className="w-4 h-4 rounded-full bg-current opacity-50" />
                         )}
                       </div>
                       <Chip
                         size="sm"
-                        color={status.completed ? 'success' : status.current ? 'primary' : 'default'}
+                        color={status.completed ? status.color : status.current ? 'primary' : 'default'}
                         variant={status.current ? 'solid' : status.completed ? 'flat' : 'light'}
                         className="mb-2 font-medium"
                       >
@@ -386,63 +495,66 @@ const OrderDetailPage: React.FC = () => {
                 </CardBody>
               </Card>
 
-              {/* Customer Details */}
-              <Card>
-                <CardHeader>
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <UserIcon className="h-5 w-5" />
-                    Klant Details
-                  </h3>
-                </CardHeader>
-                <CardBody>
-                  <div className="flex items-start gap-4">
-                    <Avatar name={order.customer.name} size="lg" />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-lg">{order.customer.name}</h4>
-                      <p className="text-foreground-600 mb-2">{order.customer.role}</p>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <EnvelopeIcon className="h-4 w-4 text-foreground-500" />
-                          <span className="text-sm">{order.customer.email}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <PhoneIcon className="h-4 w-4 text-foreground-500" />
-                          <span className="text-sm">{order.customer.phone}</span>
+              {/* Customer & Partner Details Side by Side */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Customer Details */}
+                <Card>
+                  <CardHeader>
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <UserIcon className="h-5 w-5" />
+                      Eindklant
+                    </h3>
+                  </CardHeader>
+                  <CardBody>
+                    <div className="flex items-start gap-4">
+                      <Avatar name={order.customer.name} size="lg" />
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-lg">{order.customer.name}</h4>
+                        <p className="text-foreground-600 mb-2">{order.customer.role}</p>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <EnvelopeIcon className="h-4 w-4 text-foreground-500" />
+                            <span className="text-sm">{order.customer.email}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <PhoneIcon className="h-4 w-4 text-foreground-500" />
+                            <span className="text-sm">{order.customer.phone}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </CardBody>
-              </Card>
+                  </CardBody>
+                </Card>
 
-              {/* Partner Details */}
-              <Card>
-                <CardHeader>
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <BuildingOfficeIcon className="h-5 w-5" />
-                    Partner Details
-                  </h3>
-                </CardHeader>
-                <CardBody>
-                  <div className="flex items-start gap-4">
-                    <Avatar name={order.partner.name} size="lg" color="secondary" />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-lg">{order.partnerName}</h4>
-                      <p className="text-foreground-600 mb-2">{order.partner.name} • {order.partner.role}</p>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <EnvelopeIcon className="h-4 w-4 text-foreground-500" />
-                          <span className="text-sm">{order.partner.email}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <PhoneIcon className="h-4 w-4 text-foreground-500" />
-                          <span className="text-sm">{order.partner.phone}</span>
+                {/* Partner Details */}
+                <Card>
+                  <CardHeader>
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <BuildingOfficeIcon className="h-5 w-5" />
+                      Opdrachtgever
+                    </h3>
+                  </CardHeader>
+                  <CardBody>
+                    <div className="flex items-start gap-4">
+                      <Avatar name={order.partner.name} size="lg" color="secondary" />
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-lg">{order.partnerName}</h4>
+                        <p className="text-foreground-600 mb-2">{order.partner.name} • {order.partner.role}</p>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <EnvelopeIcon className="h-4 w-4 text-foreground-500" />
+                            <span className="text-sm">{order.partner.email}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <PhoneIcon className="h-4 w-4 text-foreground-500" />
+                            <span className="text-sm">{order.partner.phone}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </CardBody>
-              </Card>
+                  </CardBody>
+                </Card>
+              </div>
 
               {/* Additional Contacts */}
               {order.additionalContacts.length > 0 && (
@@ -499,31 +611,42 @@ const OrderDetailPage: React.FC = () => {
                 </CardBody>
               </Card>
 
-              {/* Related Items */}
+              {/* Grouped Related Items */}
               <Card>
                 <CardHeader>
                   <h3 className="text-lg font-semibold">Gerelateerde Items</h3>
                 </CardHeader>
                 <CardBody>
-                  <div className="space-y-3">
-                    {order.relatedItems.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between p-3 bg-content2 rounded-lg hover:bg-content3 transition-colors cursor-pointer">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-primary/10 rounded-lg">
-                            {getRelatedItemIcon(item.type)}
-                          </div>
-                          <div>
-                            <p className="font-medium">{item.title}</p>
-                            <p className="text-sm text-foreground-600">{item.date}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          {item.amount && (
-                            <span className="font-semibold">€{item.amount.toLocaleString('nl-NL')}</span>
-                          )}
-                          <Chip size="sm" color={getRelatedItemColor(item.status)} variant="flat">
-                            {item.status}
-                          </Chip>
+                  <div className="space-y-6">
+                    {Object.entries(groupedRelatedItems).map(([type, items]) => (
+                      <div key={type}>
+                        <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                          {getRelatedItemIcon(type)}
+                          {getGroupTitle(type)}
+                          <Chip size="sm" color="primary" variant="flat">{items.length}</Chip>
+                        </h4>
+                        <div className="space-y-2">
+                          {items.map((item) => (
+                            <div key={item.id} className="flex items-center justify-between p-3 bg-content2 rounded-lg hover:bg-content3 transition-colors cursor-pointer">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 rounded-lg">
+                                  {getRelatedItemIcon(item.type)}
+                                </div>
+                                <div>
+                                  <p className="font-medium">{item.title}</p>
+                                  <p className="text-sm text-foreground-600">{item.date}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                {item.amount && (
+                                  <span className="font-semibold">€{item.amount.toLocaleString('nl-NL')}</span>
+                                )}
+                                <Chip size="sm" color={getRelatedItemColor(item.status)} variant="flat">
+                                  {item.status}
+                                </Chip>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
                     ))}
@@ -532,86 +655,160 @@ const OrderDetailPage: React.FC = () => {
               </Card>
             </div>
 
-            {/* Right Column - Comments & Audit Log */}
+            {/* Right Column - Timeline */}
             <div className="space-y-6">
-              {/* Comments Section */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <ChatBubbleLeftRightIcon className="h-5 w-5" />
-                    Opmerkingen
-                  </h3>
+              {/* Timeline Section */}
+              <Card className="h-[800px] flex flex-col">
+                <CardHeader className="pb-3 flex-shrink-0">
+                  <div className="flex items-center justify-between w-full">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                      Activiteiten
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        size="sm"
+                        isSelected={showInternalNotes}
+                        onValueChange={setShowInternalNotes}
+                        startContent={<EyeSlashIcon className="h-3 w-3" />}
+                        endContent={<EyeIcon className="h-3 w-3" />}
+                      />
+                      <span className="text-sm text-foreground-600">Intern</span>
+                    </div>
+                  </div>
                 </CardHeader>
-                <CardBody className="space-y-4">
-                  {/* Add Comment */}
+                
+                {/* Add Comment Section */}
+                <div className="px-6 pb-4 flex-shrink-0 border-b border-divider">
                   <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        size="sm"
+                        isSelected={isInternal}
+                        onValueChange={setIsInternal}
+                      />
+                      <span className="text-sm text-foreground-600">
+                        {isInternal ? 'Interne notitie' : 'Publieke opmerking'}
+                      </span>
+                    </div>
+                    
                     <Textarea
-                      placeholder="Voeg een opmerking toe..."
+                      placeholder={isInternal ? "Voeg een interne notitie toe..." : "Voeg een opmerking toe..."}
                       value={newComment}
                       onValueChange={setNewComment}
-                      minRows={3}
-                      maxRows={6}
+                      minRows={2}
+                      maxRows={4}
+                      classNames={{
+                        input: isInternal ? "bg-warning/5 border-warning/20" : ""
+                      }}
                     />
-                    <div className="flex justify-end">
+                    
+                    {/* File Upload */}
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        id="file-upload"
+                        multiple
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        startContent={<PaperClipIcon className="h-4 w-4" />}
+                        onPress={() => document.getElementById('file-upload')?.click()}
+                      >
+                        Bestanden
+                      </Button>
+                      
                       <Button
                         color="primary"
                         size="sm"
                         onPress={handleAddComment}
                         isLoading={isLoading}
                         isDisabled={!newComment.trim()}
+                        className="ml-auto"
                       >
-                        Toevoegen
+                        {isInternal ? 'Notitie Toevoegen' : 'Toevoegen'}
                       </Button>
                     </div>
-                  </div>
-
-                  <Divider />
-
-                  {/* Comments List */}
-                  <div className="space-y-4 max-h-64 overflow-y-auto">
-                    {order.comments.map((comment) => (
-                      <div key={comment.id} className="flex gap-3">
-                        <Avatar name={comment.avatar || comment.author} size="sm" />
-                        <div className="flex-1">
-                          <div className="bg-content2 rounded-lg p-3">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-sm">{comment.author}</span>
-                              <span className="text-xs text-foreground-500">{comment.timestamp}</span>
-                            </div>
-                            <p className="text-sm">{comment.content}</p>
+                    
+                    {/* Selected Files */}
+                    {selectedFiles.length > 0 && (
+                      <div className="space-y-2">
+                        {selectedFiles.map((file, index) => (
+                          <div key={index} className="flex items-center gap-2 p-2 bg-content2 rounded-lg">
+                            <span className="text-sm">{getFileIcon(file.type)}</span>
+                            <span className="text-sm flex-1 truncate">{file.name}</span>
+                            <span className="text-xs text-foreground-500">{(file.size / 1024 / 1024).toFixed(1)} MB</span>
+                            <Button
+                              size="sm"
+                              isIconOnly
+                              variant="light"
+                              color="danger"
+                              onPress={() => removeFile(index)}
+                            >
+                              ×
+                            </Button>
                           </div>
-                        </div>
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
-                </CardBody>
-              </Card>
+                </div>
 
-              {/* Audit Log */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <ClipboardDocumentListIcon className="h-5 w-5" />
-                    Audit Log
-                  </h3>
-                </CardHeader>
-                <CardBody>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {order.auditLogs.map((log, index) => (
-                      <div key={log.id} className="flex gap-3 relative">
-                        {index < order.auditLogs.length - 1 && (
-                          <div className="absolute left-2 top-8 w-0.5 h-full bg-divider" />
-                        )}
-                        <div className="w-4 h-4 bg-primary rounded-full mt-1 relative z-10" />
-                        <div className="flex-1 pb-4">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-sm">{log.action}</span>
-                            <Chip size="sm" variant="flat" color="primary" className="text-xs">
-                              {log.user}
-                            </Chip>
+                {/* Timeline Messages */}
+                <CardBody className="flex-1 overflow-y-auto p-0">
+                  <div className="p-6 space-y-4">
+                    {sortedTimeline.map((item) => (
+                      <div key={item.id} className="flex gap-3">
+                        <Avatar 
+                          name={item.avatar || item.author} 
+                          size="sm" 
+                          className={item.type === 'audit' ? 'opacity-60' : ''}
+                        />
+                        <div className="flex-1">
+                          <div className={`
+                            p-3 rounded-lg
+                            ${item.type === 'internal' 
+                              ? 'bg-warning/10 border border-warning/20' 
+                              : item.type === 'audit'
+                                ? 'bg-default/5 border border-divider'
+                                : 'bg-content2'
+                            }
+                          `}>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-medium text-sm">{item.author}</span>
+                              <span className="text-xs text-foreground-500">{formatTimestamp(item.timestamp)}</span>
+                              {item.isInternal && (
+                                <Chip size="sm" color="warning" variant="flat" className="text-xs">
+                                  Intern
+                                </Chip>
+                              )}
+                              {item.type === 'audit' && (
+                                <Chip size="sm" color="default" variant="flat" className="text-xs">
+                                  Systeem
+                                </Chip>
+                              )}
+                            </div>
+                            <p className="text-sm">{item.content}</p>
+                            
+                            {/* Files */}
+                            {item.files && item.files.length > 0 && (
+                              <div className="mt-3 space-y-2">
+                                {item.files.map((file, index) => (
+                                  <div key={index} className="flex items-center gap-2 p-2 bg-content1 rounded border border-divider">
+                                    <span>{getFileIcon(file.type)}</span>
+                                    <span className="text-sm flex-1">{file.name}</span>
+                                    <span className="text-xs text-foreground-500">{file.size}</span>
+                                    <Button size="sm" variant="light" className="text-xs">
+                                      Download
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                          <p className="text-sm text-foreground-600 mb-1">{log.details}</p>
-                          <span className="text-xs text-foreground-500">{log.timestamp}</span>
                         </div>
                       </div>
                     ))}
