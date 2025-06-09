@@ -335,9 +335,9 @@ const OrderDetailPage: React.FC = () => {
     }
   };
 
-  // Sort timeline by timestamp (newest first for chat-like display)
+  // Sort timeline by timestamp (oldest first for chat-like display)
   const sortedTimeline = [...order.timeline]
-    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
     .filter(item => !item.isInternal || showInternalNotes);
 
   const formatTimestamp = (timestamp: string) => {
@@ -436,7 +436,7 @@ const OrderDetailPage: React.FC = () => {
                       </div>
                       <Chip
                         size="sm"
-                        color={status.completed ? status.color : status.current ? 'primary' : 'default'}
+                        color={status.completed ? 'success' : status.current ? 'primary' : 'default'}
                         variant={status.current ? 'solid' : status.completed ? 'flat' : 'light'}
                         className="mb-2 font-medium"
                       >
@@ -506,10 +506,13 @@ const OrderDetailPage: React.FC = () => {
                     </h3>
                   </CardHeader>
                   <CardBody>
-                    <div className="flex items-start gap-4">
+                    <div 
+                      className="flex items-start gap-4 p-3 rounded-lg hover:bg-content2 transition-colors cursor-pointer"
+                      onClick={() => router.push(`/contacts/${order.customer.id}`)}
+                    >
                       <Avatar name={order.customer.name} size="lg" />
                       <div className="flex-1">
-                        <h4 className="font-semibold text-lg">{order.customer.name}</h4>
+                        <h4 className="font-semibold text-lg text-primary hover:text-primary-600 transition-colors">{order.customer.name}</h4>
                         <p className="text-foreground-600 mb-2">{order.customer.role}</p>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
@@ -521,6 +524,9 @@ const OrderDetailPage: React.FC = () => {
                             <span className="text-sm">{order.customer.phone}</span>
                           </div>
                         </div>
+                      </div>
+                      <div className="self-center">
+                        <ChevronRightIcon className="h-5 w-5 text-foreground-400" />
                       </div>
                     </div>
                   </CardBody>
@@ -677,9 +683,80 @@ const OrderDetailPage: React.FC = () => {
                     </div>
                   </div>
                 </CardHeader>
+
+                {/* Timeline Messages */}
+                <CardBody className="flex-1 overflow-y-auto p-0">
+                  <div className="p-6 space-y-4">
+                    {sortedTimeline.map((item) => (
+                      <div key={item.id} className="flex gap-3">
+                        {item.type !== 'audit' && (
+                          <Avatar 
+                            name={item.avatar || item.author} 
+                            size="sm" 
+                          />
+                        )}
+                        {item.type === 'audit' && (
+                          <div className="w-8 h-8 flex items-center justify-center">
+                            <div className="w-2 h-2 bg-default-400 rounded-full" />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          {item.type === 'audit' ? (
+                            // System events - simple text without background
+                            <div className="pt-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs text-foreground-500">{formatTimestamp(item.timestamp)}</span>
+                                <Chip size="sm" color="default" variant="flat" className="text-xs">
+                                  Systeem
+                                </Chip>
+                              </div>
+                              <p className="text-sm text-foreground-600 italic">{item.content}</p>
+                            </div>
+                          ) : (
+                            // Regular comments and internal notes
+                            <div className={`
+                              p-3 rounded-lg
+                              ${item.type === 'internal' 
+                                ? 'bg-warning/10 border border-warning/20' 
+                                : 'bg-content2'
+                              }
+                            `}>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-sm">{item.author}</span>
+                                <span className="text-xs text-foreground-500">{formatTimestamp(item.timestamp)}</span>
+                                {item.isInternal && (
+                                  <Chip size="sm" color="warning" variant="flat" className="text-xs">
+                                    Intern
+                                  </Chip>
+                                )}
+                              </div>
+                              <p className="text-sm">{item.content}</p>
+                              
+                              {/* Files */}
+                              {item.files && item.files.length > 0 && (
+                                <div className="mt-3 space-y-2">
+                                  {item.files.map((file, index) => (
+                                    <div key={index} className="flex items-center gap-2 p-2 bg-content1 rounded border border-divider">
+                                      <span>{getFileIcon(file.type)}</span>
+                                      <span className="text-sm flex-1">{file.name}</span>
+                                      <span className="text-xs text-foreground-500">{file.size}</span>
+                                      <Button size="sm" variant="light" className="text-xs">
+                                        Download
+                                      </Button>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardBody>
                 
-                {/* Add Comment Section */}
-                <div className="px-6 pb-4 flex-shrink-0 border-b border-divider">
+                {/* Add Comment Section - Moved to bottom */}
+                <div className="px-6 py-4 flex-shrink-0 border-t border-divider">
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <Switch
@@ -756,64 +833,6 @@ const OrderDetailPage: React.FC = () => {
                     )}
                   </div>
                 </div>
-
-                {/* Timeline Messages */}
-                <CardBody className="flex-1 overflow-y-auto p-0">
-                  <div className="p-6 space-y-4">
-                    {sortedTimeline.map((item) => (
-                      <div key={item.id} className="flex gap-3">
-                        <Avatar 
-                          name={item.avatar || item.author} 
-                          size="sm" 
-                          className={item.type === 'audit' ? 'opacity-60' : ''}
-                        />
-                        <div className="flex-1">
-                          <div className={`
-                            p-3 rounded-lg
-                            ${item.type === 'internal' 
-                              ? 'bg-warning/10 border border-warning/20' 
-                              : item.type === 'audit'
-                                ? 'bg-default/5 border border-divider'
-                                : 'bg-content2'
-                            }
-                          `}>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-sm">{item.author}</span>
-                              <span className="text-xs text-foreground-500">{formatTimestamp(item.timestamp)}</span>
-                              {item.isInternal && (
-                                <Chip size="sm" color="warning" variant="flat" className="text-xs">
-                                  Intern
-                                </Chip>
-                              )}
-                              {item.type === 'audit' && (
-                                <Chip size="sm" color="default" variant="flat" className="text-xs">
-                                  Systeem
-                                </Chip>
-                              )}
-                            </div>
-                            <p className="text-sm">{item.content}</p>
-                            
-                            {/* Files */}
-                            {item.files && item.files.length > 0 && (
-                              <div className="mt-3 space-y-2">
-                                {item.files.map((file, index) => (
-                                  <div key={index} className="flex items-center gap-2 p-2 bg-content1 rounded border border-divider">
-                                    <span>{getFileIcon(file.type)}</span>
-                                    <span className="text-sm flex-1">{file.name}</span>
-                                    <span className="text-xs text-foreground-500">{file.size}</span>
-                                    <Button size="sm" variant="light" className="text-xs">
-                                      Download
-                                    </Button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardBody>
               </Card>
             </div>
           </div>
