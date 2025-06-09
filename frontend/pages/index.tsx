@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
+import Image from 'next/image'
 import { useTheme } from '../contexts/ThemeContext'
 import ThemeToggle from '../components/ThemeToggle'
 
@@ -38,13 +39,18 @@ export default function HomePage() {
         fontFamily: 'Arial, sans-serif',
         transition: 'all 0.2s ease'
       }}>
-        <div style={{
-          color: '#0ea5e9',
-          fontSize: '3rem',
-          marginBottom: '20px',
-          fontWeight: 'bold'
-        }}>
-          ⚡ ChargeCars
+        <div style={{ marginBottom: '30px' }}>
+          <Image
+            src="/images/ChargeCars portal svg dark mode (1).svg"
+            alt="ChargeCars"
+            width={320}
+            height={115}
+            priority
+            style={{ 
+              filter: isDark ? 'none' : 'brightness(0.9)',
+              opacity: isDark ? 1 : 0.9
+            }}
+          />
         </div>
         
         <div style={{

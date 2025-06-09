@@ -2,6 +2,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useProtectedRoute } from '../hooks/useProtectedRoute';
 import ThemeToggle from '../components/ThemeToggle';
+import Layout from '../components/Layout';
 import {
   Card,
   CardBody,
@@ -38,183 +39,123 @@ const Dashboard: React.FC = () => {
     );
   }
 
-      return (
-      <div className="min-h-screen bg-background transition-colors duration-200">
-      {/* Header */}
-      <div className="bg-content1 border-b border-divider p-4 transition-colors duration-200">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center">
-              <img 
-                src="/svg/chargecars-logo.svg" 
-                alt="ChargeCars" 
-                className="h-10 w-auto"
-              />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">ChargeCars V2</h1>
-              <p className="text-xs text-default-500">Order Management System</p>
-            </div>
+  return (
+    <Layout title="Dashboard">
+      <div className="bg-background transition-colors duration-200">
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto p-6">
+          {/* Welcome Section */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-foreground mb-2">
+              Welcome back, {user?.contact?.first_name || user?.email?.split('@')[0] || 'User'}!
+            </h2>
+            <p className="text-default-500">
+              Manage your orders and track installations from your dashboard.
+            </p>
           </div>
 
-          {/* User Profile & Controls */}
-          <div className="flex items-center gap-4">
-            <ThemeToggle size="sm" />
-            <Card className="bg-content2 border-divider">
-              <CardBody className="p-3">
-                <div className="flex items-center gap-3">
-                  <Avatar
-                    size="sm"
-                    name={(user?.contact?.first_name || user?.email || 'User').charAt(0).toUpperCase()}
-                    className="bg-primary text-white"
-                  />
-                  <div className="flex flex-col">
-                    <p className="text-sm font-medium text-foreground">
-                      {user?.contact?.first_name && user?.contact?.last_name 
-                        ? `${user.contact.first_name} ${user.contact.last_name}`
-                        : user?.email || 'User'
-                      }
-                    </p>
-                    <p className="text-xs text-default-500">{user?.email || 'No email available'}</p>
-                  </div>
-                  <Chip
-                    size="sm"
-                    variant="flat"
-                    color="primary"
-                  >
-                    Active
-                  </Chip>
+          {/* User Info Card */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <Card className="bg-content1 border-divider">
+              <CardHeader>
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <UserIcon className="h-5 w-5" />
+                  User Profile
+                </h3>
+              </CardHeader>
+              <CardBody className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-default-500">Name:</span>
+                  <span className="text-foreground">
+                    {user?.contact?.first_name && user?.contact?.last_name 
+                      ? `${user.contact.first_name} ${user.contact.last_name}`
+                      : user?.email || 'Not available'
+                    }
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-default-500">Email:</span>
+                  <span className="text-foreground">{user?.email || 'Not available'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-default-500">User ID:</span>
+                  <span className="text-foreground font-mono text-xs">{user?.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-default-500">Contact ID:</span>
+                  <span className="text-foreground font-mono text-xs">{user?.contact?.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-default-500">Role ID:</span>
+                  <span className="text-foreground font-mono text-xs">{user?.role_id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-default-500">Organization:</span>
+                  <span className="text-foreground">{user?.organization?.name || 'N/A'}</span>
                 </div>
               </CardBody>
             </Card>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              startContent={<ArrowRightOnRectangleIcon className="h-4 w-4" />}
-              onPress={logout}
-              className="text-default-500 hover:text-danger"
-            >
-              Logout
-            </Button>
+            <Card className="bg-content1 border-divider">
+              <CardHeader>
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <BuildingOfficeIcon className="h-5 w-5" />
+                  Account Status
+                </h3>
+              </CardHeader>
+              <CardBody className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-default-500">Account Status:</span>
+                  <Chip 
+                    color="success"
+                    variant="flat"
+                    size="sm"
+                  >
+                    Active
+                  </Chip>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-default-500">Organization Type:</span>
+                  <span className="text-foreground capitalize">{user?.organization?.type || 'Unknown'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-default-500">Login Session:</span>
+                  <span className="text-foreground text-sm">Active</span>
+                </div>
+              </CardBody>
+            </Card>
+
+            <Card className="bg-content1 border-gray-800">
+              <CardHeader>
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <EnvelopeIcon className="h-5 w-5" />
+                  Quick Actions
+                </h3>
+              </CardHeader>
+              <CardBody className="space-y-3">
+                <Button className="w-full" color="primary" variant="flat">
+                  View Orders
+                </Button>
+                <Button className="w-full" color="secondary" variant="flat">
+                  Create Quote
+                </Button>
+                <Button className="w-full" color="success" variant="flat">
+                  Schedule Installation
+                </Button>
+                <Button className="w-full" variant="bordered">
+                  View Reports
+                </Button>
+              </CardBody>
+            </Card>
           </div>
+
+          <Divider className="my-8 bg-gray-700" />
+
+          {/* Order Management Component */}
+          <OrderManagement />
         </div>
       </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-foreground mb-2">
-            Welcome back, {user?.contact?.first_name || user?.email?.split('@')[0] || 'User'}!
-                      </h2>
-            <p className="text-default-500">
-              Manage your orders and track installations from your dashboard.
-            </p>
-        </div>
-
-        {/* User Info Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-content1 border-divider">
-            <CardHeader>
-              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <UserIcon className="h-5 w-5" />
-                User Profile
-              </h3>
-            </CardHeader>
-            <CardBody className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-default-500">Name:</span>
-                <span className="text-foreground">
-                  {user?.contact?.first_name && user?.contact?.last_name 
-                    ? `${user.contact.first_name} ${user.contact.last_name}`
-                    : user?.email || 'Not available'
-                  }
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-default-500">Email:</span>
-                <span className="text-foreground">{user?.email || 'Not available'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-default-500">User ID:</span>
-                <span className="text-foreground font-mono text-xs">{user?.id}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-default-500">Contact ID:</span>
-                <span className="text-foreground font-mono text-xs">{user?.contact?.id}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-default-500">Role ID:</span>
-                <span className="text-foreground font-mono text-xs">{user?.role_id}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-default-500">Organization:</span>
-                <span className="text-foreground">{user?.organization?.name || 'N/A'}</span>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-content1 border-divider">
-            <CardHeader>
-              <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <BuildingOfficeIcon className="h-5 w-5" />
-                Account Status
-              </h3>
-            </CardHeader>
-            <CardBody className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-default-500">Account Status:</span>
-                <Chip 
-                  color="success"
-                  variant="flat"
-                  size="sm"
-                >
-                  Active
-                </Chip>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-default-500">Organization Type:</span>
-                <span className="text-foreground capitalize">{user?.organization?.type || 'Unknown'}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-default-500">Login Session:</span>
-                <span className="text-foreground text-sm">Active</span>
-              </div>
-            </CardBody>
-          </Card>
-
-          <Card className="bg-content1 border-gray-800">
-            <CardHeader>
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <EnvelopeIcon className="h-5 w-5" />
-                Quick Actions
-              </h3>
-            </CardHeader>
-            <CardBody className="space-y-3">
-              <Button className="w-full" color="primary" variant="flat">
-                View Orders
-              </Button>
-              <Button className="w-full" color="secondary" variant="flat">
-                Create Quote
-              </Button>
-              <Button className="w-full" color="success" variant="flat">
-                Schedule Installation
-              </Button>
-              <Button className="w-full" variant="bordered">
-                View Reports
-              </Button>
-            </CardBody>
-          </Card>
-        </div>
-
-        <Divider className="my-8 bg-gray-700" />
-
-        {/* Order Management Component */}
-        <OrderManagement />
-      </div>
-    </div>
+    </Layout>
   );
 };
 

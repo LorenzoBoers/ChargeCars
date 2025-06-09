@@ -37,7 +37,7 @@ ChargeCars V2 is an enterprise-grade order management system designed to streaml
 ## 📁 Project Structure
 
 ```
-chargecars/
+chargecars-v2/
 ├── backend/          # Xano backend configuration
 │   ├── api-specs/    # OpenAPI specifications
 │   ├── database/     # Database schema and migrations
@@ -45,15 +45,23 @@ chargecars/
 │   └── xano-config/  # Xano-specific configurations
 │
 ├── frontend/         # React application
-│   ├── src/          # Source code
-│   ├── public/       # Static assets
+│   ├── components/   # React components
+│   ├── pages/        # Next.js pages
+│   ├── public/       # Static assets (including logo)
 │   └── package.json  # Dependencies
 │
-├── docs/             # Documentation
+├── prd/              # Product Requirements Documents
+│   ├── unified-prd.md              # Complete system PRD
+│   ├── order-management-features.md # Order management specs
+│   └── frontend-prompts/           # AI generation prompts
+│
+├── documentation/    # All project documentation
 │   ├── api/          # API documentation
-│   ├── business/     # Business requirements
+│   ├── business/     # Business requirements & insights
+│   ├── frontend/     # Frontend documentation
+│   ├── status/       # Project status & logs
 │   ├── technical/    # Technical specifications
-│   └── workflows/    # Process workflows
+│   └── workflows/    # Business process workflows
 │
 ├── tools/            # Development tools
 │   ├── scripts/      # Utility scripts
@@ -68,23 +76,23 @@ chargecars/
 
 ### Backend
 - **Platform**: [Xano](https://xano.com) - No-code backend
-- **Database**: PostgreSQL
+- **Database**: PostgreSQL (57 tables, 99% health score)
 - **APIs**: RESTful with OpenAPI 3.0
 - **Authentication**: JWT-based with refresh tokens
 
 ### Frontend
-- **Framework**: React 18+ with TypeScript
+- **Framework**: Next.js 14+ with TypeScript
 - **UI Library**: NextUI + TailwindCSS
 - **State Management**: React Context + Hooks
-- **Routing**: Next.js App Router
+- **Routing**: Next.js Pages Router
 - **Build Tool**: Next.js
 
 ### Integrations
+- **Automation**: Make.com (37 scenarios, 45k+ operations)
 - **Maps**: Google Maps API & PostcodeAPI.nu
 - **Communication**: WhatsApp Business API
 - **Email**: SendGrid
-- **Payments**: Stripe (planned)
-- **Partners**: Custom REST APIs
+- **Partners**: Custom REST APIs (50five, Alva, Eneco, Groendus, Essent)
 
 ## 🚦 Getting Started
 
@@ -122,14 +130,15 @@ chargecars/
 
 ### Configuration
 
-See [docs/technical/configuration.md](docs/technical/configuration.md) for detailed configuration options.
+See [documentation/technical/](documentation/technical/) for detailed configuration options.
 
 ## 📖 Documentation
 
-- **[API Documentation](docs/api/)** - Complete API reference
-- **[Business Requirements](docs/business/)** - Business logic and rules
-- **[Technical Specs](docs/technical/)** - Architecture and implementation details
-- **[Workflows](docs/workflows/)** - Business process documentation
+- **[PRDs](prd/)** - Product Requirements Documents
+- **[API Documentation](documentation/api/)** - Complete API reference
+- **[Business Requirements](documentation/business/)** - Business logic and rules
+- **[Technical Specs](documentation/technical/)** - Architecture and implementation details
+- **[Workflows](documentation/workflows/)** - Business process documentation
 
 ## 🧪 Testing
 
@@ -145,8 +154,8 @@ npm test
 
 ## 🤝 Contributing
 
-1. Review [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines
-2. Check [docs/workflows/development-workflow.md](docs/workflows/development-workflow.md)
+1. Review contribution guidelines
+2. Check [documentation/workflows/](documentation/workflows/)
 3. Follow the established coding standards
 4. Submit PR with comprehensive description
 
