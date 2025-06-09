@@ -1,0 +1,173 @@
+import React from 'react';
+import { useRouter } from 'next/router';
+import {
+  Card,
+  CardBody,
+  Button,
+  Divider,
+  Avatar,
+  Chip
+} from "@nextui-org/react";
+import {
+  HomeIcon,
+  ClipboardDocumentListIcon,
+  UserGroupIcon,
+  ChartBarIcon,
+  CogIcon,
+  ArrowRightOnRectangleIcon,
+  BoltIcon
+} from "@heroicons/react/24/outline";
+import Logo from './Logo';
+import { useAuth } from '../../contexts/AuthContext';
+
+/**
+ * @component Sidebar
+ * @description Reusable sidebar navigation for the entire ChargeCars app
+ * @example
+ * <Sidebar />
+ */
+
+interface SidebarProps {
+  className?: string;
+}
+
+interface NavigationItem {
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  isActive?: boolean;
+  badge?: string;
+}
+
+export function Sidebar({ className = "" }: SidebarProps) {
+  const router = useRouter();
+  const { user, logout } = useAuth();
+
+  const navigationItems: NavigationItem[] = [
+    {
+      label: 'Dashboard',
+      href: '/dashboard',
+      icon: HomeIcon,
+      isActive: router.pathname === '/dashboard'
+    },
+    {
+      label: 'Order Beheer',
+      href: '/orders',
+      icon: ClipboardDocumentListIcon,
+      isActive: router.pathname === '/orders'
+    },
+    {
+      label: 'Klanten',
+      href: '/customers',
+      icon: UserGroupIcon,
+      isActive: router.pathname === '/customers'
+    },
+    {
+      label: 'Rapportages',
+      href: '/reports',
+      icon: ChartBarIcon,
+      isActive: router.pathname === '/reports'
+    },
+    {
+      label: 'Instellingen',
+      href: '/settings',
+      icon: CogIcon,
+      isActive: router.pathname === '/settings'
+    }
+  ];
+
+  const handleNavigation = (href: string) => {
+    router.push(href);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/auth/login');
+  };
+
+  return (
+    <Card className={`h-screen w-64 rounded-none border-r border-divider bg-content1 ${className}`}>
+      <CardBody className="p-0 flex flex-col h-full">
+        {/* Logo Header */}
+        <div className="p-6 border-b border-divider">
+          <div className="flex items-center gap-3">
+            <Logo size="sm" />
+            <div>
+              <h1 className="text-lg font-bold text-foreground">ChargeCars</h1>
+              <p className="text-xs text-foreground-500">Order Management</p>
+            </div>
+          </div>
+        </div>
+
+        {/* User Info */}
+        <div className="p-4 border-b border-divider">
+          <div className="flex items-center gap-3">
+            <Avatar
+              size="sm"
+              name={user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'User'}
+              className="text-tiny"
+              color="primary"
+            />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">
+                {user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'Gebruiker'}
+              </p>
+              <p className="text-xs text-foreground-500 truncate">
+                {user?.email || 'user@chargecars.nl'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-2">
+          <div className="space-y-1">
+            {navigationItems.map((item) => {
+              const IconComponent = item.icon;
+              return (
+                <Button
+                  key={item.href}
+                  variant={item.isActive ? "flat" : "light"}
+                  color={item.isActive ? "primary" : "default"}
+                  className={`w-full justify-start h-11 ${
+                    item.isActive 
+                      ? 'bg-primary/10 text-primary font-medium' 
+                      : 'text-foreground-600 hover:text-foreground hover:bg-content2'
+                  }`}
+                  startContent={
+                    <IconComponent className={`h-5 w-5 ${
+                      item.isActive ? 'text-primary' : 'text-foreground-500'
+                    }`} />
+                  }
+                  endContent={
+                    item.badge && (
+                      <Chip size="sm" color="primary" variant="flat">
+                        {item.badge}
+                      </Chip>
+                    )
+                  }
+                  onPress={() => handleNavigation(item.href)}
+                >
+                  {item.label}
+                </Button>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* Footer Actions */}
+        <div className="p-4 border-t border-divider">
+          <Button
+            variant="light"
+            color="danger"
+            className="w-full justify-start"
+            startContent={<ArrowRightOnRectangleIcon className="h-5 w-5" />}
+            onPress={handleLogout}
+          >
+            Uitloggen
+          </Button>
+        </div>
+      </CardBody>
+    </Card>
+  );
+} 

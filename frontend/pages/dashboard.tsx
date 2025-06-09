@@ -1,15 +1,14 @@
 import React from 'react';
+import Head from 'next/head';
 import { useAuth } from '../contexts/AuthContext';
 import { useProtectedRoute } from '../hooks/useProtectedRoute';
-import ThemeToggle from '../components/ThemeToggle';
-import Layout from '../components/Layout';
+import { AppLayout } from '../components/layouts/AppLayout';
 import {
   Card,
   CardBody,
   CardHeader,
   Button,
   Chip,
-  Avatar,
   Divider
 } from "@nextui-org/react";
 import {
@@ -17,7 +16,10 @@ import {
   UserIcon,
   EnvelopeIcon,
   BuildingOfficeIcon,
-  ArrowRightOnRectangleIcon
+  ChartBarIcon,
+  ClipboardDocumentListIcon,
+  CurrencyEuroIcon,
+  CalendarIcon
 } from "@heroicons/react/24/outline";
 import OrderManagement from '../components/OrderManagement';
 
@@ -40,10 +42,14 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <Layout title="Dashboard">
-      <div className="bg-background transition-colors duration-200">
-        {/* Main Content */}
-        <div className="max-w-7xl mx-auto p-6">
+    <>
+      <Head>
+        <title>Dashboard - ChargeCars Portal</title>
+        <meta name="description" content="ChargeCars order management dashboard" />
+      </Head>
+
+      <AppLayout>
+        <div className="p-6">
           {/* Welcome Section */}
           <div className="mb-8">
             <h2 className="text-2xl font-bold text-foreground mb-2">
@@ -154,8 +160,8 @@ const Dashboard: React.FC = () => {
           {/* Order Management Component */}
           <OrderManagement />
         </div>
-      </div>
-    </Layout>
+      </AppLayout>
+    </>
   );
 };
 

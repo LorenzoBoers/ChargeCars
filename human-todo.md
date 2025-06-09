@@ -12,7 +12,70 @@
 
 ## 🔥 High Priority
 
-*Geen items - project is klaar voor nieuwe frontend development*
+### Backend Required: Order Management API
+
+**Component**: `frontend/pages/orders.tsx`  
+**Required Endpoint**: `GET /api/orders`  
+**Xano Function**: `get_orders_list` (if applicable)
+
+**Request Schema**:
+```typescript
+{
+  page?: number;
+  per_page?: number;
+  search?: string;
+  business_entity?: string;
+  order_type?: string;
+  status?: string;
+  user_id?: string; // for "Mijn Orders" filter
+}
+```
+
+**Response Schema**:
+```typescript
+{
+  success: boolean;
+  data: {
+    orders: Order[];
+    total: number;
+    page: number;
+    per_page: number;
+    total_pages: number;
+  };
+  error?: string;
+}
+
+interface Order {
+  id: string;
+  order_number: string;
+  customer_name: string;
+  business_entity: string;
+  order_type: string;
+  status: string;
+  amount: number;
+  created_at: string;
+  updated_at: string;
+  priority: 'low' | 'medium' | 'high';
+  installation_date?: string;
+}
+```
+
+**Business Logic**: 
+- Paginated order list with search and filtering
+- Support for filtering by business entity, order type, status
+- Search across order number and customer name
+- User-specific filtering for "Mijn Orders"
+- Proper sorting by creation date (newest first)
+
+**UI Context**:
+- Order management table with filters and search
+- Preset filter buttons for quick access
+- Pagination for large datasets
+- Real-time status updates needed
+
+**Priority**: HIGH  
+**Added**: 2024-12-19  
+**Estimated Effort**: Medium
 
 ---
 
