@@ -492,9 +492,9 @@ export default function OrdersPage() {
                               </Button>
                             </DropdownTrigger>
                             <DropdownMenu>
-                              <DropdownItem>Dupliceren</DropdownItem>
-                              <DropdownItem>Factuur genereren</DropdownItem>
-                              <DropdownItem className="text-danger" color="danger">
+                              <DropdownItem key="duplicate">Dupliceren</DropdownItem>
+                              <DropdownItem key="invoice">Factuur genereren</DropdownItem>
+                              <DropdownItem key="delete" className="text-danger" color="danger">
                                 Verwijderen
                               </DropdownItem>
                             </DropdownMenu>
