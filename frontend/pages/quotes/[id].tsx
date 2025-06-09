@@ -69,7 +69,16 @@ import {
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../../components/layouts/AppLayout';
 
-// Interfaces (simplified version of build page)
+// Interfaces
+interface QuoteStatus {
+  id: string;
+  name: string;
+  date: string;
+  color: 'success' | 'primary' | 'secondary' | 'warning' | 'danger';
+  completed: boolean;
+  current: boolean;
+}
+
 interface QuoteLineItem {
   id: string;
   description: string;
@@ -77,9 +86,21 @@ interface QuoteLineItem {
   unit_price: number;
   total_price: number;
   category: 'product' | 'service' | 'installation' | 'other';
+  visit_id: string;
   visit_name: string;
+  contact_id: string;
   contact_name: string;
+  contact_role: 'account' | 'end_customer' | 'intermediary';
   is_customer_responsible: boolean;
+}
+
+interface QuoteContact {
+  id: string;
+  name: string;
+  role: 'account' | 'end_customer' | 'intermediary';
+  email: string;
+  phone: string;
+  avatar?: string;
 }
 
 interface QuoteDetail {
@@ -98,6 +119,8 @@ interface QuoteDetail {
   customer_name: string;
   partner_name: string;
   line_items: QuoteLineItem[];
+  statuses: QuoteStatus[];
+  contacts: QuoteContact[];
   terms_conditions?: string;
   delivery_time?: string;
   warranty_period?: string;
@@ -123,7 +146,40 @@ const mockQuote: QuoteDetail = {
   warranty_period: '5 jaar garantie',
   terms_conditions: 'Standaard ChargeCars voorwaarden van toepassing. Betaling binnen 30 dagen na levering.',
   
+  statuses: [
+    { id: '1', name: 'Concept', date: '2024-01-20', color: 'success', completed: true, current: false },
+    { id: '2', name: 'Ter Review', date: '2024-01-21', color: 'success', completed: true, current: false },
+    { id: '3', name: 'Verzonden', date: '2024-01-22', color: 'primary', completed: false, current: true },
+    { id: '4', name: 'Geaccepteerd', date: '', color: 'success', completed: false, current: false },
+    { id: '5', name: 'Naar Order', date: '', color: 'secondary', completed: false, current: false }
+  ],
+
+  contacts: [
+    {
+      id: 'CONT-001',
+      name: 'Henk van der Berg',
+      role: 'end_customer',
+      email: 'h.vandenberg@email.nl',
+      phone: '+31 6 12345678'
+    },
+    {
+      id: 'CONT-002',
+      name: 'EnergieDirect B.V.',
+      role: 'account',
+      email: 'orders@energiedirect.nl', 
+      phone: '+31 20 1234567'
+    },
+    {
+      id: 'CONT-003',
+      name: 'Maria Adviseur',
+      role: 'intermediary',
+      email: 'm.adviseur@intermediair.nl',
+      phone: '+31 30 9876543'
+    }
+  ],
+  
   line_items: [
+    // Visit 1 items
     {
       id: 'LI-001',
       description: 'Locatie inspectie en technische meting',
@@ -131,8 +187,11 @@ const mockQuote: QuoteDetail = {
       unit_price: 125.00,
       total_price: 125.00,
       category: 'service',
+      visit_id: 'VIS-001',
       visit_name: 'Locatie Inspectie',
+      contact_id: 'CONT-001',
       contact_name: 'Henk van der Berg',
+      contact_role: 'end_customer',
       is_customer_responsible: true
     },
     {
@@ -142,10 +201,15 @@ const mockQuote: QuoteDetail = {
       unit_price: 75.00,
       total_price: 75.00,
       category: 'service',
+      visit_id: 'VIS-001',
       visit_name: 'Locatie Inspectie',
+      contact_id: 'CONT-002',
       contact_name: 'EnergieDirect B.V.',
+      contact_role: 'account',
       is_customer_responsible: false
     },
+    
+    // Visit 2 items
     {
       id: 'LI-003',
       description: 'ChargeCars Pro 22kW Laadpaal',
@@ -153,8 +217,11 @@ const mockQuote: QuoteDetail = {
       unit_price: 1850.00,
       total_price: 1850.00,
       category: 'product',
+      visit_id: 'VIS-002',
       visit_name: 'Installatie',
+      contact_id: 'CONT-001',
       contact_name: 'Henk van der Berg',
+      contact_role: 'end_customer',
       is_customer_responsible: true
     },
     {
@@ -164,8 +231,11 @@ const mockQuote: QuoteDetail = {
       unit_price: 275.00,
       total_price: 275.00,
       category: 'product',
+      visit_id: 'VIS-002',
       visit_name: 'Installatie',
+      contact_id: 'CONT-001',
       contact_name: 'Henk van der Berg',
+      contact_role: 'end_customer',
       is_customer_responsible: true
     },
     {
@@ -175,8 +245,11 @@ const mockQuote: QuoteDetail = {
       unit_price: 85.00,
       total_price: 680.00,
       category: 'installation',
+      visit_id: 'VIS-002',
       visit_name: 'Installatie',
+      contact_id: 'CONT-001',
       contact_name: 'Henk van der Berg',
+      contact_role: 'end_customer',
       is_customer_responsible: true
     },
     {
@@ -186,10 +259,15 @@ const mockQuote: QuoteDetail = {
       unit_price: 200.00,
       total_price: 200.00,
       category: 'service',
+      visit_id: 'VIS-002',
       visit_name: 'Installatie',
+      contact_id: 'CONT-002',
       contact_name: 'EnergieDirect B.V.',
+      contact_role: 'account',
       is_customer_responsible: false
     },
+    
+    // Visit 3 items
     {
       id: 'LI-007',
       description: 'Eindcontrole en test laadpaal',
@@ -197,9 +275,26 @@ const mockQuote: QuoteDetail = {
       unit_price: 120.00,
       total_price: 120.00,
       category: 'service',
+      visit_id: 'VIS-003',
       visit_name: 'Afronding',
+      contact_id: 'CONT-001',
       contact_name: 'Henk van der Berg',
+      contact_role: 'end_customer',
       is_customer_responsible: true
+    },
+    {
+      id: 'LI-008',
+      description: 'Oplevering documentatie',
+      quantity: 1,
+      unit_price: 50.00,
+      total_price: 50.00,
+      category: 'service',
+      visit_id: 'VIS-003',
+      visit_name: 'Afronding',
+      contact_id: 'CONT-003',
+      contact_name: 'Maria Adviseur',
+      contact_role: 'intermediary',
+      is_customer_responsible: false
     }
   ]
 };
@@ -246,6 +341,24 @@ const QuoteDetailPage: React.FC = () => {
     }
   };
 
+  const getContactColor = (role: string) => {
+    switch (role) {
+      case 'end_customer': return 'success';
+      case 'account': return 'primary';
+      case 'intermediary': return 'warning';
+      default: return 'default';
+    }
+  };
+
+  const getContactLabel = (role: string) => {
+    switch (role) {
+      case 'end_customer': return 'Eindklant';
+      case 'account': return 'Account';
+      case 'intermediary': return 'Tussenpersoon';
+      default: return role;
+    }
+  };
+
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case 'product': return '📦';
@@ -256,17 +369,24 @@ const QuoteDetailPage: React.FC = () => {
     }
   };
 
-  // Group line items by visit
-  const itemsByVisit = quote.line_items.reduce((groups, item) => {
-    if (!groups[item.visit_name]) {
-      groups[item.visit_name] = [];
+  // Group line items by visit and then by contact
+  const groupedItems = quote.line_items.reduce((acc, item) => {
+    if (!acc[item.visit_id]) {
+      acc[item.visit_id] = {
+        visit_name: item.visit_name,
+        contacts: {}
+      };
     }
-    groups[item.visit_name].push(item);
-    return groups;
-  }, {} as Record<string, QuoteLineItem[]>);
-
-  const customerItems = quote.line_items.filter(item => item.is_customer_responsible);
-  const partnerItems = quote.line_items.filter(item => !item.is_customer_responsible);
+    if (!acc[item.visit_id].contacts[item.contact_id]) {
+      acc[item.visit_id].contacts[item.contact_id] = {
+        contact_name: item.contact_name,
+        contact_role: item.contact_role,
+        items: []
+      };
+    }
+    acc[item.visit_id].contacts[item.contact_id].items.push(item);
+    return acc;
+  }, {} as Record<string, { visit_name: string; contacts: Record<string, { contact_name: string; contact_role: string; items: QuoteLineItem[] }> }>);
 
   return (
     <>
@@ -328,109 +448,154 @@ const QuoteDetailPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Quote Overview */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <h3 className="text-lg font-semibold">Quote Details</h3>
-                </CardHeader>
-                <CardBody className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-foreground-600">Klant</p>
-                      <p className="font-medium">{quote.customer_name}</p>
+          {/* Status Timeline */}
+          <Card>
+            <CardHeader className="pb-3">
+              <h2 className="text-lg font-semibold">Quote Status</h2>
+            </CardHeader>
+            <CardBody className="pt-0">
+              <div className="flex items-center justify-between w-full overflow-x-auto pb-4">
+                {quote.statuses.map((status, index) => (
+                  <React.Fragment key={status.id}>
+                    <div className="flex flex-col items-center min-w-[120px]">
+                      <div className={`
+                        w-12 h-12 rounded-full flex items-center justify-center border-3 mb-3 transition-all duration-200
+                        ${status.completed 
+                          ? 'bg-success border-success text-white shadow-lg' 
+                          : status.current 
+                            ? 'border-primary bg-primary/10 text-primary ring-4 ring-primary/20 shadow-md' 
+                            : 'border-default-300 bg-default-100 text-default-400'
+                        }
+                      `}>
+                        {status.completed ? (
+                          <CheckCircleIcon className="h-6 w-6" />
+                        ) : status.current ? (
+                          <div className="w-4 h-4 rounded-full bg-primary" />
+                        ) : (
+                          <div className="w-4 h-4 rounded-full bg-current opacity-50" />
+                        )}
+                      </div>
+                      <Chip
+                        size="sm"
+                        color={status.completed ? 'success' : status.current ? 'primary' : 'default'}
+                        variant={status.current ? 'solid' : status.completed ? 'flat' : 'light'}
+                        className="mb-2 font-medium"
+                      >
+                        {status.name}
+                      </Chip>
+                      {status.date && (
+                        <span className="text-xs text-foreground-500 font-medium">{status.date}</span>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-sm text-foreground-600">Partner</p>
-                      <p className="font-medium">{quote.partner_name}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-foreground-600">Geldig tot</p>
-                      <p className="font-medium">{quote.valid_until}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-foreground-600">Levertijd</p>
-                      <p className="font-medium">{quote.delivery_time}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-foreground-600">Garantie</p>
-                      <p className="font-medium">{quote.warranty_period}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-foreground-600">Aangemaakt</p>
-                      <p className="font-medium">{quote.created_at}</p>
-                    </div>
-                  </div>
-                  
-                  {quote.terms_conditions && (
-                    <div>
-                      <p className="text-sm text-foreground-600 mb-2">Voorwaarden</p>
-                      <p className="text-sm bg-content2 p-3 rounded-lg">{quote.terms_conditions}</p>
-                    </div>
-                  )}
-                </CardBody>
-              </Card>
-            </div>
+                    {index < quote.statuses.length - 1 && (
+                      <div className="flex items-center justify-center flex-1 mx-2">
+                        <div className={`
+                          h-1 flex-1 rounded-full transition-colors duration-300
+                          ${status.completed ? 'bg-success' : 'bg-default-200'}
+                        `} />
+                        <ChevronRightIcon className={`
+                          h-5 w-5 mx-1 transition-colors duration-300
+                          ${status.completed ? 'text-success' : 'text-default-300'}
+                        `} />
+                      </div>
+                    )}
+                  </React.Fragment>
+                ))}
+              </div>
+            </CardBody>
+          </Card>
 
-            {/* Totals Summary */}
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <h3 className="text-lg font-semibold">Totaal Overzicht</h3>
-                </CardHeader>
-                <CardBody className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-foreground-600">Klant Verantwoordelijk:</span>
-                      <span className="font-semibold text-success">€{quote.customer_amount.toLocaleString('nl-NL')}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-foreground-600">Partner Verantwoordelijk:</span>
-                      <span className="font-semibold text-primary">€{quote.partner_amount.toLocaleString('nl-NL')}</span>
-                    </div>
-                    <Divider />
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-semibold">Totaal:</span>
-                      <span className="text-2xl font-bold text-foreground">€{quote.total_amount.toLocaleString('nl-NL')}</span>
-                    </div>
+          {/* Quote Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <h3 className="text-sm font-medium text-foreground-600">Quote Gegevens</h3>
+              </CardHeader>
+              <CardBody className="pt-0">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Geldig tot:</span>
+                    <span className="text-sm font-medium">{quote.valid_until}</span>
                   </div>
-                </CardBody>
-              </Card>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Levertijd:</span>
+                    <span className="text-sm font-medium">{quote.delivery_time}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Garantie:</span>
+                    <span className="text-sm font-medium">{quote.warranty_period}</span>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
 
-              <Card>
-                <CardHeader>
-                  <h3 className="text-lg font-semibold">Quick Stats</h3>
-                </CardHeader>
-                <CardBody>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-3 bg-content2 rounded-lg">
-                      <p className="text-xl font-bold text-primary">{quote.line_items.length}</p>
-                      <p className="text-xs text-foreground-600">Line Items</p>
+            <Card>
+              <CardHeader className="pb-2">
+                <h3 className="text-sm font-medium text-foreground-600">Klant Gegevens</h3>
+              </CardHeader>
+              <CardBody className="pt-0">
+                <div className="space-y-2">
+                  {quote.contacts.filter(c => c.role === 'end_customer').map(contact => (
+                    <div key={contact.id} className="flex items-center gap-2">
+                      <Avatar name={contact.name} size="sm" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{contact.name}</p>
+                        <p className="text-xs text-foreground-500 truncate">{contact.email}</p>
+                      </div>
                     </div>
-                    <div className="text-center p-3 bg-content2 rounded-lg">
-                      <p className="text-xl font-bold text-success">{Object.keys(itemsByVisit).length}</p>
-                      <p className="text-xs text-foreground-600">Bezoeken</p>
+                  ))}
+                </div>
+              </CardBody>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <h3 className="text-sm font-medium text-foreground-600">Account Gegevens</h3>
+              </CardHeader>
+              <CardBody className="pt-0">
+                <div className="space-y-2">
+                  {quote.contacts.filter(c => c.role === 'account').map(contact => (
+                    <div key={contact.id} className="flex items-center gap-2">
+                      <Avatar name={contact.name} size="sm" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{contact.name}</p>
+                        <p className="text-xs text-foreground-500 truncate">{contact.email}</p>
+                      </div>
                     </div>
-                    <div className="text-center p-3 bg-content2 rounded-lg">
-                      <p className="text-xl font-bold text-warning">{customerItems.length}</p>
-                      <p className="text-xs text-foreground-600">Klant Items</p>
-                    </div>
-                    <div className="text-center p-3 bg-content2 rounded-lg">
-                      <p className="text-xl font-bold text-secondary">{partnerItems.length}</p>
-                      <p className="text-xs text-foreground-600">Partner Items</p>
-                    </div>
+                  ))}
+                </div>
+              </CardBody>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <h3 className="text-sm font-medium text-foreground-600">Totaal Overzicht</h3>
+              </CardHeader>
+              <CardBody className="pt-0">
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-foreground-600">Klant:</span>
+                    <span className="text-sm font-semibold text-success">€{quote.customer_amount.toLocaleString('nl-NL')}</span>
                   </div>
-                </CardBody>
-              </Card>
-            </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-foreground-600">Partner:</span>
+                    <span className="text-sm font-semibold text-primary">€{quote.partner_amount.toLocaleString('nl-NL')}</span>
+                  </div>
+                  <Divider />
+                  <div className="flex justify-between">
+                    <span className="text-sm font-semibold">Totaal:</span>
+                    <span className="text-lg font-bold text-foreground">€{quote.total_amount.toLocaleString('nl-NL')}</span>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
           </div>
 
-          {/* Line Items by Visit */}
+          {/* Line Items Table */}
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Line Items per Bezoek</h3>
+                <h3 className="text-lg font-semibold">Line Items Gegevens per Klus</h3>
                 <Button 
                   size="sm" 
                   color="primary" 
@@ -442,54 +607,165 @@ const QuoteDetailPage: React.FC = () => {
                 </Button>
               </div>
             </CardHeader>
-            <CardBody>
-              <div className="space-y-6">
-                {Object.entries(itemsByVisit).map(([visitName, items]) => (
-                  <div key={visitName} className="border border-divider rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <CalendarDaysIcon className="h-5 w-5 text-primary" />
-                        <h4 className="font-semibold">{visitName}</h4>
-                      </div>
-                      <span className="font-medium">
-                        €{items.reduce((sum, item) => sum + item.total_price, 0).toLocaleString('nl-NL')}
-                      </span>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      {items.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between p-3 bg-content2 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <span className="text-lg">{getCategoryIcon(item.category)}</span>
-                            <div className="flex-1">
-                              <p className="font-medium text-sm">{item.description}</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="text-xs text-foreground-500">{item.contact_name}</span>
-                                <Chip size="sm" variant="flat" color="default">
-                                  {item.category}
-                                </Chip>
-                                {item.is_customer_responsible && (
-                                  <Chip size="sm" variant="flat" color="success">
-                                    Klant
-                                  </Chip>
+            <CardBody className="p-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-divider">
+                      <th className="text-left py-3 px-4 font-semibold text-sm text-foreground-600 min-w-[100px]">Visit</th>
+                      <th className="text-left py-3 px-4 font-semibold text-sm text-foreground-600 min-w-[40px]">#</th>
+                      <th className="text-left py-3 px-4 font-semibold text-sm text-foreground-600 min-w-[300px]">Line Item Gegevens Kolommen</th>
+                      <th className="text-right py-3 px-4 font-semibold text-sm text-foreground-600 min-w-[80px]">Aantal</th>
+                      <th className="text-right py-3 px-4 font-semibold text-sm text-foreground-600 min-w-[100px]">Prijs p/s</th>
+                      <th className="text-right py-3 px-4 font-semibold text-sm text-foreground-600 min-w-[100px]">Totaal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(groupedItems).map(([visitId, visitData], visitIndex) => {
+                      const visitItems = Object.values(visitData.contacts).flatMap(contact => contact.items);
+                      const visitTotal = visitItems.reduce((sum, item) => sum + item.total_price, 0);
+                      
+                      return (
+                        <React.Fragment key={visitId}>
+                          {Object.entries(visitData.contacts).map(([contactId, contactData], contactIndex) => {
+                            const contactItems = contactData.items;
+                            const contactTotal = contactItems.reduce((sum, item) => sum + item.total_price, 0);
+                            
+                            return (
+                              <React.Fragment key={contactId}>
+                                {contactItems.map((item, itemIndex) => (
+                                  <tr key={item.id} className="border-b border-divider/50 hover:bg-content2/50 transition-colors">
+                                    {/* Visit column - only show on first item of first contact */}
+                                    {visitIndex === 0 && contactIndex === 0 && itemIndex === 0 && (
+                                      <td 
+                                        rowSpan={visitItems.length}
+                                        className="py-3 px-4 border-r border-divider bg-primary/5 align-top"
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <CalendarDaysIcon className="h-4 w-4 text-primary" />
+                                          <span className="font-semibold text-sm">{visitData.visit_name}</span>
+                                        </div>
+                                      </td>
+                                    )}
+                                    {/* Show visit for subsequent visits */}
+                                    {visitIndex > 0 && contactIndex === 0 && itemIndex === 0 && (
+                                      <td 
+                                        rowSpan={visitItems.length}
+                                        className="py-3 px-4 border-r border-divider bg-primary/5 align-top"
+                                      >
+                                        <div className="flex items-center gap-2">
+                                          <CalendarDaysIcon className="h-4 w-4 text-primary" />
+                                          <span className="font-semibold text-sm">{visitData.visit_name}</span>
+                                        </div>
+                                      </td>
+                                    )}
+                                    
+                                    {/* Contact section - show contact info on first item of each contact */}
+                                    {itemIndex === 0 && (
+                                      <td 
+                                        rowSpan={contactItems.length}
+                                        className="py-3 px-4 border-r border-divider/50 bg-content2/30 align-top"
+                                      >
+                                        <div className="space-y-1">
+                                          <p className="font-medium text-sm">{contactData.contact_name}</p>
+                                          <Chip size="sm" color={getContactColor(contactData.contact_role)} variant="flat">
+                                            {getContactLabel(contactData.contact_role)}
+                                          </Chip>
+                                        </div>
+                                      </td>
+                                    )}
+                                    
+                                    {/* Line item description */}
+                                    <td className="py-2 px-4">
+                                      <div className="flex items-center gap-3">
+                                        <span className="text-lg">{getCategoryIcon(item.category)}</span>
+                                        <div className="flex-1">
+                                          <p className="font-medium text-sm">{item.description}</p>
+                                          <div className="flex items-center gap-2 mt-1">
+                                            <Chip size="sm" variant="flat" color="default" className="text-xs">
+                                              {item.category}
+                                            </Chip>
+                                            {item.is_customer_responsible && (
+                                              <Chip size="sm" variant="flat" color="success" className="text-xs">
+                                                Klant
+                                              </Chip>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </td>
+                                    
+                                    {/* Quantity */}
+                                    <td className="py-2 px-4 text-right">
+                                      <span className="font-medium text-sm">{item.quantity}</span>
+                                    </td>
+                                    
+                                    {/* Unit price */}
+                                    <td className="py-2 px-4 text-right">
+                                      <span className="font-medium text-sm">€{item.unit_price.toLocaleString('nl-NL')}</span>
+                                    </td>
+                                    
+                                    {/* Total price */}
+                                    <td className="py-2 px-4 text-right">
+                                      <span className="font-semibold text-sm">€{item.total_price.toLocaleString('nl-NL')}</span>
+                                    </td>
+                                  </tr>
+                                ))}
+                                
+                                {/* Contact subtotal row */}
+                                {contactIndex === Object.keys(visitData.contacts).length - 1 && (
+                                  <tr className="bg-content2/50 border-b-2 border-divider">
+                                    <td className="py-2 px-4 text-right font-semibold text-sm" colSpan={3}>
+                                      Subtotaal {contactData.contact_name}:
+                                    </td>
+                                    <td className="py-2 px-4 text-right font-bold">
+                                      €{contactTotal.toLocaleString('nl-NL')}
+                                    </td>
+                                  </tr>
                                 )}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold">€{item.total_price.toLocaleString('nl-NL')}</p>
-                            <p className="text-xs text-foreground-500">
-                              {item.quantity}x €{item.unit_price.toLocaleString('nl-NL')}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                              </React.Fragment>
+                            );
+                          })}
+                          
+                          {/* Visit total row */}
+                          <tr className="bg-primary/10 border-b-2 border-primary/20">
+                            <td className="py-3 px-4 text-right font-bold text-primary" colSpan={5}>
+                              Totaal {visitData.visit_name}:
+                            </td>
+                            <td className="py-3 px-4 text-right font-bold text-lg text-primary">
+                              €{visitTotal.toLocaleString('nl-NL')}
+                            </td>
+                          </tr>
+                        </React.Fragment>
+                      );
+                    })}
+                    
+                    {/* Grand total row */}
+                    <tr className="bg-foreground/5 border-t-2 border-foreground/20">
+                      <td className="py-4 px-4 text-right font-bold text-lg" colSpan={5}>
+                        TOTAAL OFFERTE:
+                      </td>
+                      <td className="py-4 px-4 text-right font-bold text-xl">
+                        €{quote.total_amount.toLocaleString('nl-NL')}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </CardBody>
           </Card>
+
+          {/* Terms and Conditions */}
+          {quote.terms_conditions && (
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold">Voorwaarden</h3>
+              </CardHeader>
+              <CardBody>
+                <p className="text-sm text-foreground-600">{quote.terms_conditions}</p>
+              </CardBody>
+            </Card>
+          )}
         </div>
       </AppLayout>
     </>
