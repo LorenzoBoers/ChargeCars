@@ -47,7 +47,10 @@ import {
   PaperClipIcon,
   EyeIcon,
   EyeSlashIcon,
-  CloudArrowUpIcon
+  CloudArrowUpIcon,
+  PhotoIcon,
+  TableCellsIcon,
+  PresentationChartBarIcon
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../../components/layouts/AppLayout';
 
@@ -309,11 +312,11 @@ const OrderDetailPage: React.FC = () => {
   };
 
   const getFileIcon = (type: string) => {
-    if (type.includes('image')) return '🖼️';
-    if (type.includes('pdf')) return '📄';
-    if (type.includes('word')) return '📝';
-    if (type.includes('excel')) return '📊';
-    return '📎';
+    if (type.includes('image')) return <PhotoIcon className="h-4 w-4 text-primary" />;
+    if (type.includes('pdf')) return <DocumentTextIcon className="h-4 w-4 text-danger" />;
+    if (type.includes('word')) return <DocumentTextIcon className="h-4 w-4 text-primary" />;
+    if (type.includes('excel')) return <TableCellsIcon className="h-4 w-4 text-success" />;
+    return <PaperClipIcon className="h-4 w-4 text-default-500" />;
   };
 
   // Group related items by type
@@ -784,7 +787,7 @@ const OrderDetailPage: React.FC = () => {
                                 <div className="mt-3 space-y-2">
                                   {item.files.map((file, index) => (
                                     <div key={index} className="flex items-center gap-2 p-2 bg-content1 rounded border border-divider">
-                                      <span>{getFileIcon(file.type)}</span>
+                                      <div className="flex-shrink-0">{getFileIcon(file.type)}</div>
                                       <span className="text-sm flex-1">{file.name}</span>
                                       <span className="text-xs text-foreground-500">{file.size}</span>
                                       <Button size="sm" variant="light" className="text-xs">
@@ -862,14 +865,13 @@ const OrderDetailPage: React.FC = () => {
                       <div className="space-y-2">
                         {selectedFiles.map((file, index) => (
                           <div key={index} className="flex items-center gap-2 p-2 bg-content2 rounded-lg">
-                            <span className="text-sm">{getFileIcon(file.type)}</span>
+                            <div className="flex-shrink-0">{getFileIcon(file.type)}</div>
                             <span className="text-sm flex-1 truncate">{file.name}</span>
                             <span className="text-xs text-foreground-500">{(file.size / 1024 / 1024).toFixed(1)} MB</span>
                             <Button
                               size="sm"
                               isIconOnly
                               variant="light"
-                              color="danger"
                               onPress={() => removeFile(index)}
                             >
                               ×

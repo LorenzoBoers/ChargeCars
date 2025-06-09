@@ -65,7 +65,11 @@ import {
   DocumentDuplicateIcon,
   BookmarkIcon,
   XMarkIcon,
-  WrenchScrewdriverIcon
+  WrenchScrewdriverIcon,
+  ArchiveBoxIcon,
+  CogIcon,
+  PaperAirplaneIcon,
+  DocumentArrowDownIcon
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../../components/layouts/AppLayout';
 
@@ -361,11 +365,11 @@ const QuoteDetailPage: React.FC = () => {
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'product': return '📦';
-      case 'service': return '🛠️';
-      case 'installation': return '⚡';
-      case 'other': return '📋';
-      default: return '📋';
+      case 'product': return <ArchiveBoxIcon className="h-4 w-4 text-primary" />;
+      case 'service': return <WrenchScrewdriverIcon className="h-4 w-4 text-success" />;
+      case 'installation': return <BoltIcon className="h-4 w-4 text-warning" />;
+      case 'other': return <DocumentTextIcon className="h-4 w-4 text-default-500" />;
+      default: return <DocumentTextIcon className="h-4 w-4 text-default-500" />;
     }
   };
 
@@ -388,6 +392,13 @@ const QuoteDetailPage: React.FC = () => {
     return acc;
   }, {} as Record<string, { visit_name: string; contacts: Record<string, { contact_name: string; contact_role: string; items: QuoteLineItem[] }> }>);
 
+  // Calculate totals per contact
+  const getContactTotal = (contactId: string) => {
+    return quote.line_items
+      .filter(item => item.contact_id === contactId)
+      .reduce((sum, item) => sum + item.total_price, 0);
+  };
+
   return (
     <>
       <Head>
@@ -395,43 +406,39 @@ const QuoteDetailPage: React.FC = () => {
       </Head>
 
       <AppLayout>
-        <div className="p-6 space-y-6">
+        <div className="p-4 space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Button
                 isIconOnly
                 variant="light"
+                size="sm"
                 onPress={() => router.back()}
               >
-                <ArrowLeftIcon className="h-5 w-5" />
+                <ArrowLeftIcon className="h-4 w-4" />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Quote {quote.quote_number}</h1>
-                <p className="text-foreground-600">Order {quote.order_number} • {quote.business_entity}</p>
+                <h1 className="text-xl font-bold text-foreground">Quote {quote.quote_number}</h1>
+                <p className="text-sm text-foreground-600">Order {quote.order_number} • {quote.business_entity}</p>
               </div>
-              <Chip size="lg" color={getStatusColor(quote.status)} variant="flat">
-                {getStatusLabel(quote.status)}
-              </Chip>
             </div>
             
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <Button 
                 color="primary" 
+                size="sm"
                 startContent={<WrenchScrewdriverIcon className="h-4 w-4" />}
                 onPress={() => router.push(`/quotes/${quote.id}/build`)}
               >
                 Bewerken
               </Button>
-              <Button variant="bordered" startContent={<PrinterIcon className="h-4 w-4" />}>
-                Printen
-              </Button>
-              <Button variant="bordered" startContent={<ShareIcon className="h-4 w-4" />}>
-                Delen
+              <Button variant="bordered" size="sm" startContent={<PrinterIcon className="h-4 w-4" />}>
+                Print
               </Button>
               <Dropdown>
                 <DropdownTrigger>
-                  <Button isIconOnly variant="bordered">
+                  <Button isIconOnly variant="bordered" size="sm">
                     <EllipsisVerticalIcon className="h-4 w-4" />
                   </Button>
                 </DropdownTrigger>
@@ -450,51 +457,51 @@ const QuoteDetailPage: React.FC = () => {
 
           {/* Status Timeline */}
           <Card>
-            <CardHeader className="pb-3">
-              <h2 className="text-lg font-semibold">Quote Status</h2>
+            <CardHeader className="pb-2">
+              <h2 className="text-base font-semibold">Quote Status</h2>
             </CardHeader>
             <CardBody className="pt-0">
-              <div className="flex items-center justify-between w-full overflow-x-auto pb-4">
+              <div className="flex items-center justify-between w-full overflow-x-auto pb-2">
                 {quote.statuses.map((status, index) => (
                   <React.Fragment key={status.id}>
-                    <div className="flex flex-col items-center min-w-[120px]">
+                    <div className="flex flex-col items-center min-w-[100px]">
                       <div className={`
-                        w-12 h-12 rounded-full flex items-center justify-center border-3 mb-3 transition-all duration-200
+                        w-8 h-8 rounded-full flex items-center justify-center border-2 mb-2 transition-all duration-200
                         ${status.completed 
-                          ? 'bg-success border-success text-white shadow-lg' 
+                          ? 'bg-success border-success text-white shadow-md' 
                           : status.current 
-                            ? 'border-primary bg-primary/10 text-primary ring-4 ring-primary/20 shadow-md' 
+                            ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary/20' 
                             : 'border-default-300 bg-default-100 text-default-400'
                         }
                       `}>
                         {status.completed ? (
-                          <CheckCircleIcon className="h-6 w-6" />
+                          <CheckCircleIcon className="h-4 w-4" />
                         ) : status.current ? (
-                          <div className="w-4 h-4 rounded-full bg-primary" />
+                          <div className="w-2 h-2 rounded-full bg-primary" />
                         ) : (
-                          <div className="w-4 h-4 rounded-full bg-current opacity-50" />
+                          <div className="w-2 h-2 rounded-full bg-current opacity-50" />
                         )}
                       </div>
                       <Chip
                         size="sm"
                         color={status.completed ? 'success' : status.current ? 'primary' : 'default'}
                         variant={status.current ? 'solid' : status.completed ? 'flat' : 'light'}
-                        className="mb-2 font-medium"
+                        className="mb-1 text-xs"
                       >
                         {status.name}
                       </Chip>
                       {status.date && (
-                        <span className="text-xs text-foreground-500 font-medium">{status.date}</span>
+                        <span className="text-xs text-foreground-500">{status.date}</span>
                       )}
                     </div>
                     {index < quote.statuses.length - 1 && (
-                      <div className="flex items-center justify-center flex-1 mx-2">
+                      <div className="flex items-center justify-center flex-1 mx-1">
                         <div className={`
-                          h-1 flex-1 rounded-full transition-colors duration-300
+                          h-0.5 flex-1 rounded-full transition-colors duration-300
                           ${status.completed ? 'bg-success' : 'bg-default-200'}
                         `} />
                         <ChevronRightIcon className={`
-                          h-5 w-5 mx-1 transition-colors duration-300
+                          h-4 w-4 mx-1 transition-colors duration-300
                           ${status.completed ? 'text-success' : 'text-default-300'}
                         `} />
                       </div>
@@ -506,125 +513,105 @@ const QuoteDetailPage: React.FC = () => {
           </Card>
 
           {/* Quote Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader className="pb-2">
-                <h3 className="text-sm font-medium text-foreground-600">Quote Gegevens</h3>
-              </CardHeader>
-              <CardBody className="pt-0">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm">Geldig tot:</span>
-                    <span className="text-sm font-medium">{quote.valid_until}</span>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="p-3">
+              <div className="space-y-2">
+                <h3 className="text-xs font-medium text-foreground-600 uppercase tracking-wide">Quote Gegevens</h3>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span>Geldig tot:</span>
+                    <span className="font-medium">{quote.valid_until}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Levertijd:</span>
-                    <span className="text-sm font-medium">{quote.delivery_time}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm">Garantie:</span>
-                    <span className="text-sm font-medium">{quote.warranty_period}</span>
+                  <div className="flex justify-between text-xs">
+                    <span>Levertijd:</span>
+                    <span className="font-medium">{quote.delivery_time}</span>
                   </div>
                 </div>
-              </CardBody>
+              </div>
             </Card>
 
-            <Card>
-              <CardHeader className="pb-2">
-                <h3 className="text-sm font-medium text-foreground-600">Klant Gegevens</h3>
-              </CardHeader>
-              <CardBody className="pt-0">
-                <div className="space-y-2">
-                  {quote.contacts.filter(c => c.role === 'end_customer').map(contact => (
-                    <div key={contact.id} className="flex items-center gap-2">
-                      <Avatar name={contact.name} size="sm" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{contact.name}</p>
-                        <p className="text-xs text-foreground-500 truncate">{contact.email}</p>
-                      </div>
+            <Card className="p-3">
+              <div className="space-y-2">
+                <h3 className="text-xs font-medium text-foreground-600 uppercase tracking-wide">Klant</h3>
+                {quote.contacts.filter(c => c.role === 'end_customer').map(contact => (
+                  <div key={contact.id} className="flex items-center gap-2">
+                    <Avatar name={contact.name} size="sm" className="w-6 h-6 text-xs" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">{contact.name}</p>
+                      <p className="text-xs text-foreground-500 truncate">{contact.email}</p>
                     </div>
-                  ))}
-                </div>
-              </CardBody>
+                  </div>
+                ))}
+              </div>
             </Card>
 
-            <Card>
-              <CardHeader className="pb-2">
-                <h3 className="text-sm font-medium text-foreground-600">Account Gegevens</h3>
-              </CardHeader>
-              <CardBody className="pt-0">
-                <div className="space-y-2">
-                  {quote.contacts.filter(c => c.role === 'account').map(contact => (
-                    <div key={contact.id} className="flex items-center gap-2">
-                      <Avatar name={contact.name} size="sm" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{contact.name}</p>
-                        <p className="text-xs text-foreground-500 truncate">{contact.email}</p>
-                      </div>
+            <Card className="p-3">
+              <div className="space-y-2">
+                <h3 className="text-xs font-medium text-foreground-600 uppercase tracking-wide">Account</h3>
+                {quote.contacts.filter(c => c.role === 'account').map(contact => (
+                  <div key={contact.id} className="flex items-center gap-2">
+                    <Avatar name={contact.name} size="sm" className="w-6 h-6 text-xs" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium truncate">{contact.name}</p>
+                      <p className="text-xs text-foreground-500 truncate">{contact.email}</p>
                     </div>
-                  ))}
-                </div>
-              </CardBody>
+                  </div>
+                ))}
+              </div>
             </Card>
 
-            <Card>
-              <CardHeader className="pb-2">
-                <h3 className="text-sm font-medium text-foreground-600">Totaal Overzicht</h3>
-              </CardHeader>
-              <CardBody className="pt-0">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-sm text-foreground-600">Klant:</span>
-                    <span className="text-sm font-semibold text-success">€{quote.customer_amount.toLocaleString('nl-NL')}</span>
+            <Card className="p-3">
+              <div className="space-y-2">
+                <h3 className="text-xs font-medium text-foreground-600 uppercase tracking-wide">Totaal</h3>
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span>Klant:</span>
+                    <span className="font-semibold text-success">€{quote.customer_amount.toLocaleString('nl-NL')}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-sm text-foreground-600">Partner:</span>
-                    <span className="text-sm font-semibold text-primary">€{quote.partner_amount.toLocaleString('nl-NL')}</span>
+                  <div className="flex justify-between text-xs">
+                    <span>Partner:</span>
+                    <span className="font-semibold text-primary">€{quote.partner_amount.toLocaleString('nl-NL')}</span>
                   </div>
-                  <Divider />
+                  <Divider className="my-1" />
                   <div className="flex justify-between">
-                    <span className="text-sm font-semibold">Totaal:</span>
-                    <span className="text-lg font-bold text-foreground">€{quote.total_amount.toLocaleString('nl-NL')}</span>
+                    <span className="text-xs font-semibold">Totaal:</span>
+                    <span className="text-sm font-bold text-foreground">€{quote.total_amount.toLocaleString('nl-NL')}</span>
                   </div>
                 </div>
-              </CardBody>
+              </div>
             </Card>
           </div>
 
           {/* Line Items Table */}
           <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">Line Items Gegevens per Klus</h3>
-                <Button 
-                  size="sm" 
-                  color="primary" 
-                  variant="flat"
-                  startContent={<PencilIcon className="h-4 w-4" />}
-                  onPress={() => router.push(`/quotes/${quote.id}/build`)}
-                >
-                  Bewerken
-                </Button>
-              </div>
+            <CardHeader className="flex justify-between items-center p-4">
+              <h3 className="text-base font-semibold">Line Items per Bezoek</h3>
+              <Button 
+                size="sm" 
+                color="primary" 
+                variant="flat"
+                startContent={<PencilIcon className="h-3 w-3" />}
+                onPress={() => router.push(`/quotes/${quote.id}/build`)}
+              >
+                Bewerken
+              </Button>
             </CardHeader>
             <CardBody className="p-0">
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-divider">
-                      <th className="text-left py-3 px-4 font-semibold text-sm text-foreground-600 min-w-[100px]">Visit</th>
-                      <th className="text-left py-3 px-4 font-semibold text-sm text-foreground-600 min-w-[40px]">#</th>
-                      <th className="text-left py-3 px-4 font-semibold text-sm text-foreground-600 min-w-[300px]">Line Item Gegevens Kolommen</th>
-                      <th className="text-right py-3 px-4 font-semibold text-sm text-foreground-600 min-w-[80px]">Aantal</th>
-                      <th className="text-right py-3 px-4 font-semibold text-sm text-foreground-600 min-w-[100px]">Prijs p/s</th>
-                      <th className="text-right py-3 px-4 font-semibold text-sm text-foreground-600 min-w-[100px]">Totaal</th>
+                    <tr className="border-b border-divider bg-content2/30">
+                      <th className="text-left py-2 px-3 font-medium text-xs text-foreground-600 min-w-[80px]">Visit</th>
+                      <th className="text-left py-2 px-3 font-medium text-xs text-foreground-600 min-w-[120px]">Contact</th>
+                      <th className="text-left py-2 px-3 font-medium text-xs text-foreground-600 min-w-[300px]">Beschrijving</th>
+                      <th className="text-center py-2 px-3 font-medium text-xs text-foreground-600 min-w-[60px]">Aantal</th>
+                      <th className="text-right py-2 px-3 font-medium text-xs text-foreground-600 min-w-[80px]">Prijs</th>
+                      <th className="text-right py-2 px-3 font-medium text-xs text-foreground-600 min-w-[80px]">Totaal</th>
+                      <th className="text-center py-2 px-3 font-medium text-xs text-foreground-600 min-w-[100px]">Acties</th>
                     </tr>
                   </thead>
                   <tbody>
                     {Object.entries(groupedItems).map(([visitId, visitData], visitIndex) => {
-                      const visitItems = Object.values(visitData.contacts).flatMap(contact => contact.items);
-                      const visitTotal = visitItems.reduce((sum, item) => sum + item.total_price, 0);
-                      
                       return (
                         <React.Fragment key={visitId}>
                           {Object.entries(visitData.contacts).map(([contactId, contactData], contactIndex) => {
@@ -634,41 +621,31 @@ const QuoteDetailPage: React.FC = () => {
                             return (
                               <React.Fragment key={contactId}>
                                 {contactItems.map((item, itemIndex) => (
-                                  <tr key={item.id} className="border-b border-divider/50 hover:bg-content2/50 transition-colors">
-                                    {/* Visit column - only show on first item of first contact */}
-                                    {visitIndex === 0 && contactIndex === 0 && itemIndex === 0 && (
+                                  <tr key={item.id} className="border-b border-divider/50 hover:bg-content2/20 transition-colors">
+                                    {/* Visit column - show as vertical badge on first item */}
+                                    {contactIndex === 0 && itemIndex === 0 && (
                                       <td 
-                                        rowSpan={visitItems.length}
-                                        className="py-3 px-4 border-r border-divider bg-primary/5 align-top"
+                                        rowSpan={Object.values(visitData.contacts).flatMap(c => c.items).length}
+                                        className="py-2 px-3 border-r border-divider bg-primary/5 align-top"
                                       >
-                                        <div className="flex items-center gap-2">
-                                          <CalendarDaysIcon className="h-4 w-4 text-primary" />
-                                          <span className="font-semibold text-sm">{visitData.visit_name}</span>
-                                        </div>
-                                      </td>
-                                    )}
-                                    {/* Show visit for subsequent visits */}
-                                    {visitIndex > 0 && contactIndex === 0 && itemIndex === 0 && (
-                                      <td 
-                                        rowSpan={visitItems.length}
-                                        className="py-3 px-4 border-r border-divider bg-primary/5 align-top"
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <CalendarDaysIcon className="h-4 w-4 text-primary" />
-                                          <span className="font-semibold text-sm">{visitData.visit_name}</span>
+                                        <div className="flex flex-col items-start gap-1">
+                                          <CalendarDaysIcon className="h-3 w-3 text-primary" />
+                                          <div className="writing-vertical text-xs font-medium text-primary transform -rotate-90 origin-left whitespace-nowrap">
+                                            {visitData.visit_name}
+                                          </div>
                                         </div>
                                       </td>
                                     )}
                                     
-                                    {/* Contact section - show contact info on first item of each contact */}
+                                    {/* Contact column - show on first item of each contact */}
                                     {itemIndex === 0 && (
                                       <td 
                                         rowSpan={contactItems.length}
-                                        className="py-3 px-4 border-r border-divider/50 bg-content2/30 align-top"
+                                        className="py-2 px-3 border-r border-divider/50 bg-content2/10 align-top"
                                       >
                                         <div className="space-y-1">
-                                          <p className="font-medium text-sm">{contactData.contact_name}</p>
-                                          <Chip size="sm" color={getContactColor(contactData.contact_role)} variant="flat">
+                                          <p className="text-xs font-medium">{contactData.contact_name}</p>
+                                          <Chip size="sm" color={getContactColor(contactData.contact_role)} variant="flat" className="text-xs h-4">
                                             {getContactLabel(contactData.contact_role)}
                                           </Chip>
                                         </div>
@@ -676,17 +653,17 @@ const QuoteDetailPage: React.FC = () => {
                                     )}
                                     
                                     {/* Line item description */}
-                                    <td className="py-2 px-4">
-                                      <div className="flex items-center gap-3">
-                                        <span className="text-lg">{getCategoryIcon(item.category)}</span>
+                                    <td className="py-1.5 px-3">
+                                      <div className="flex items-center gap-2">
+                                        <div className="flex-shrink-0">{getCategoryIcon(item.category)}</div>
                                         <div className="flex-1">
-                                          <p className="font-medium text-sm">{item.description}</p>
-                                          <div className="flex items-center gap-2 mt-1">
-                                            <Chip size="sm" variant="flat" color="default" className="text-xs">
+                                          <p className="text-xs font-medium">{item.description}</p>
+                                          <div className="flex items-center gap-1 mt-0.5">
+                                            <Chip size="sm" variant="flat" color="default" className="text-xs h-4 px-1">
                                               {item.category}
                                             </Chip>
                                             {item.is_customer_responsible && (
-                                              <Chip size="sm" variant="flat" color="success" className="text-xs">
+                                              <Chip size="sm" variant="flat" color="success" className="text-xs h-4 px-1">
                                                 Klant
                                               </Chip>
                                             )}
@@ -696,58 +673,77 @@ const QuoteDetailPage: React.FC = () => {
                                     </td>
                                     
                                     {/* Quantity */}
-                                    <td className="py-2 px-4 text-right">
-                                      <span className="font-medium text-sm">{item.quantity}</span>
+                                    <td className="py-1.5 px-3 text-center">
+                                      <span className="text-xs font-medium">{item.quantity}</span>
                                     </td>
                                     
                                     {/* Unit price */}
-                                    <td className="py-2 px-4 text-right">
-                                      <span className="font-medium text-sm">€{item.unit_price.toLocaleString('nl-NL')}</span>
+                                    <td className="py-1.5 px-3 text-right">
+                                      <span className="text-xs font-medium">€{item.unit_price.toLocaleString('nl-NL')}</span>
                                     </td>
                                     
                                     {/* Total price */}
-                                    <td className="py-2 px-4 text-right">
-                                      <span className="font-semibold text-sm">€{item.total_price.toLocaleString('nl-NL')}</span>
+                                    <td className="py-1.5 px-3 text-right">
+                                      <span className="text-xs font-semibold">€{item.total_price.toLocaleString('nl-NL')}</span>
+                                    </td>
+
+                                    {/* Actions - only on last item of contact */}
+                                    <td className="py-1.5 px-3 text-center">
+                                      {itemIndex === contactItems.length - 1 && (
+                                        <div className="flex items-center justify-center gap-1">
+                                          <Tooltip content="Verstuur voor akkoord">
+                                            <Button
+                                              size="sm"
+                                              isIconOnly
+                                              color="primary"
+                                              variant="flat"
+                                              className="h-6 w-6 min-w-6"
+                                            >
+                                              <PaperAirplaneIcon className="h-3 w-3" />
+                                            </Button>
+                                          </Tooltip>
+                                          <Tooltip content="Download PDF">
+                                            <Button
+                                              size="sm"
+                                              isIconOnly
+                                              variant="flat"
+                                              className="h-6 w-6 min-w-6"
+                                            >
+                                              <DocumentArrowDownIcon className="h-3 w-3" />
+                                            </Button>
+                                          </Tooltip>
+                                        </div>
+                                      )}
                                     </td>
                                   </tr>
                                 ))}
                                 
                                 {/* Contact subtotal row */}
-                                {contactIndex === Object.keys(visitData.contacts).length - 1 && (
-                                  <tr className="bg-content2/50 border-b-2 border-divider">
-                                    <td className="py-2 px-4 text-right font-semibold text-sm" colSpan={3}>
-                                      Subtotaal {contactData.contact_name}:
-                                    </td>
-                                    <td className="py-2 px-4 text-right font-bold">
-                                      €{contactTotal.toLocaleString('nl-NL')}
-                                    </td>
-                                  </tr>
-                                )}
+                                <tr className="bg-content2/30 border-b border-divider">
+                                  <td className="py-1.5 px-3 text-right text-xs font-semibold" colSpan={4}>
+                                    Subtotaal {contactData.contact_name}:
+                                  </td>
+                                  <td className="py-1.5 px-3 text-right text-xs font-bold">
+                                    €{contactTotal.toLocaleString('nl-NL')}
+                                  </td>
+                                  <td></td>
+                                </tr>
                               </React.Fragment>
                             );
                           })}
-                          
-                          {/* Visit total row */}
-                          <tr className="bg-primary/10 border-b-2 border-primary/20">
-                            <td className="py-3 px-4 text-right font-bold text-primary" colSpan={5}>
-                              Totaal {visitData.visit_name}:
-                            </td>
-                            <td className="py-3 px-4 text-right font-bold text-lg text-primary">
-                              €{visitTotal.toLocaleString('nl-NL')}
-                            </td>
-                          </tr>
                         </React.Fragment>
                       );
                     })}
                     
                     {/* Grand total row */}
                     <tr className="bg-foreground/5 border-t-2 border-foreground/20">
-                      <td className="py-4 px-4 text-right font-bold text-lg" colSpan={5}>
+                      <td className="py-3 px-3 text-right font-bold text-sm" colSpan={5}>
                         TOTAAL OFFERTE:
                       </td>
-                      <td className="py-4 px-4 text-right font-bold text-xl">
+                      <td className="py-3 px-3 text-right font-bold text-base">
                         €{quote.total_amount.toLocaleString('nl-NL')}
                       </td>
+                      <td></td>
                     </tr>
                   </tbody>
                 </table>
@@ -758,11 +754,11 @@ const QuoteDetailPage: React.FC = () => {
           {/* Terms and Conditions */}
           {quote.terms_conditions && (
             <Card>
-              <CardHeader>
-                <h3 className="text-lg font-semibold">Voorwaarden</h3>
+              <CardHeader className="pb-2">
+                <h3 className="text-base font-semibold">Voorwaarden</h3>
               </CardHeader>
-              <CardBody>
-                <p className="text-sm text-foreground-600">{quote.terms_conditions}</p>
+              <CardBody className="pt-0">
+                <p className="text-xs text-foreground-600">{quote.terms_conditions}</p>
               </CardBody>
             </Card>
           )}

@@ -58,7 +58,12 @@ import {
   BoltIcon,
   CreditCardIcon,
   TicketIcon,
-  InboxIcon
+  InboxIcon,
+  HomeIcon,
+  XCircleIcon,
+  PlusIcon,
+  DocumentDuplicateIcon,
+  TrashIcon
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../../components/layouts/AppLayout';
 
@@ -246,7 +251,7 @@ const mockCommunications: Communication[] = [
     id: 'COM-001',
     type: 'phone',
     direction: 'inbound',
-    summary: 'Klant belt over problemen met laadpaal na stroomstoring',
+    summary: 'Klant belts over problemen met laadpaal na stroomstoring',
     duration: '12:30',
     date: '2024-01-18T09:15:00',
     agent: 'Maria Jansen'
@@ -389,22 +394,18 @@ const ContactDetailPage: React.FC = () => {
     }
   };
 
-  const getAddressIcon = (type: string) => {
-    switch (type) {
-      case 'home': return '🏠';
-      case 'work': return '🏢';
-      case 'billing': return '💰';
-      case 'installation': return '🔧';
-      default: return '📍';
+  const getPropertyTypeIcon = (propertyType: string) => {
+    switch (propertyType) {
+      case 'home': return <HomeIcon className="h-5 w-5 text-success" />;
+      default: return <BuildingOfficeIcon className="h-5 w-5 text-primary" />;
     }
   };
 
-  const getVehicleIcon = (type: string) => {
-    switch (type) {
-      case 'bev': return '🔋';
-      case 'phev': return '⚡';
-      case 'hev': return '🌱';
-      default: return '🚗';
+  const getVehicleTypeIcon = (vehicleType: string) => {
+    switch (vehicleType) {
+      case 'bev': return <BoltIcon className="h-5 w-5 text-success" />;
+      case 'phev': return <BoltIcon className="h-5 w-5 text-warning" />;
+      default: return <TruckIcon className="h-5 w-5 text-primary" />;
     }
   };
 
@@ -576,16 +577,13 @@ const ContactDetailPage: React.FC = () => {
                       {mockAddresses.map((address) => (
                         <div key={address.id} className="p-4 border border-divider rounded-lg">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-lg">{getAddressIcon(address.type)}</span>
+                            <div className="flex-shrink-0">{getPropertyTypeIcon(address.type)}</div>
                             <Chip 
                               size="sm" 
                               variant="flat" 
-                              color={address.isPrimary ? 'primary' : 'default'}
+                              color={address.type === 'billing' ? 'warning' : 'default'}
                             >
-                              {address.type === 'home' ? 'Thuis' : 
-                               address.type === 'work' ? 'Werk' : 
-                               address.type === 'billing' ? 'Factuur' : 'Installatie'}
-                              {address.isPrimary && ' (Primair)'}
+                              {address.type}
                             </Chip>
                           </div>
                           <div className="text-sm space-y-1">
@@ -949,8 +947,8 @@ const ContactDetailPage: React.FC = () => {
                   {mockVehicles.map((vehicle) => (
                     <div key={vehicle.id} className="p-4 border border-divider rounded-lg">
                       <div className="flex items-start gap-3">
-                        <div className="text-2xl">
-                          {getVehicleIcon(vehicle.type)}
+                        <div className="flex-shrink-0 pt-1">
+                          {getVehicleTypeIcon(vehicle.type)}
                         </div>
                         <div className="flex-1">
                           <h4 className="font-semibold">{vehicle.brand} {vehicle.model}</h4>
