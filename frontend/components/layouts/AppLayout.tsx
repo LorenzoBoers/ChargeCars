@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { Sidebar } from '../ui/Sidebar';
+import { TopBar } from '../ui/TopBar';
 
 /**
  * @component AppLayout
@@ -21,10 +22,16 @@ export function AppLayout({ children, className = "" }: AppLayoutProps) {
       {/* Sidebar */}
       <Sidebar />
       
-      {/* Main Content */}
-      <main className={`flex-1 overflow-auto bg-content1 ${className}`}>
-        {children}
-      </main>
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Bar */}
+        <TopBar />
+        
+        {/* Page Content */}
+        <main className={`flex-1 overflow-auto bg-content1 ${className}`}>
+          {children}
+        </main>
+      </div>
     </div>
   );
 } 

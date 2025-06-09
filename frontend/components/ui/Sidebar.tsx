@@ -99,26 +99,6 @@ export function Sidebar({ className = "" }: SidebarProps) {
           </div>
         </div>
 
-        {/* User Info */}
-        <div className="p-4 border-b border-divider">
-          <div className="flex items-center gap-3">
-            <Avatar
-              size="sm"
-              name={user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'User'}
-              className="text-tiny"
-              color="primary"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground truncate">
-                {user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'Gebruiker'}
-              </p>
-              <p className="text-xs text-foreground-500 truncate">
-                {user?.email || 'user@chargecars.nl'}
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* Navigation */}
         <nav className="flex-1 p-2">
           <div className="space-y-1">
@@ -155,8 +135,26 @@ export function Sidebar({ className = "" }: SidebarProps) {
           </div>
         </nav>
 
-        {/* Footer Actions */}
+        {/* User Info */}
         <div className="p-4 border-t border-divider">
+          <div className="flex items-center gap-3 mb-4">
+            <Avatar
+              size="sm"
+              name={user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'User'}
+              className="text-tiny"
+              color="primary"
+            />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-foreground truncate">
+                {user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'Gebruiker'}
+              </p>
+              <p className="text-xs text-foreground-500 truncate">
+                {user?.email || 'user@chargecars.nl'}
+              </p>
+            </div>
+          </div>
+
+          {/* Logout Button */}
           <Button
             variant="light"
             color="danger"
