@@ -66,9 +66,9 @@ import {
   InboxIcon,
   PlusIcon,
   TrashIcon,
-  GripVerticalIcon,
+  Bars3Icon,
   DocumentDuplicateIcon,
-  SaveIcon,
+  BookmarkIcon,
   XMarkIcon
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../../../components/layouts/AppLayout';
@@ -522,7 +522,7 @@ const QuoteBuildPage: React.FC = () => {
             <div className="flex items-center gap-3">
               <Button 
                 color="success" 
-                startContent={<SaveIcon className="h-4 w-4" />}
+                startContent={<BookmarkIcon className="h-4 w-4" />}
                 onPress={saveQuote}
                 isDisabled={!isDirty}
               >
@@ -743,7 +743,7 @@ const QuoteBuildPage: React.FC = () => {
                                                   {...provided.dragHandleProps}
                                                   className="cursor-grab hover:cursor-grabbing text-foreground-400"
                                                 >
-                                                  <GripVerticalIcon className="h-4 w-4" />
+                                                  <Bars3Icon className="h-4 w-4" />
                                                 </div>
                                                 
                                                 <div className="text-lg">{getCategoryIcon(item.category)}</div>
