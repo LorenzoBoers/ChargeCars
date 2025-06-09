@@ -582,178 +582,269 @@ const QuoteDetailPage: React.FC = () => {
             </Card>
           </div>
 
-          {/* Line Items Table */}
-          <Card>
-            <CardHeader className="flex justify-between items-center p-4">
-              <h3 className="text-base font-semibold">Line Items per Bezoek</h3>
-              <Button 
-                size="sm" 
-                color="primary" 
-                variant="flat"
-                startContent={<PencilIcon className="h-3 w-3" />}
-                onPress={() => router.push(`/quotes/${quote.id}/build`)}
-              >
-                Bewerken
-              </Button>
-            </CardHeader>
-            <CardBody className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-content2 border-b border-divider">
-                    <tr>
-                      <th className="text-left py-3 px-4 font-semibold text-sm text-foreground min-w-[120px]">Visit</th>
-                      <th className="text-left py-3 px-4 font-semibold text-sm text-foreground min-w-[150px]">Contact</th>
-                      <th className="text-left py-3 px-4 font-semibold text-sm text-foreground min-w-[350px]">Beschrijving</th>
-                      <th className="text-center py-3 px-4 font-semibold text-sm text-foreground min-w-[80px]">Aantal</th>
-                      <th className="text-right py-3 px-4 font-semibold text-sm text-foreground min-w-[100px]">Prijs</th>
-                      <th className="text-right py-3 px-4 font-semibold text-sm text-foreground min-w-[100px]">Totaal</th>
-                      <th className="text-center py-3 px-4 font-semibold text-sm text-foreground min-w-[120px]">Acties</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(groupedItems).map(([visitId, visitData], visitIndex) => {
-                      const visitTotal = Object.values(visitData.contacts).reduce((sum, contact) => 
-                        sum + contact.items.reduce((itemSum, item) => itemSum + item.total_price, 0), 0
-                      );
-                      
-                      return (
-                        <React.Fragment key={visitId}>
-                          {/* Visit header row */}
-                          <tr className="bg-primary/5 border-b border-divider">
-                            <td className="py-3 px-4 font-semibold text-sm text-primary" colSpan={7}>
-                              <div className="flex items-center gap-2">
-                                <CalendarDaysIcon className="h-4 w-4" />
-                                {visitData.visit_name}
-                                <Chip size="sm" variant="flat" color="primary" className="ml-auto">
-                                  €{visitTotal.toLocaleString('nl-NL')}
-                                </Chip>
-                              </div>
-                            </td>
-                          </tr>
+          {/* Line Items and Contact Cards */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+            {/* Line Items Table - Left Side */}
+            <div className="xl:col-span-2">
+              <Card>
+                <CardHeader className="flex justify-between items-center p-4">
+                  <h3 className="text-base font-semibold">Line Items per Bezoek</h3>
+                  <Button 
+                    size="sm" 
+                    color="primary" 
+                    variant="flat"
+                    startContent={<PencilIcon className="h-3 w-3" />}
+                    onPress={() => router.push(`/quotes/${quote.id}/build`)}
+                  >
+                    Bewerken
+                  </Button>
+                </CardHeader>
+                <CardBody className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-content2 border-b border-divider">
+                        <tr>
+                          <th className="text-left py-3 px-4 font-semibold text-sm text-foreground min-w-[300px]">Beschrijving</th>
+                          <th className="text-center py-3 px-4 font-semibold text-sm text-foreground min-w-[60px]">Aantal</th>
+                          <th className="text-right py-3 px-4 font-semibold text-sm text-foreground min-w-[80px]">Prijs</th>
+                          <th className="text-right py-3 px-4 font-semibold text-sm text-foreground min-w-[80px]">Totaal</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(groupedItems).map(([visitId, visitData], visitIndex) => {
+                          const visitTotal = Object.values(visitData.contacts).reduce((sum, contact) => 
+                            sum + contact.items.reduce((itemSum, item) => itemSum + item.total_price, 0), 0
+                          );
                           
-                          {Object.entries(visitData.contacts).map(([contactId, contactData], contactIndex) => {
-                            const contactItems = contactData.items;
-                            const contactTotal = contactItems.reduce((sum, item) => sum + item.total_price, 0);
-                            
-                            return (
-                              <React.Fragment key={contactId}>
-                                {/* Contact header row */}
-                                <tr className="bg-content2/20 border-b border-divider/50">
-                                  <td className="py-2 px-4"></td>
-                                  <td className="py-2 px-4" colSpan={6}>
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-2">
-                                        <Avatar name={contactData.contact_name} size="sm" className="w-6 h-6 text-xs" />
-                                        <span className="font-medium text-sm">{contactData.contact_name}</span>
-                                        <Chip 
-                                          size="sm" 
-                                          color={getContactColor(contactData.contact_role)} 
-                                          variant="flat" 
-                                          className="text-xs"
-                                        >
-                                          {getContactLabel(contactData.contact_role)}
-                                        </Chip>
-                                      </div>
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-xs text-foreground-600">Subtotaal:</span>
-                                        <span className="font-semibold text-sm">€{contactTotal.toLocaleString('nl-NL')}</span>
-                                        <div className="flex gap-1 ml-2">
-                                          <Tooltip content="Verstuur voor akkoord">
-                                            <Button
-                                              size="sm"
-                                              isIconOnly
-                                              color="primary"
-                                              variant="flat"
-                                              className="h-6 w-6 min-w-6"
-                                            >
-                                              <PaperAirplaneIcon className="h-3 w-3" />
-                                            </Button>
-                                          </Tooltip>
-                                          <Tooltip content="Download PDF">
-                                            <Button
-                                              size="sm"
-                                              isIconOnly
-                                              variant="flat"
-                                              className="h-6 w-6 min-w-6"
-                                            >
-                                              <DocumentArrowDownIcon className="h-3 w-3" />
-                                            </Button>
-                                          </Tooltip>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
+                          return (
+                            <React.Fragment key={visitId}>
+                              {/* Visit header row */}
+                              <tr className="bg-primary/5 border-b border-divider">
+                                <td className="py-3 px-4 font-semibold text-sm text-primary" colSpan={4}>
+                                  <div className="flex items-center gap-2">
+                                    <CalendarDaysIcon className="h-4 w-4" />
+                                    {visitData.visit_name}
+                                    <Chip size="sm" variant="flat" color="primary" className="ml-auto">
+                                      €{visitTotal.toLocaleString('nl-NL')}
+                                    </Chip>
+                                  </div>
+                                </td>
+                              </tr>
+                              
+                              {Object.entries(visitData.contacts).map(([contactId, contactData], contactIndex) => {
+                                const contactItems = contactData.items;
+                                const contactTotal = contactItems.reduce((sum, item) => sum + item.total_price, 0);
                                 
-                                {/* Line items for this contact */}
-                                {contactItems.map((item, itemIndex) => (
-                                  <tr key={item.id} className="border-b border-divider/30 hover:bg-content2/10 transition-colors">
-                                    <td className="py-2 px-4"></td>
-                                    <td className="py-2 px-4"></td>
-                                    
-                                    {/* Line item description */}
-                                    <td className="py-2 px-4">
-                                      <div className="flex items-start gap-3">
-                                        <div className="flex-shrink-0 mt-0.5">{getCategoryIcon(item.category)}</div>
-                                        <div className="flex-1">
-                                          <p className="text-sm font-medium text-foreground">{item.description}</p>
-                                          <div className="flex items-center gap-2 mt-1">
-                                            <Chip size="sm" variant="flat" color="default" className="text-xs">
-                                              {item.category}
-                                            </Chip>
-                                            {item.is_customer_responsible && (
-                                              <Chip size="sm" variant="flat" color="success" className="text-xs">
-                                                Klant
-                                              </Chip>
-                                            )}
-                                          </div>
+                                return (
+                                  <React.Fragment key={contactId}>
+                                    {/* Contact header row */}
+                                    <tr className="bg-content2/20 border-b border-divider/50">
+                                      <td className="py-2 px-4" colSpan={4}>
+                                        <div className="flex items-center gap-2">
+                                          <Avatar name={contactData.contact_name} size="sm" className="w-6 h-6 text-xs" />
+                                          <span className="font-medium text-sm">{contactData.contact_name}</span>
+                                          <Chip 
+                                            size="sm" 
+                                            color={getContactColor(contactData.contact_role)} 
+                                            variant="flat" 
+                                            className="text-xs"
+                                          >
+                                            {getContactLabel(contactData.contact_role)}
+                                          </Chip>
+                                          <span className="text-xs text-foreground-600 ml-auto">€{contactTotal.toLocaleString('nl-NL')}</span>
                                         </div>
-                                      </div>
-                                    </td>
+                                      </td>
+                                    </tr>
                                     
-                                    {/* Quantity */}
-                                    <td className="py-2 px-4 text-center">
-                                      <span className="text-sm font-medium">{item.quantity}</span>
-                                    </td>
-                                    
-                                    {/* Unit price */}
-                                    <td className="py-2 px-4 text-right">
-                                      <span className="text-sm font-medium">€{item.unit_price.toLocaleString('nl-NL')}</span>
-                                    </td>
-                                    
-                                    {/* Total price */}
-                                    <td className="py-2 px-4 text-right">
-                                      <span className="text-sm font-semibold">€{item.total_price.toLocaleString('nl-NL')}</span>
-                                    </td>
+                                    {/* Line items for this contact */}
+                                    {contactItems.map((item, itemIndex) => (
+                                      <tr key={item.id} className="border-b border-divider/30 hover:bg-content2/10 transition-colors">
+                                        {/* Line item description */}
+                                        <td className="py-2 px-4">
+                                          <div className="flex items-start gap-3">
+                                            <div className="flex-shrink-0 mt-0.5">{getCategoryIcon(item.category)}</div>
+                                            <div className="flex-1">
+                                              <p className="text-sm font-medium text-foreground">{item.description}</p>
+                                              <div className="flex items-center gap-2 mt-1">
+                                                <Chip size="sm" variant="flat" color="default" className="text-xs">
+                                                  {item.category}
+                                                </Chip>
+                                                {item.is_customer_responsible && (
+                                                  <Chip size="sm" variant="flat" color="success" className="text-xs">
+                                                    Klant
+                                                  </Chip>
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </td>
+                                        
+                                        {/* Quantity */}
+                                        <td className="py-2 px-4 text-center">
+                                          <span className="text-sm font-medium">{item.quantity}</span>
+                                        </td>
+                                        
+                                        {/* Unit price */}
+                                        <td className="py-2 px-4 text-right">
+                                          <span className="text-sm font-medium">€{item.unit_price.toLocaleString('nl-NL')}</span>
+                                        </td>
+                                        
+                                        {/* Total price */}
+                                        <td className="py-2 px-4 text-right">
+                                          <span className="text-sm font-semibold">€{item.total_price.toLocaleString('nl-NL')}</span>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </React.Fragment>
+                                );
+                              })}
+                            </React.Fragment>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardBody>
+              </Card>
 
-                                    {/* Actions column - empty for line items */}
-                                    <td className="py-2 px-4"></td>
-                                  </tr>
-                                ))}
-                              </React.Fragment>
-                            );
-                          })}
-                        </React.Fragment>
-                      );
-                    })}
+              {/* Totals Breakdown */}
+              <Card className="mt-4">
+                <CardHeader className="pb-2">
+                  <h3 className="text-base font-semibold">Totaaloverzicht</h3>
+                </CardHeader>
+                <CardBody className="pt-0">
+                  <div className="space-y-3">
+                    {/* Per Contact Totals */}
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-foreground-600">Per Contact:</h4>
+                      {quote.contacts.map(contact => {
+                        const contactTotal = getContactTotal(contact.id);
+                        if (contactTotal === 0) return null;
+                        
+                        return (
+                          <div key={contact.id} className="flex justify-between items-center py-1">
+                            <div className="flex items-center gap-2">
+                              <Avatar name={contact.name} size="sm" className="w-5 h-5 text-xs" />
+                              <span className="text-sm">{contact.name}</span>
+                              <Chip size="sm" color={getContactColor(contact.role)} variant="flat" className="text-xs">
+                                {getContactLabel(contact.role)}
+                              </Chip>
+                            </div>
+                            <span className="text-sm font-medium">€{contactTotal.toLocaleString('nl-NL')}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                     
-                    {/* Grand total row */}
-                    <tr className="bg-foreground/5 border-t-2 border-foreground/20">
-                      <td className="py-4 px-4 text-right font-bold text-base" colSpan={6}>
-                        <div className="flex items-center justify-end gap-2">
-                          <CurrencyEuroIcon className="h-5 w-5" />
-                          TOTAAL OFFERTE:
+                    <Divider />
+                    
+                    {/* VAT Breakdown */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span>Subtotaal (excl. BTW):</span>
+                        <span className="font-medium">€{(quote.total_amount / 1.21).toLocaleString('nl-NL', { maximumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>BTW (21%):</span>
+                        <span className="font-medium">€{(quote.total_amount - (quote.total_amount / 1.21)).toLocaleString('nl-NL', { maximumFractionDigits: 2 })}</span>
+                      </div>
+                      <Divider />
+                      <div className="flex justify-between font-bold text-base">
+                        <span>Totaal (incl. BTW):</span>
+                        <span className="text-primary">€{quote.total_amount.toLocaleString('nl-NL')}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            </div>
+
+            {/* Contact Cards - Right Side */}
+            <div className="space-y-4">
+              <h3 className="text-base font-semibold">Contact Acties</h3>
+              
+              {quote.contacts.map(contact => {
+                const contactTotal = getContactTotal(contact.id);
+                if (contactTotal === 0) return null;
+                
+                return (
+                  <Card key={contact.id} className="p-4">
+                    <div className="space-y-3">
+                      {/* Contact Header */}
+                      <div className="flex items-center gap-3">
+                        <Avatar name={contact.name} size="md" />
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-sm">{contact.name}</h4>
+                          <p className="text-xs text-foreground-600">{contact.email}</p>
+                          <Chip size="sm" color={getContactColor(contact.role)} variant="flat" className="text-xs mt-1">
+                            {getContactLabel(contact.role)}
+                          </Chip>
                         </div>
-                      </td>
-                      <td className="py-4 px-4 text-right font-bold text-lg text-primary">
-                        €{quote.total_amount.toLocaleString('nl-NL')}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </CardBody>
-          </Card>
+                        <div className="text-right">
+                          <p className="text-xs text-foreground-600">Totaal:</p>
+                          <p className="font-bold text-sm">€{contactTotal.toLocaleString('nl-NL')}</p>
+                        </div>
+                      </div>
+
+                      <Divider />
+
+                      {/* Documents */}
+                      <div className="space-y-2">
+                        <h5 className="text-xs font-medium text-foreground-600 uppercase">Documenten</h5>
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between p-2 bg-content2/30 rounded-md">
+                            <div className="flex items-center gap-2">
+                              <DocumentTextIcon className="h-4 w-4 text-foreground-600" />
+                              <span className="text-xs">Offerte PDF</span>
+                            </div>
+                            <Button size="sm" isIconOnly variant="light" className="h-6 w-6">
+                              <DocumentArrowDownIcon className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between p-2 bg-content2/30 rounded-md">
+                            <div className="flex items-center gap-2">
+                              <DocumentTextIcon className="h-4 w-4 text-foreground-600" />
+                              <span className="text-xs">Technische specs</span>
+                            </div>
+                            <Button size="sm" isIconOnly variant="light" className="h-6 w-6">
+                              <DocumentArrowDownIcon className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Online Quote Link */}
+                      <div className="space-y-2">
+                        <h5 className="text-xs font-medium text-foreground-600 uppercase">Online Offerte</h5>
+                        <div className="flex gap-2">
+                          <Button size="sm" color="primary" variant="flat" className="flex-1 text-xs">
+                            <ShareIcon className="h-3 w-3 mr-1" />
+                            Deel Link
+                          </Button>
+                          <Button size="sm" variant="bordered" isIconOnly className="h-6 w-6">
+                            <DocumentDuplicateIcon className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Signature Status */}
+                      <div className="space-y-2">
+                        <h5 className="text-xs font-medium text-foreground-600 uppercase">Ondertekening</h5>
+                        <div className="flex items-center gap-2">
+                          <ClockIcon className="h-4 w-4 text-warning" />
+                          <span className="text-xs">Wacht op ondertekening</span>
+                        </div>
+                        <Button size="sm" color="success" variant="flat" className="w-full text-xs">
+                          <PaperAirplaneIcon className="h-3 w-3 mr-1" />
+                          Verstuur voor Akkoord
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
 
           {/* Terms and Conditions */}
           {quote.terms_conditions && (
