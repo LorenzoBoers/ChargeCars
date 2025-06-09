@@ -42,6 +42,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../components/layouts/AppLayout';
 import { useAuth } from '../contexts/AuthContext';
+import { useRouter } from 'next/router';
 
 // Mock data - will be replaced with API calls
 interface Order {
@@ -127,6 +128,7 @@ export default function OrdersPage() {
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const rowsPerPage = 10;
+  const router = useRouter();
 
   // Preset filters
   const presetFilters = [
@@ -205,8 +207,7 @@ export default function OrdersPage() {
   };
 
   const handleViewOrder = (orderId: string) => {
-    console.log('View order:', orderId);
-    // Will navigate to order detail page
+    router.push(`/orders/${orderId}`);
   };
 
   const handleEditOrder = (orderId: string) => {
@@ -310,6 +311,18 @@ export default function OrdersPage() {
           <Card>
             <CardHeader className="pb-3">
               <div className="flex flex-col gap-4 w-full">
+                {/* Demo Link */}
+                <div className="flex justify-end">
+                  <Button
+                    size="sm"
+                    color="secondary"
+                    variant="flat"
+                    onPress={() => router.push('/orders/CHC-2024-001')}
+                  >
+                    🚀 Bekijk Demo Order Detail
+                  </Button>
+                </div>
+
                 {/* Preset Filter Buttons */}
                 <div className="flex flex-wrap gap-2">
                   {presetFilters.map((filter, index) => (
