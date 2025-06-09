@@ -142,10 +142,10 @@ const LoginPage: React.FC = () => {
             </div>
 
             <div className="text-center">
-              <h2 className={`text-xl font-semibold transition-colors duration-200 ${
+              <h2 className={`text-base font-semibold transition-colors duration-200 ${
                 isDark ? 'text-white' : 'text-gray-900'
               }`}>Welcome Back</h2>
-              <p className={`text-sm mt-1 transition-colors duration-200 ${
+              <p className={`text-xs mt-1 transition-colors duration-200 ${
                 isDark ? 'text-gray-400' : 'text-gray-600'
               }`}>Sign in to your account to continue</p>
             </div>

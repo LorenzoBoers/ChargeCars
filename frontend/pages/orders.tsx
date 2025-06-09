@@ -211,36 +211,47 @@ export default function OrdersPage() {
   };
 
   const handleEditOrder = (orderId: string) => {
+    // Navigate to edit page
     console.log('Edit order:', orderId);
-    // Will navigate to order edit page
+  };
+
+  const handleDuplicateOrder = (orderId: string) => {
+    // Duplicate order logic
+    console.log('Duplicate order:', orderId);
+  };
+
+  const handleDeleteOrder = (orderId: string) => {
+    // Delete order logic
+    console.log('Delete order:', orderId);
   };
 
   return (
     <>
       <Head>
-        <title>Order Beheer - ChargeCars Portal</title>
-        <meta name="description" content="Beheer al je laadpaal orders op één centrale plek" />
+        <title>Orders - ChargeCars Portal</title>
+        <meta name="description" content="Beheer en bekijk alle laadpaal orders" />
       </Head>
 
       <AppLayout>
-        <div className="p-6 space-y-6">
+        <div className="p-4 space-y-4">
           {/* Header */}
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Order Beheer</h1>
-              <p className="text-foreground-600 mt-1">
-                Beheer al je laadpaal orders op één centrale plek
-              </p>
+              <h1 className="text-xl font-bold text-foreground">Order Management</h1>
+              <p className="text-sm text-foreground-600">Beheer en volg alle laadpaal orders</p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2">
               <Button
+                color="default"
                 variant="bordered"
+                size="sm"
                 startContent={<DocumentArrowDownIcon className="h-4 w-4" />}
               >
                 Export
               </Button>
               <Button
                 color="primary"
+                size="sm"
                 startContent={<PlusIcon className="h-4 w-4" />}
               >
                 Nieuwe Order
@@ -248,316 +259,261 @@ export default function OrdersPage() {
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardBody className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <CalendarIcon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-foreground-600">Vandaag</p>
-                    <p className="text-2xl font-bold text-foreground">12</p>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-            
-            <Card>
-              <CardBody className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-warning/10 rounded-lg">
-                    <AdjustmentsHorizontalIcon className="h-5 w-5 text-warning" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-foreground-600">In Behandeling</p>
-                    <p className="text-2xl font-bold text-foreground">8</p>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-            
-            <Card>
-              <CardBody className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-success/10 rounded-lg">
-                    <UserIcon className="h-5 w-5 text-success" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-foreground-600">Voltooid</p>
-                    <p className="text-2xl font-bold text-foreground">156</p>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-            
-            <Card>
-              <CardBody className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-secondary/10 rounded-lg">
-                    <BuildingOfficeIcon className="h-5 w-5 text-secondary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-foreground-600">Deze Maand</p>
-                    <p className="text-2xl font-bold text-foreground">89</p>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-          </div>
-
-          {/* Filters and Search */}
+          {/* Quick Filter Presets */}
           <Card>
-            <CardHeader className="pb-3">
-              <div className="flex flex-col gap-4 w-full">
-                {/* Demo Link */}
-                <div className="flex justify-end">
+            <CardBody className="p-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-medium text-foreground-600">Quick Filters:</span>
+                {presetFilters.map((filter, index) => (
                   <Button
+                    key={index}
                     size="sm"
-                    color="secondary"
                     variant="flat"
-                    onPress={() => router.push('/orders/CHC-2024-001')}
+                    className="h-6 text-xs"
+                    onPress={filter.action}
                   >
-                    🚀 Bekijk Demo Order Detail
+                    {filter.label}
                   </Button>
-                </div>
+                ))}
+              </div>
+            </CardBody>
+          </Card>
 
-                {/* Preset Filter Buttons */}
-                <div className="flex flex-wrap gap-2">
-                  {presetFilters.map((filter, index) => (
-                    <Button
-                      key={index}
-                      size="sm"
-                      variant="flat"
-                      onPress={filter.action}
-                      className={index === presetFilters.length - 1 ? 'text-warning' : ''}
-                    >
-                      {filter.label}
-                    </Button>
-                  ))}
-                </div>
-
-                {/* Search and Filters */}
-                <div className="flex flex-col md:flex-row gap-4">
-                  <Input
-                    className="md:w-80"
-                    placeholder="Zoek op ordernummer of klant..."
-                    value={searchValue}
-                    onValueChange={setSearchValue}
-                    startContent={<MagnifyingGlassIcon className="h-4 w-4 text-foreground-400" />}
-                    isClearable
-                  />
-                  
-                  <div className="flex gap-3">
-                    <Select
-                      className="w-48"
-                      label="Business Entity"
-                      selectedKeys={[selectedBusinessEntity]}
-                      onSelectionChange={(keys) => setSelectedBusinessEntity(Array.from(keys)[0] as string)}
-                    >
-                      {businessEntities.map((entity) => (
-                        <SelectItem key={entity} value={entity}>
-                          {entity}
-                        </SelectItem>
-                      ))}
-                    </Select>
-
-                    <Select
-                      className="w-40"
-                      label="Order Type"
-                      selectedKeys={[selectedOrderType]}
-                      onSelectionChange={(keys) => setSelectedOrderType(Array.from(keys)[0] as string)}
-                    >
-                      {orderTypes.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </Select>
-
-                    <Select
-                      className="w-48"
-                      label="Status"
-                      selectedKeys={[selectedStatus]}
-                      onSelectionChange={(keys) => setSelectedStatus(Array.from(keys)[0] as string)}
-                    >
-                      {statuses.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </Select>
-                  </div>
-                </div>
+          {/* Filters */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <FunnelIcon className="h-4 w-4 text-foreground-600" />
+                <h3 className="text-base font-semibold">Filters</h3>
               </div>
             </CardHeader>
-
             <CardBody className="pt-0">
-              {/* Orders Table */}
-              <Table
-                aria-label="Orders table"
-                classNames={{
-                  wrapper: "min-h-[222px]",
-                  th: "bg-default-50 text-default-900 h-10 text-xs font-medium px-3",
-                  td: "py-2 px-3 text-sm",
-                }}
-                bottomContent={
-                  totalPages > 1 ? (
-                    <div className="flex w-full justify-center">
-                      <Pagination
-                        isCompact
-                        showControls
-                        showShadow
-                        color="primary"
-                        page={page}
-                        total={totalPages}
-                        onChange={setPage}
-                      />
-                    </div>
-                  ) : null
-                }
-              >
-                <TableHeader>
-                  <TableColumn className="w-32">ORDER</TableColumn>
-                  <TableColumn className="w-40">KLANT</TableColumn>
-                  <TableColumn className="w-32">ENTITY</TableColumn>
-                  <TableColumn className="w-28">TYPE</TableColumn>
-                  <TableColumn className="w-28">STATUS</TableColumn>
-                  <TableColumn className="w-24 text-right">BEDRAG</TableColumn>
-                  <TableColumn className="w-28">DATUM</TableColumn>
-                  <TableColumn className="w-20">ACTIES</TableColumn>
-                </TableHeader>
-                <TableBody
-                  isLoading={isLoading}
-                  loadingContent={<Spinner />}
-                  emptyContent="Geen orders gevonden"
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+                <Input
+                  placeholder="Zoek orders..."
+                  value={searchValue}
+                  onValueChange={setSearchValue}
+                  startContent={<MagnifyingGlassIcon className="h-4 w-4 text-foreground-500" />}
+                  size="sm"
+                  className="lg:col-span-2"
+                />
+                
+                <Select
+                  placeholder="Business Entity"
+                  selectedKeys={[selectedBusinessEntity]}
+                  onSelectionChange={(keys) => setSelectedBusinessEntity(Array.from(keys)[0] as string)}
+                  size="sm"
                 >
-                  {paginatedOrders.map((order) => (
-                    <TableRow key={order.id} className="hover:bg-default-50">
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <span className="font-semibold text-foreground text-sm">{order.order_number}</span>
-                          {order.priority !== 'low' && (
-                            <Chip
-                              size="sm"
-                              color={priorityColorMap[order.priority]}
-                              variant="flat"
-                              className="w-fit text-xs"
-                            >
-                              {order.priority === 'high' ? 'Urgent' : 'Medium'}
-                            </Chip>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Avatar name={order.customer_name} size="sm" className="w-6 h-6 text-xs" />
-                          <span className="font-medium text-sm truncate">{order.customer_name}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Chip size="sm" variant="flat" color="secondary" className="text-xs">
-                          {order.business_entity}
-                        </Chip>
-                      </TableCell>
-                      <TableCell className="text-sm">{order.order_type}</TableCell>
-                      <TableCell>
-                        <Chip
-                          color={statusColorMap[order.status] || 'default'}
-                          variant="flat"
-                          size="sm"
-                          className="text-xs"
-                        >
-                          {order.status}
-                        </Chip>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <span className="font-semibold text-sm">{formatCurrency(order.amount)}</span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-xs text-foreground">{formatDate(order.created_at)}</span>
-                          {order.installation_date && (
-                            <span className="text-xs text-foreground-500">
-                              Install: {formatDate(order.installation_date)}
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Tooltip content="Bekijken">
-                            <Button
-                              isIconOnly
-                              size="sm"
-                              variant="light"
-                              onPress={() => handleViewOrder(order.id)}
-                            >
-                              <EyeIcon className="h-4 w-4" />
-                            </Button>
-                          </Tooltip>
-                          <Tooltip content="Bewerken">
-                            <Button
-                              isIconOnly
-                              size="sm"
-                              variant="light"
-                              onPress={() => handleEditOrder(order.id)}
-                            >
-                              <PencilIcon className="h-4 w-4" />
-                            </Button>
-                          </Tooltip>
-                          <Dropdown>
-                            <DropdownTrigger>
+                  {businessEntities.map((entity) => (
+                    <SelectItem key={entity} value={entity}>
+                      {entity}
+                    </SelectItem>
+                  ))}
+                </Select>
+
+                <Select
+                  placeholder="Order Type"
+                  selectedKeys={[selectedOrderType]}
+                  onSelectionChange={(keys) => setSelectedOrderType(Array.from(keys)[0] as string)}
+                  size="sm"
+                >
+                  {orderTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </Select>
+
+                <Select
+                  placeholder="Status"
+                  selectedKeys={[selectedStatus]}
+                  onSelectionChange={(keys) => setSelectedStatus(Array.from(keys)[0] as string)}
+                  size="sm"
+                >
+                  {statuses.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {status}
+                    </SelectItem>
+                  ))}
+                </Select>
+              </div>
+            </CardBody>
+          </Card>
+
+          {/* Orders Table */}
+          <Card>
+            <CardBody className="p-0">
+              {isLoading ? (
+                <div className="flex justify-center items-center p-8">
+                  <Spinner size="lg" />
+                </div>
+              ) : (
+                <Table 
+                  aria-label="Orders table"
+                  classNames={{
+                    wrapper: "shadow-none rounded-none",
+                    th: "bg-content2/50 text-xs font-semibold",
+                    td: "text-xs"
+                  }}
+                >
+                  <TableHeader>
+                    <TableColumn>ORDER</TableColumn>
+                    <TableColumn>KLANT</TableColumn>
+                    <TableColumn>BUSINESS ENTITY</TableColumn>
+                    <TableColumn>TYPE</TableColumn>
+                    <TableColumn>STATUS</TableColumn>
+                    <TableColumn>PRIORITEIT</TableColumn>
+                    <TableColumn>BEDRAG</TableColumn>
+                    <TableColumn>DATUM</TableColumn>
+                    <TableColumn>ACTIES</TableColumn>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium text-xs">{order.order_number}</p>
+                            {order.installation_date && (
+                              <p className="text-xs text-foreground-500">
+                                Installatie: {formatDate(order.installation_date)}
+                              </p>
+                            )}
+                          </div>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Avatar name={order.customer_name} size="sm" className="w-6 h-6 text-xs" />
+                            <span className="font-medium text-xs">{order.customer_name}</span>
+                          </div>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <Chip 
+                            size="sm" 
+                            variant="flat" 
+                            color="primary"
+                            className="text-xs h-5"
+                          >
+                            {order.business_entity}
+                          </Chip>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <span className="text-xs">{order.order_type}</span>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <Chip 
+                            size="sm" 
+                            color={statusColorMap[order.status]} 
+                            variant="flat"
+                            className="text-xs h-5"
+                          >
+                            {order.status}
+                          </Chip>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <Chip 
+                            size="sm" 
+                            color={priorityColorMap[order.priority]} 
+                            variant="dot"
+                            className="text-xs h-5"
+                          >
+                            {order.priority === 'high' ? 'Hoog' : order.priority === 'medium' ? 'Normaal' : 'Laag'}
+                          </Chip>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <span className="font-medium text-xs">{formatCurrency(order.amount)}</span>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <span className="text-xs">{formatDate(order.created_at)}</span>
+                        </TableCell>
+                        
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Tooltip content="Bekijken">
                               <Button
                                 isIconOnly
                                 size="sm"
                                 variant="light"
+                                onPress={() => handleViewOrder(order.id)}
+                                className="h-6 w-6 min-w-6"
                               >
-                                <EllipsisVerticalIcon className="h-4 w-4" />
+                                <EyeIcon className="h-3 w-3" />
                               </Button>
-                            </DropdownTrigger>
-                            <DropdownMenu aria-label="Order acties">
-                              <DropdownItem
-                                key="duplicate"
-                                startContent={<DocumentDuplicateIcon className="h-4 w-4" />}
+                            </Tooltip>
+                            
+                            <Tooltip content="Bewerken">
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                variant="light"
+                                onPress={() => handleEditOrder(order.id)}
+                                className="h-6 w-6 min-w-6"
                               >
-                                Dupliceren
-                              </DropdownItem>
-                              <DropdownItem
-                                key="invoice"
-                                startContent={<DocumentTextIcon className="h-4 w-4" />}
-                              >
-                                Factuur
-                              </DropdownItem>
-                              <DropdownItem
-                                key="delete"
-                                className="text-danger"
-                                color="danger"
-                                startContent={<TrashIcon className="h-4 w-4" />}
-                              >
-                                Verwijderen
-                              </DropdownItem>
-                            </DropdownMenu>
-                          </Dropdown>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-
-              {/* Results summary */}
-              <div className="flex justify-between items-center mt-4 text-sm text-foreground-600">
-                <span>
-                  {filteredOrders.length} van {mockOrders.length} orders
-                </span>
-                <span>
-                  Pagina {page} van {totalPages}
-                </span>
-              </div>
+                                <PencilIcon className="h-3 w-3" />
+                              </Button>
+                            </Tooltip>
+                            
+                            <Dropdown>
+                              <DropdownTrigger>
+                                <Button
+                                  isIconOnly
+                                  size="sm"
+                                  variant="light"
+                                  className="h-6 w-6 min-w-6"
+                                >
+                                  <EllipsisVerticalIcon className="h-3 w-3" />
+                                </Button>
+                              </DropdownTrigger>
+                              <DropdownMenu>
+                                <DropdownItem
+                                  key="duplicate"
+                                  onPress={() => handleDuplicateOrder(order.id)}
+                                  startContent={<DocumentDuplicateIcon className="h-3 w-3" />}
+                                  className="text-xs"
+                                >
+                                  Dupliceren
+                                </DropdownItem>
+                                <DropdownItem
+                                  key="delete"
+                                  color="danger"
+                                  onPress={() => handleDeleteOrder(order.id)}
+                                  startContent={<TrashIcon className="h-3 w-3" />}
+                                  className="text-xs"
+                                >
+                                  Verwijderen
+                                </DropdownItem>
+                              </DropdownMenu>
+                            </Dropdown>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardBody>
           </Card>
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center">
+            <p className="text-xs text-foreground-500">
+              {filteredOrders.length} resultaten gevonden
+            </p>
+            <Pagination
+              total={totalPages}
+              page={page}
+              onChange={setPage}
+              size="sm"
+              showControls
+              className="gap-2"
+            />
+          </div>
         </div>
       </AppLayout>
     </>

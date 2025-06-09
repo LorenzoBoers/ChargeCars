@@ -366,31 +366,32 @@ const OrderDetailPage: React.FC = () => {
       </Head>
 
       <AppLayout>
-        <div className="p-6 space-y-6">
+        <div className="p-4 space-y-4">
           {/* Header with Actions */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Button
                 isIconOnly
                 variant="light"
+                size="sm"
                 onPress={() => router.back()}
               >
-                <ArrowLeftIcon className="h-5 w-5" />
+                <ArrowLeftIcon className="h-4 w-4" />
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Order {order.orderNumber}</h1>
-                <p className="text-foreground-600">{order.customerName} • {order.partnerName}</p>
+                <h1 className="text-xl font-bold text-foreground">Order {order.orderNumber}</h1>
+                <p className="text-sm text-foreground-600">{order.customerName} • {order.partnerName}</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-3">
-              <Button color="primary" startContent={<PencilIcon className="h-4 w-4" />}>
+            <div className="flex items-center gap-2">
+              <Button color="primary" size="sm" startContent={<PencilIcon className="h-4 w-4" />}>
                 Bewerken
               </Button>
-              <Button variant="bordered" startContent={<PrinterIcon className="h-4 w-4" />}>
-                Printen
+              <Button variant="bordered" size="sm" startContent={<PrinterIcon className="h-4 w-4" />}>
+                Print
               </Button>
-              <Button variant="bordered" startContent={<ShareIcon className="h-4 w-4" />}>
+              <Button variant="bordered" size="sm" startContent={<ShareIcon className="h-4 w-4" />}>
                 Delen
               </Button>
               <Dropdown>
@@ -412,51 +413,51 @@ const OrderDetailPage: React.FC = () => {
 
           {/* Status Timeline */}
           <Card>
-            <CardHeader className="pb-3">
-              <h2 className="text-lg font-semibold">Order Status</h2>
+            <CardHeader className="pb-2">
+              <h2 className="text-base font-semibold">Order Status</h2>
             </CardHeader>
             <CardBody className="pt-0">
-              <div className="flex items-center justify-between w-full overflow-x-auto pb-4">
+              <div className="flex items-center justify-between w-full overflow-x-auto pb-2">
                 {order.statuses.map((status, index) => (
                   <React.Fragment key={status.id}>
-                    <div className="flex flex-col items-center min-w-[120px]">
+                    <div className="flex flex-col items-center min-w-[100px]">
                       <div className={`
-                        w-12 h-12 rounded-full flex items-center justify-center border-3 mb-3 transition-all duration-200
+                        w-8 h-8 rounded-full flex items-center justify-center border-2 mb-2 transition-all duration-200
                         ${status.completed 
-                          ? 'bg-success border-success text-white shadow-lg' 
+                          ? 'bg-success border-success text-white shadow-md' 
                           : status.current 
-                            ? 'border-primary bg-primary/10 text-primary ring-4 ring-primary/20 shadow-md' 
+                            ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary/20' 
                             : 'border-default-300 bg-default-100 text-default-400'
                         }
                       `}>
                         {status.completed ? (
-                          <CheckCircleIcon className="h-6 w-6" />
+                          <CheckCircleIcon className="h-4 w-4" />
                         ) : status.current ? (
-                          <div className="w-4 h-4 rounded-full bg-primary" />
+                          <div className="w-2 h-2 rounded-full bg-primary" />
                         ) : (
-                          <div className="w-4 h-4 rounded-full bg-current opacity-50" />
+                          <div className="w-2 h-2 rounded-full bg-current opacity-50" />
                         )}
                       </div>
                       <Chip
                         size="sm"
                         color={status.completed ? 'success' : status.current ? 'primary' : 'default'}
                         variant={status.current ? 'solid' : status.completed ? 'flat' : 'light'}
-                        className="mb-2 font-medium"
+                        className="mb-1 text-xs"
                       >
                         {status.name}
                       </Chip>
                       {status.date && (
-                        <span className="text-xs text-foreground-500 font-medium">{status.date}</span>
+                        <span className="text-xs text-foreground-500">{status.date}</span>
                       )}
                     </div>
                     {index < order.statuses.length - 1 && (
-                      <div className="flex items-center justify-center flex-1 mx-2">
+                      <div className="flex items-center justify-center flex-1 mx-1">
                         <div className={`
-                          h-1 flex-1 rounded-full transition-colors duration-300
+                          h-0.5 flex-1 rounded-full transition-colors duration-300
                           ${status.completed ? 'bg-success' : 'bg-default-200'}
                         `} />
                         <ChevronRightIcon className={`
-                          h-5 w-5 mx-1 transition-colors duration-300
+                          h-4 w-4 mx-1 transition-colors duration-300
                           ${status.completed ? 'text-success' : 'text-default-300'}
                         `} />
                       </div>

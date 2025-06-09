@@ -171,8 +171,8 @@ const SignupPage: React.FC = () => {
             </div>
 
             <div className="text-center">
-              <h2 className="text-xl font-semibold text-white">Create Account</h2>
-              <p className="text-gray-400 text-sm mt-1">Join ChargeCars platform to get started</p>
+              <h2 className="text-base font-semibold text-white">Create Account</h2>
+              <p className="text-gray-400 text-xs mt-1">Join ChargeCars platform to get started</p>
             </div>
           </CardHeader>
 

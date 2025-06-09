@@ -396,16 +396,16 @@ const ContactDetailPage: React.FC = () => {
 
   const getPropertyTypeIcon = (propertyType: string) => {
     switch (propertyType) {
-      case 'home': return <HomeIcon className="h-5 w-5 text-success" />;
-      default: return <BuildingOfficeIcon className="h-5 w-5 text-primary" />;
+      case 'home': return <HomeIcon className="h-4 w-4 text-success" />;
+      default: return <BuildingOfficeIcon className="h-4 w-4 text-primary" />;
     }
   };
 
   const getVehicleTypeIcon = (vehicleType: string) => {
     switch (vehicleType) {
-      case 'bev': return <BoltIcon className="h-5 w-5 text-success" />;
-      case 'phev': return <BoltIcon className="h-5 w-5 text-warning" />;
-      default: return <TruckIcon className="h-5 w-5 text-primary" />;
+      case 'bev': return <BoltIcon className="h-4 w-4 text-success" />;
+      case 'phev': return <BoltIcon className="h-4 w-4 text-warning" />;
+      default: return <TruckIcon className="h-4 w-4 text-primary" />;
     }
   };
 
@@ -421,21 +421,22 @@ const ContactDetailPage: React.FC = () => {
       </Head>
 
       <AppLayout>
-        <div className="p-6 space-y-6">
+        <div className="p-4 space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Button
                 isIconOnly
                 variant="light"
+                size="sm"
                 onPress={() => router.back()}
               >
-                <ArrowLeftIcon className="h-5 w-5" />
+                <ArrowLeftIcon className="h-4 w-4" />
               </Button>
-              <div className="flex items-center gap-4">
-                <Avatar name={contact.name} size="lg" />
+              <div className="flex items-center gap-3">
+                <Avatar name={contact.name} size="md" className="w-8 h-8" />
                 <div>
-                  <h1 className="text-2xl font-bold text-foreground">{contact.name}</h1>
+                  <h1 className="text-xl font-bold text-foreground">{contact.name}</h1>
                   <div className="flex items-center gap-2">
                     <p className="text-foreground-600">{contact.role}</p>
                     {contact.company && (

@@ -31,10 +31,10 @@ const Dashboard: React.FC = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mx-auto mb-4">
-            <BoltIcon className="h-7 w-7 text-white animate-pulse" />
+          <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mx-auto mb-4">
+            <BoltIcon className="h-4 w-4 text-white animate-pulse" />
           </div>
-          <p className="text-foreground-500">Loading...</p>
+          <p className="text-foreground-500 text-sm">Loading...</p>
         </div>
       </div>
     );
@@ -50,85 +50,85 @@ const Dashboard: React.FC = () => {
       </Head>
 
       <AppLayout>
-        <div className="p-6 space-y-6">
+        <div className="p-4 space-y-4">
           {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Welkom terug, {userName}! 👋
+          <div className="mb-6">
+            <h1 className="text-xl font-bold text-foreground mb-2">
+              Welkom terug, {userName}!
             </h1>
-            <p className="text-foreground-600 text-lg">
+            <p className="text-foreground-600 text-sm">
               Hier is een overzicht van je ChargeCars portal
             </p>
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card className="border border-divider">
-              <CardBody className="p-6">
+              <CardBody className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-foreground-600 font-medium">Orders Vandaag</p>
-                    <p className="text-3xl font-bold text-foreground mt-1">12</p>
-                    <div className="flex items-center mt-2">
-                      <ArrowTrendingUpIcon className="h-4 w-4 text-success mr-1" />
-                      <span className="text-success text-sm font-medium">+8%</span>
+                    <p className="text-xs text-foreground-600 font-medium">Orders Vandaag</p>
+                    <p className="text-lg font-bold text-foreground mt-1">12</p>
+                    <div className="flex items-center mt-1">
+                      <ArrowTrendingUpIcon className="h-3 w-3 text-success mr-1" />
+                      <span className="text-success text-xs font-medium">+8%</span>
                     </div>
                   </div>
-                  <div className="p-3 bg-primary/10 rounded-xl">
-                    <CalendarIcon className="h-8 w-8 text-primary" />
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <CalendarIcon className="h-4 w-4 text-primary" />
                   </div>
                 </div>
               </CardBody>
             </Card>
 
             <Card className="border border-divider">
-              <CardBody className="p-6">
+              <CardBody className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-foreground-600 font-medium">Actieve Orders</p>
-                    <p className="text-3xl font-bold text-foreground mt-1">24</p>
-                    <div className="flex items-center mt-2">
-                      <span className="text-foreground-500 text-sm">In behandeling</span>
+                    <p className="text-xs text-foreground-600 font-medium">Actieve Orders</p>
+                    <p className="text-lg font-bold text-foreground mt-1">24</p>
+                    <div className="flex items-center mt-1">
+                      <span className="text-foreground-500 text-xs">In behandeling</span>
                     </div>
                   </div>
-                  <div className="p-3 bg-warning/10 rounded-xl">
-                    <ClipboardDocumentListIcon className="h-8 w-8 text-warning" />
+                  <div className="p-2 bg-warning/10 rounded-lg">
+                    <ClipboardDocumentListIcon className="h-4 w-4 text-warning" />
                   </div>
                 </div>
               </CardBody>
             </Card>
 
             <Card className="border border-divider">
-              <CardBody className="p-6">
+              <CardBody className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-foreground-600 font-medium">Omzet Deze Maand</p>
-                    <p className="text-3xl font-bold text-foreground mt-1">€45.2K</p>
-                    <div className="flex items-center mt-2">
-                      <ArrowTrendingUpIcon className="h-4 w-4 text-success mr-1" />
-                      <span className="text-success text-sm font-medium">+12%</span>
+                    <p className="text-xs text-foreground-600 font-medium">Omzet Deze Maand</p>
+                    <p className="text-lg font-bold text-foreground mt-1">€45.2K</p>
+                    <div className="flex items-center mt-1">
+                      <ArrowTrendingUpIcon className="h-3 w-3 text-success mr-1" />
+                      <span className="text-success text-xs font-medium">+12%</span>
                     </div>
                   </div>
-                  <div className="p-3 bg-success/10 rounded-xl">
-                    <CurrencyEuroIcon className="h-8 w-8 text-success" />
+                  <div className="p-2 bg-success/10 rounded-lg">
+                    <CurrencyEuroIcon className="h-4 w-4 text-success" />
                   </div>
                 </div>
               </CardBody>
             </Card>
 
             <Card className="border border-divider">
-              <CardBody className="p-6">
+              <CardBody className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-foreground-600 font-medium">Voltooide Orders</p>
-                    <p className="text-3xl font-bold text-foreground mt-1">156</p>
-                    <div className="flex items-center mt-2">
-                      <CheckCircleIcon className="h-4 w-4 text-success mr-1" />
-                      <span className="text-foreground-500 text-sm">Deze maand</span>
+                    <p className="text-xs text-foreground-600 font-medium">Voltooide Orders</p>
+                    <p className="text-lg font-bold text-foreground mt-1">156</p>
+                    <div className="flex items-center mt-1">
+                      <CheckCircleIcon className="h-3 w-3 text-success mr-1" />
+                      <span className="text-foreground-500 text-xs">Deze maand</span>
                     </div>
                   </div>
-                  <div className="p-3 bg-secondary/10 rounded-xl">
-                    <ChartBarIcon className="h-8 w-8 text-secondary" />
+                  <div className="p-2 bg-secondary/10 rounded-lg">
+                    <ChartBarIcon className="h-4 w-4 text-secondary" />
                   </div>
                 </div>
               </CardBody>
@@ -136,40 +136,40 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card className="border border-divider">
-              <CardHeader className="pb-3">
-                <h3 className="text-xl font-semibold text-foreground">Quick Actions</h3>
+              <CardHeader className="pb-2">
+                <h3 className="text-base font-semibold text-foreground">Quick Actions</h3>
               </CardHeader>
-              <CardBody className="space-y-3">
+              <CardBody className="space-y-2 pt-0">
                 <Button 
-                  className="w-full justify-start h-12" 
+                  className="w-full justify-start h-10 text-sm" 
                   color="primary" 
                   variant="flat"
-                  startContent={<ClipboardDocumentListIcon className="h-5 w-5" />}
+                  startContent={<ClipboardDocumentListIcon className="h-4 w-4" />}
                 >
                   Nieuwe Order Aanmaken
                 </Button>
                 <Button 
-                  className="w-full justify-start h-12" 
+                  className="w-full justify-start h-10 text-sm" 
                   color="secondary" 
                   variant="flat"
-                  startContent={<UserIcon className="h-5 w-5" />}
+                  startContent={<UserIcon className="h-4 w-4" />}
                 >
                   Klant Toevoegen
                 </Button>
                 <Button 
-                  className="w-full justify-start h-12" 
+                  className="w-full justify-start h-10 text-sm" 
                   color="success" 
                   variant="flat"
-                  startContent={<CalendarIcon className="h-5 w-5" />}
+                  startContent={<CalendarIcon className="h-4 w-4" />}
                 >
                   Installatie Plannen
                 </Button>
                 <Button 
-                  className="w-full justify-start h-12" 
+                  className="w-full justify-start h-10 text-sm" 
                   variant="bordered"
-                  startContent={<ChartBarIcon className="h-5 w-5" />}
+                  startContent={<ChartBarIcon className="h-4 w-4" />}
                 >
                   Rapportages Bekijken
                 </Button>
@@ -177,83 +177,71 @@ const Dashboard: React.FC = () => {
             </Card>
 
             <Card className="border border-divider">
-              <CardHeader className="pb-3">
-                <h3 className="text-xl font-semibold text-foreground">Systeem Status</h3>
+              <CardHeader className="pb-2">
+                <h3 className="text-base font-semibold text-foreground">Systeem Status</h3>
               </CardHeader>
-              <CardBody className="space-y-4">
+              <CardBody className="space-y-3 pt-0">
                 <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-foreground">API Beschikbaarheid</span>
-                    <Chip size="sm" color="success" variant="flat">99.8%</Chip>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs font-medium text-foreground">API Beschikbaarheid</span>
+                    <Chip size="sm" color="success" variant="flat" className="text-xs h-4">99.8%</Chip>
                   </div>
-                  <Progress value={99.8} color="success" className="h-2" />
+                  <Progress value={99.8} color="success" className="h-1" />
                 </div>
                 
                 <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-foreground">Database Performance</span>
-                    <Chip size="sm" color="primary" variant="flat">95.2%</Chip>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs font-medium text-foreground">Database Performance</span>
+                    <Chip size="sm" color="primary" variant="flat" className="text-xs h-4">95.2%</Chip>
                   </div>
-                  <Progress value={95.2} color="primary" className="h-2" />
+                  <Progress value={95.2} color="primary" className="h-1" />
                 </div>
                 
                 <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-foreground">Sync Status</span>
-                    <Chip size="sm" color="warning" variant="flat">89.1%</Chip>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs font-medium text-foreground">Systeem Gezondheid</span>
+                    <Chip size="sm" color="success" variant="flat" className="text-xs h-4">Excellent</Chip>
                   </div>
-                  <Progress value={89.1} color="warning" className="h-2" />
-                </div>
-
-                <div className="pt-2 border-t border-divider">
-                  <p className="text-xs text-foreground-500">
-                    Laatste update: {new Date().toLocaleTimeString('nl-NL')}
-                  </p>
+                  <Progress value={98} color="success" className="h-1" />
                 </div>
               </CardBody>
             </Card>
           </div>
 
-          {/* Account Info */}
+          {/* Recent Activity */}
           <Card className="border border-divider">
-            <CardHeader className="pb-3">
-              <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                <UserIcon className="h-6 w-6" />
-                Account Informatie
-              </h3>
+            <CardHeader className="pb-2">
+              <h3 className="text-base font-semibold text-foreground">Recente Activiteit</h3>
             </CardHeader>
-            <CardBody>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-foreground-500 font-medium">Naam</p>
-                    <p className="text-foreground">{userName}</p>
+            <CardBody className="pt-0">
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-2 rounded-lg bg-content2/30">
+                  <div className="p-1.5 bg-success/10 rounded-lg">
+                    <CheckCircleIcon className="h-3 w-3 text-success" />
                   </div>
-                  <div>
-                    <p className="text-sm text-foreground-500 font-medium">Email</p>
-                    <p className="text-foreground">{user?.email || 'Niet beschikbaar'}</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-foreground-500 font-medium">Organisatie</p>
-                    <p className="text-foreground">{user?.organization?.name || 'Niet beschikbaar'}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-foreground-500 font-medium">Account Status</p>
-                    <Chip color="success" variant="flat" size="sm">Actief</Chip>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium">Order CHC-2024-001 voltooid</p>
+                    <p className="text-xs text-foreground-500">5 minuten geleden</p>
                   </div>
                 </div>
                 
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-sm text-foreground-500 font-medium">Laatste Login</p>
-                    <p className="text-foreground">Vandaag, {new Date().toLocaleTimeString('nl-NL')}</p>
+                <div className="flex items-center gap-3 p-2 rounded-lg bg-content2/30">
+                  <div className="p-1.5 bg-primary/10 rounded-lg">
+                    <ClipboardDocumentListIcon className="h-3 w-3 text-primary" />
                   </div>
-                  <div>
-                    <p className="text-sm text-foreground-500 font-medium">Sessie</p>
-                    <Chip color="primary" variant="flat" size="sm">Actief</Chip>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium">Nieuwe order CHC-2024-024 ontvangen</p>
+                    <p className="text-xs text-foreground-500">12 minuten geleden</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-3 p-2 rounded-lg bg-content2/30">
+                  <div className="p-1.5 bg-warning/10 rounded-lg">
+                    <UserIcon className="h-3 w-3 text-warning" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-medium">Klant feedback ontvangen</p>
+                    <p className="text-xs text-foreground-500">1 uur geleden</p>
                   </div>
                 </div>
               </div>
