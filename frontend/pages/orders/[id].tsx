@@ -632,27 +632,74 @@ const OrderDetailPage: React.FC = () => {
                           <Chip size="sm" color="primary" variant="flat">{items.length}</Chip>
                         </h4>
                         <div className="space-y-2">
-                          {items.map((item) => (
-                            <div key={item.id} className="flex items-center justify-between p-3 bg-content2 rounded-lg hover:bg-content3 transition-colors cursor-pointer">
-                              <div className="flex items-center gap-3">
-                                <div className="p-2 bg-primary/10 rounded-lg">
-                                  {getRelatedItemIcon(item.type)}
+                          {type === 'quote' && (
+                            <div className="space-y-2">
+                              {items.map((item) => (
+                                <div key={item.id} className="flex items-center justify-between p-3 bg-content2 rounded-lg hover:bg-content3 transition-colors cursor-pointer">
+                                  <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-primary/10 rounded-lg">
+                                      {getRelatedItemIcon(item.type)}
+                                    </div>
+                                    <div>
+                                      <p className="font-medium">{item.title}</p>
+                                      <p className="text-sm text-foreground-600">{item.date}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    {item.amount && (
+                                      <span className="font-semibold">€{item.amount.toLocaleString('nl-NL')}</span>
+                                    )}
+                                    <Chip size="sm" color={getRelatedItemColor(item.status)} variant="flat">
+                                      {item.status}
+                                    </Chip>
+                                    <div className="flex gap-1">
+                                      <Button 
+                                        size="sm" 
+                                        variant="light"
+                                        onPress={() => router.push(`/quotes/${item.id}`)}
+                                      >
+                                        Bekijken
+                                      </Button>
+                                      <Button 
+                                        size="sm" 
+                                        color="primary" 
+                                        variant="flat"
+                                        onPress={() => router.push(`/quotes/${item.id}/build`)}
+                                      >
+                                        Bewerken
+                                      </Button>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div>
-                                  <p className="font-medium">{item.title}</p>
-                                  <p className="text-sm text-foreground-600">{item.date}</p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                {item.amount && (
-                                  <span className="font-semibold">€{item.amount.toLocaleString('nl-NL')}</span>
-                                )}
-                                <Chip size="sm" color={getRelatedItemColor(item.status)} variant="flat">
-                                  {item.status}
-                                </Chip>
-                              </div>
+                              ))}
                             </div>
-                          ))}
+                          )}
+
+                          {type !== 'quote' && (
+                            <div className="space-y-2">
+                              {items.map((item) => (
+                                <div key={item.id} className="flex items-center justify-between p-3 bg-content2 rounded-lg hover:bg-content3 transition-colors cursor-pointer">
+                                  <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-primary/10 rounded-lg">
+                                      {getRelatedItemIcon(item.type)}
+                                    </div>
+                                    <div>
+                                      <p className="font-medium">{item.title}</p>
+                                      <p className="text-sm text-foreground-600">{item.date}</p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    {item.amount && (
+                                      <span className="font-semibold">€{item.amount.toLocaleString('nl-NL')}</span>
+                                    )}
+                                    <Chip size="sm" color={getRelatedItemColor(item.status)} variant="flat">
+                                      {item.status}
+                                    </Chip>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
