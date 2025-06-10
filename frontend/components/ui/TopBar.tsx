@@ -252,8 +252,11 @@ export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
             size="sm"
             variant="light"
             onPress={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            isDisabled={!mounted}
           >
-            {theme === 'dark' ? (
+            {!mounted ? (
+              <div className="w-4 h-4 bg-foreground/20 rounded animate-pulse" />
+            ) : theme === 'dark' ? (
               <SunIcon className="h-4 w-4 text-foreground-600" />
             ) : (
               <MoonIcon className="h-4 w-4 text-foreground-600" />

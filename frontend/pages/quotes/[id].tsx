@@ -12,7 +12,15 @@ import {
   DropdownItem,
   Input,
   Avatar,
-  Badge
+  Badge,
+  Tooltip,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Select,
+  SelectItem
 } from "@nextui-org/react";
 import {
   ArrowLeftIcon,
@@ -37,7 +45,8 @@ import {
   EnvelopeIcon,
   PhoneIcon,
   PaperAirplaneIcon,
-  EyeIcon
+  EyeIcon,
+  UserPlusIcon
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../../components/layouts/AppLayout';
 
@@ -246,9 +255,9 @@ const QuoteDetailPage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingItem, setEditingItem] = useState<string | null>(null);
-  const [newItemVisitId, setNewItemVisitId] = useState<string | null>(null);
-  const [newItemContactId, setNewItemContactId] = useState<string | null>(null);
   const [isAddingItem, setIsAddingItem] = useState(false);
+  const [newItemVisitId, setNewItemVisitId] = useState<string>('');
+  const [newItemContactId, setNewItemContactId] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
@@ -258,8 +267,15 @@ const QuoteDetailPage: React.FC = () => {
     unit_price: 0,
     total_price: 0
   });
-
   const inputRef = useRef<HTMLInputElement>(null);
+  const [lineItems, setLineItems] = useState<QuoteLineItem[]>(quote.line_items);
+
+  // New states for adding visit and new contact
+  const [isAddingVisit, setIsAddingVisit] = useState(false);
+  const [isAddingContact, setIsAddingContact] = useState(false);
+  const [newVisitName, setNewVisitName] = useState('');
+  const [newContactName, setNewContactName] = useState('');
+  const [newContactRole, setNewContactRole] = useState<'account' | 'end_customer'>('end_customer');
 
   // Group items by visit and contact
   const groupedItems = React.useMemo(() => {
@@ -398,8 +414,8 @@ const QuoteDetailPage: React.FC = () => {
 
     // Reset form
     setIsAddingItem(false);
-    setNewItemVisitId(null);
-    setNewItemContactId(null);
+    setNewItemVisitId('');
+    setNewItemContactId('');
     setNewItem({});
     setSearchQuery('');
     setSelectedArticle(null);
@@ -408,11 +424,51 @@ const QuoteDetailPage: React.FC = () => {
   // Cancel new line item
   const cancelNewLineItem = () => {
     setIsAddingItem(false);
-    setNewItemVisitId(null);
-    setNewItemContactId(null);
+    setNewItemVisitId('');
+    setNewItemContactId('');
     setNewItem({});
     setSearchQuery('');
-    setSelectedArticle(null);
+    setFilteredArticles([]);
+  };
+
+  // Add visit function
+  const addNewVisit = () => {
+    if (!newVisitName.trim()) return;
+    
+    // Create new visit with empty contacts
+    const newVisit = {
+      id: `visit-${Date.now()}`,
+      name: newVisitName,
+      contacts: {}
+    };
+    
+    // Add to grouped items (this would normally sync with backend)
+    // setHasChanges(true); // This would be handled by proper state management
+    setIsAddingVisit(false);
+    setNewVisitName('');
+  };
+
+  // Add contact function
+  const addNewContact = () => {
+    if (!newContactName.trim()) return;
+    
+    const newContact = {
+      id: `contact-${Date.now()}`,
+      name: newContactName,
+      email: `${newContactName.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+      phone: '+31 6 12345678',
+      role: newContactRole
+    };
+    
+    // Add to quote contacts (this would normally sync with backend)
+    // setHasChanges(true); // This would be handled by proper state management
+    setIsAddingContact(false);
+    setNewContactName('');
+  };
+
+  // Add line item for new contact (shows contact selection)
+  const addLineItemForNewContact = () => {
+    setIsAddingContact(true);
   };
 
   // Remove line item
@@ -760,11 +816,34 @@ const QuoteDetailPage: React.FC = () => {
             <Card className="p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-base font-semibold">Regelitems</h3>
-                {hasChanges && !isEditing && (
-                  <Chip size="sm" color="warning" variant="flat">
-                    Niet opgeslagen wijzigingen
-                  </Chip>
-                )}
+                <div className="flex items-center gap-2">
+                  {hasChanges && !isEditing && (
+                    <Chip size="sm" color="warning" variant="flat">
+                      Niet opgeslagen wijzigingen
+                    </Chip>
+                  )}
+                  {isEditing && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        startContent={<PlusIcon className="h-4 w-4" />}
+                        onPress={() => setIsAddingVisit(true)}
+                      >
+                        Bezoek toevoegen
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        color="secondary"
+                        startContent={<UserPlusIcon className="h-4 w-4" />}
+                        onPress={addLineItemForNewContact}
+                      >
+                        Nieuw contact
+                      </Button>
+                    </>
+                  )}
+                </div>
               </div>
               
               <div className="overflow-x-auto">
@@ -803,7 +882,7 @@ const QuoteDetailPage: React.FC = () => {
                                 </div>
                               </td>
                             )}
-                            <td colSpan={isEditing ? 5 : 4} className="py-2 px-2">
+                            <td colSpan={isEditing ? 5 : 5} className="py-2 px-2">
                               <div className="flex items-center gap-2">
                                 <Chip size="sm" color={getContactColor(contact.contact_role)} variant="flat">
                                   {getContactLabel(contact.contact_role)}
@@ -1166,6 +1245,70 @@ const QuoteDetailPage: React.FC = () => {
           </Card>
         )}
       </div>
+
+      {/* Add Visit Modal */}
+      <Modal isOpen={isAddingVisit} onClose={() => setIsAddingVisit(false)} size="sm">
+        <ModalContent>
+          <ModalHeader>
+            <h3 className="text-lg font-semibold">Nieuw bezoek toevoegen</h3>
+          </ModalHeader>
+          <ModalBody>
+            <Input
+              label="Bezoek naam"
+              placeholder="Bijv. Bezoek 3"
+              value={newVisitName}
+              onChange={(e) => setNewVisitName(e.target.value)}
+              autoFocus
+            />
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="flat" onPress={() => setIsAddingVisit(false)}>
+              Annuleren
+            </Button>
+            <Button color="primary" onPress={addNewVisit}>
+              Toevoegen
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Add Contact Modal */}
+      <Modal isOpen={isAddingContact} onClose={() => setIsAddingContact(false)} size="sm">
+        <ModalContent>
+          <ModalHeader>
+            <h3 className="text-lg font-semibold">Nieuw contact toevoegen</h3>
+          </ModalHeader>
+          <ModalBody className="space-y-4">
+            <Input
+              label="Contact naam"
+              placeholder="Bijv. John Doe"
+              value={newContactName}
+              onChange={(e) => setNewContactName(e.target.value)}
+              autoFocus
+            />
+            <Select
+              label="Contact rol"
+              selectedKeys={[newContactRole]}
+              onSelectionChange={(keys) => setNewContactRole(Array.from(keys)[0] as 'account' | 'end_customer')}
+            >
+              <SelectItem key="end_customer" value="end_customer">
+                Eindklant
+              </SelectItem>
+              <SelectItem key="account" value="account">
+                Account
+              </SelectItem>
+            </Select>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="flat" onPress={() => setIsAddingContact(false)}>
+              Annuleren
+            </Button>
+            <Button color="primary" onPress={addNewContact}>
+              Toevoegen
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </AppLayout>
   );
 };

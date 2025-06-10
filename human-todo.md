@@ -12,6 +12,132 @@
 
 ## 🔥 High Priority
 
+### Backend Required: Quote Builder Line Items Management
+
+**Component**: `frontend/pages/quotes/[id].tsx`  
+**Required Endpoints**: 
+- `POST /api/quotes/{id}/line-items` - Add new line item
+- `PUT /api/quotes/{id}/line-items/{item_id}` - Update line item
+- `DELETE /api/quotes/{id}/line-items/{item_id}` - Remove line item
+- `POST /api/quotes/{id}/visits` - Add new visit
+- `POST /api/quotes/{id}/contacts` - Add new contact
+
+**Request Schemas**:
+```typescript
+// Add Line Item
+{
+  visit_id: string;
+  contact_id: string;
+  article_code: string;
+  description: string;
+  quantity: number;
+  unit_price: number;
+  category: string;
+}
+
+// Add Visit
+{
+  name: string;
+  sequence: number;
+}
+
+// Add Contact
+{
+  name: string;
+  email: string;
+  phone: string;
+  role: 'account' | 'end_customer';
+}
+```
+
+**Response Schema**:
+```typescript
+{
+  success: boolean;
+  data: {
+    line_item?: QuoteLineItem;
+    visit?: Visit;
+    contact?: Contact;
+    updated_totals?: {
+      customer_amount: number;
+      partner_amount: number;
+    };
+  };
+  error?: string;
+}
+```
+
+**Business Logic**: 
+- Line items grouped by visit and contact
+- Automatic calculation of totals per contact and overall
+- Visit sequence management for ordering
+- Contact role-based pricing calculations
+- Article lookup from product catalog
+- Inline editing with real-time updates
+
+**UI Context**:
+- Drag & drop line item management
+- Inline editing of quantities and prices
+- Visit-based organization structure
+- Contact grouping with role-based totals
+- Modal dialogs for adding visits/contacts
+
+**Priority**: HIGH  
+**Added**: 2025-01-09  
+**Estimated Effort**: Large
+
+### Backend Required: Quote Article Search & Catalog
+
+**Component**: `frontend/pages/quotes/[id].tsx`  
+**Required Endpoint**: `GET /api/articles/search`  
+
+**Request Schema**:
+```typescript
+{
+  query: string;
+  category?: string;
+  limit?: number;
+}
+```
+
+**Response Schema**:
+```typescript
+{
+  success: boolean;
+  data: {
+    articles: Article[];
+  };
+  error?: string;
+}
+
+interface Article {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  unit_price: number;
+  category: string;
+  unit: string;
+}
+```
+
+**Business Logic**: 
+- Fuzzy search across article names and codes
+- Category-based filtering
+- Price lookup from current catalog
+- Fast autocomplete response times
+- Support for custom articles/descriptions
+
+**UI Context**:
+- Real-time search autocomplete
+- Article selection dropdown
+- Price auto-population
+- Category icon display
+
+**Priority**: HIGH  
+**Added**: 2025-01-09  
+**Estimated Effort**: Medium
+
 ### Backend Required: Order Management API
 
 **Component**: `frontend/pages/orders.tsx`  
@@ -168,12 +294,12 @@ interface Order {
 
 | Priority | Items | Status |
 |----------|--------|---------|
-| 🔥 High | 0 | Clean |
+| 🔥 High | 3 | Quote Builder & Order Management |
 | 🟡 Medium | 0 | Clean |
 | 🟢 Low | 0 | Clean |
 | ✅ Completed | 1 | Setup done |
 
-**Next Actions**: Klaar voor frontend feature development! 🚀
+**Next Actions**: Implement quote builder backend API endpoints en order management! 🚀
 
 ---
 
