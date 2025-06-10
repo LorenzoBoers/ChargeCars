@@ -1,14 +1,43 @@
+/**
+ * @fileoverview ChargeCars Authentication Context
+ * 
+ * Provides global authentication state management for the ChargeCars application.
+ * Handles login, logout, token storage, and automatic API client synchronization.
+ * 
+ * Features:
+ * - Persistent authentication state via localStorage and cookies
+ * - Automatic token validation and cleanup
+ * - Seamless API client integration
+ * - Login flow with multiple redirect strategies
+ * - Comprehensive error handling and logging
+ * 
+ * @author ChargeCars Development Team
+ * @version 2.0.0
+ */
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/router';
 import { User, authAPI, tokenManager } from '../lib/auth';
 import { apiClient } from '../lib/api';
 
+/**
+ * Authentication context interface
+ * 
+ * Defines the shape of authentication state and methods available
+ * throughout the application via the useAuth hook
+ */
 interface AuthContextType {
+  /** Current authenticated user object, null if not logged in */
   user: User | null;
+  /** Loading state for auth operations */
   isLoading: boolean;
+  /** Computed boolean based on user and token validity */
   isAuthenticated: boolean;
+  /** Login method that returns success/error status */
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  /** Logout method that clears all auth state */
   logout: () => void;
+  /** Check current auth status and restore session if valid */
   checkAuth: () => Promise<void>;
 }
 
@@ -50,6 +79,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   //   }
   // }, [isLoading, isAuthenticated]);
 
+  /**
+   * Check and restore authentication state
+   * 
+   * This method is called on app startup to restore authentication
+   * from stored tokens and user data. It performs token validation
+   * and can optionally fetch fresh user data from the API.
+   * 
+   * Flow:
+   * 1. Check for stored token and validate expiry
+   * 2. If valid, restore cached user data
+   * 3. Sync token with API client
+   * 4. Optionally fetch fresh user data if needed
+   */
   const checkAuth = async (): Promise<void> => {
     setIsLoading(true);
     
@@ -122,6 +164,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  /**
+   * Authenticate user with email and password
+   * 
+   * Handles the complete login flow including token storage,
+   * user data persistence, API client synchronization, and
+   * automatic redirection to the dashboard.
+   * 
+   * @param email - User's email address
+   * @param password - User's password
+   * @returns Promise with success status and optional error message
+   * 
+   * @example
+   * ```typescript
+   * const { login } = useAuth();
+   * const result = await login('user@chargecars.nl', 'password123');
+   * if (result.success) {
+   *   // User is logged in and redirected
+   * } else {
+   *   console.error('Login failed:', result.error);
+   * }
+   * ```
+   */
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     console.log('🔑 AUTH: Login started for:', email);
     setIsLoading(true);

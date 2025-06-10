@@ -1,3 +1,20 @@
+/**
+ * @fileoverview ChargeCars API Client
+ * 
+ * This module provides a comprehensive API client for the ChargeCars application,
+ * handling authentication, token management, and all API communications with the Xano backend.
+ * 
+ * Key Features:
+ * - Automatic token initialization from localStorage/cookies
+ * - Token validation and automatic cleanup
+ * - Comprehensive error handling
+ * - Detailed logging for debugging
+ * - Support for both V2 API and auth endpoints
+ * 
+ * @author ChargeCars Development Team
+ * @version 2.0.0
+ */
+
 // API Configuration and Client
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.chargecars.nl';
 const API_GROUP = process.env.NEXT_PUBLIC_API_GROUP || 'V2';
@@ -11,7 +28,7 @@ export const API_ENDPOINTS = {
   contacts: '/contact',
   quotes: '/quote',
   businessEntities: '/business_entities',
-  dashboardStats: '/order/dashboard',
+
   
   // Auth endpoints (different API group)
   auth: {
@@ -112,12 +129,33 @@ export interface MeResponse {
   // Add other user fields based on actual API response
 }
 
-// API Client class
+/**
+ * ChargeCars API Client
+ * 
+ * Handles all HTTP communication with the Xano backend API.
+ * Automatically manages authentication tokens and provides methods for
+ * orders, authentication, and other business operations.
+ * 
+ * @example
+ * ```typescript
+ * import { apiClient } from './lib/api';
+ * 
+ * // Login
+ * const response = await apiClient.login('user@example.com', 'password');
+ * 
+ * // Fetch orders with filters
+ * const orders = await apiClient.getOrders({ status: 'active' });
+ * ```
+ */
 class ApiClient {
   private baseUrl: string;
   private authBaseUrl: string;
   private token: string | null = null;
 
+  /**
+   * Initialize the API client
+   * Sets up base URLs and automatically loads stored authentication token
+   */
   constructor() {
     this.baseUrl = `${API_BASE_URL}/api:${API_GROUP}`;
     this.authBaseUrl = `${API_BASE_URL}/api:auth`;
@@ -126,6 +164,15 @@ class ApiClient {
     this.initializeToken();
   }
 
+  /**
+   * Initialize authentication token from storage
+   * 
+   * Attempts to load a stored authentication token and validates it.
+   * If the token is expired, it will be automatically cleared.
+   * This ensures the API client is ready for authenticated requests immediately.
+   * 
+   * @private
+   */
   private initializeToken(): void {
     try {
       // Check if we're in browser environment
@@ -145,11 +192,26 @@ class ApiClient {
     }
   }
 
+  /**
+   * Set the authentication token for API requests
+   * 
+   * @param token - The JWT token or null to clear
+   * @example
+   * ```typescript
+   * apiClient.setToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...');
+   * apiClient.setToken(null); // Clear token
+   * ```
+   */
   setToken(token: string | null) {
     this.token = token;
     console.log('🔑 API: Token updated:', !!token);
   }
 
+  /**
+   * Get the current authentication token
+   * 
+   * @returns The current JWT token or null if not authenticated
+   */
   getToken(): string | null {
     return this.token;
   }
@@ -222,7 +284,31 @@ class ApiClient {
     }
   }
 
-  // Order API methods
+  /**
+   * ===== ORDER API METHODS =====
+   * Methods for managing orders, quotes, and related business operations
+   */
+
+  /**
+   * Fetch orders with optional filtering and pagination
+   * 
+   * @param filters - Optional filters for search, status, business entity, etc.
+   * @returns Promise resolving to API response with orders data
+   * 
+   * @example
+   * ```typescript
+   * // Get all orders
+   * const allOrders = await apiClient.getOrders();
+   * 
+   * // Get orders with filters
+   * const filteredOrders = await apiClient.getOrders({
+   *   status: 'active',
+   *   search: 'Tesla',
+   *   page: 1,
+   *   per_page: 20
+   * });
+   * ```
+   */
   async getOrders(filters: OrderFilters = {}): Promise<ApiResponse<OrderResponse[]>> {
     const params = new URLSearchParams();
     
@@ -284,11 +370,74 @@ class ApiClient {
     });
   }
 
+  /**
+   * Calculate dashboard statistics from orders data
+   * Since there's no dedicated dashboard endpoint, we calculate stats from the orders
+   * 
+   * @returns Promise resolving to calculated dashboard statistics
+   */
   async getDashboardStats(): Promise<ApiResponse<DashboardStats>> {
-    return this.request<DashboardStats>(API_ENDPOINTS.dashboardStats);
+    try {
+      // Fetch all orders to calculate stats
+      const response = await this.getOrders({ per_page: 1000 }); // Get more orders for accurate stats
+      
+      if (!response.success) {
+        return {
+          success: false,
+          data: null as any,
+          error: response.error
+        };
+      }
+
+      const orders = response.data;
+      
+      // Calculate stats from orders data
+      const stats: DashboardStats = {
+        total_revenue: orders.reduce((sum, order) => sum + (order.amount || 0), 0),
+        active_orders: orders.filter(order => order.status === 'active' || order.status === 'in_progress').length,
+        completed_orders: orders.filter(order => order.status === 'completed').length,
+        pending_orders: orders.filter(order => order.status === 'pending' || order.status === 'draft').length,
+        revenue_change: 0, // TODO: Calculate based on time period comparison
+        orders_change: 0, // TODO: Calculate based on time period comparison
+      };
+
+      return {
+        success: true,
+        data: stats
+      };
+    } catch (error) {
+      return {
+        success: false,
+        data: null as any,
+        error: {
+          code: 'CALCULATION_ERROR',
+          message: 'Failed to calculate dashboard statistics',
+        }
+      };
+    }
   }
 
-  // Authentication methods
+  /**
+   * ===== AUTHENTICATION METHODS =====
+   * Methods for user authentication and token management
+   */
+
+  /**
+   * Authenticate user with email and password
+   * 
+   * @param email - User's email address
+   * @param password - User's password
+   * @returns Promise resolving to API response with auth tokens and user data
+   * 
+   * @example
+   * ```typescript
+   * const response = await apiClient.login('user@chargecars.nl', 'password123');
+   * if (response.success) {
+   *   console.log('Login successful:', response.data.user);
+   *   // Token is automatically set in the client
+   * }
+   * ```
+   */
   async login(email: string, password: string): Promise<ApiResponse<LoginResponse>> {
     console.log('🚀 API: Login request started for:', email);
     console.log('🚀 API: Using auth endpoint:', `${this.authBaseUrl}${API_ENDPOINTS.auth.login}`);
