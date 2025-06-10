@@ -7,7 +7,6 @@ import {
   Input,
   Avatar,
   Divider,
-  Badge,
   Tabs,
   Tab,
   ScrollShadow
@@ -326,7 +325,9 @@ export default function InboxPage() {
               >
                 <div className="flex-1 flex justify-between items-center">
                   <span>Alle Berichten</span>
-                  <Badge content={conversations.length} color="primary" size="sm" />
+                  <Chip size="sm" color="primary" variant="flat">
+                    {conversations.length}
+                  </Chip>
                 </div>
               </Button>
 
@@ -349,7 +350,9 @@ export default function InboxPage() {
                     >
                       <div className="flex-1 flex justify-between items-center">
                         <span className="font-medium">{entity.shortName}</span>
-                        <Badge content={getTotalCount(entity)} color="primary" size="sm" />
+                        <Chip size="sm" color="primary" variant="flat">
+                          {getTotalCount(entity)}
+                        </Chip>
                       </div>
                     </Button>
                     
@@ -370,7 +373,9 @@ export default function InboxPage() {
                                 {channel.replace('_', ' ')}
                               </span>
                               {count > 0 && (
-                                <Badge content={count} color={getChannelColor(channel)} size="sm" />
+                                <Chip size="sm" color={getChannelColor(channel)} variant="flat">
+                                  {count}
+                                </Chip>
                               )}
                             </div>
                           </Button>
@@ -408,11 +413,13 @@ export default function InboxPage() {
                   >
                     <div className="flex-1 flex justify-between items-center">
                       <span className="text-sm">{channel.label}</span>
-                      <Badge 
-                        content={conversations.filter(c => c.channel === channel.key).length} 
-                        color={getChannelColor(channel.icon)} 
+                      <Chip 
                         size="sm" 
-                      />
+                        color={getChannelColor(channel.icon)} 
+                        variant="flat"
+                      >
+                        {conversations.filter(c => c.channel === channel.key).length}
+                      </Chip>
                     </div>
                   </Button>
                 ))}
@@ -464,7 +471,9 @@ export default function InboxPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       {conversation.unreadCount > 0 && (
-                        <Badge content={conversation.unreadCount} color="danger" size="sm" />
+                        <Chip size="sm" color="danger" variant="flat">
+                          {conversation.unreadCount}
+                        </Chip>
                       )}
                       <span className="text-xs text-foreground-500">{conversation.lastMessageTime}</span>
                     </div>
