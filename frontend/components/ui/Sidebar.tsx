@@ -89,6 +89,12 @@ export function Sidebar({ className = "" }: SidebarProps) {
       isActive: router.pathname === '/reports'
     },
     {
+      label: 'Analytics',
+      href: '/analytics',
+      icon: ChartBarIcon,
+      isActive: router.pathname === '/analytics'
+    },
+    {
       label: 'Instellingen',
       href: '/settings',
       icon: CogIcon,
@@ -110,7 +116,7 @@ export function Sidebar({ className = "" }: SidebarProps) {
       <CardBody className="p-0 flex flex-col h-full">
         {/* Logo Header */}
         <div className="p-4 border-b border-divider flex justify-center">
-          <Logo size="sm" />
+          <Logo size="xs" />
         </div>
 
         {/* Navigation */}

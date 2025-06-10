@@ -659,7 +659,7 @@ export default function OrdersPage() {
               className="gap-2"
             />
           </div>
-        </div>
+      </div>
       </AppLayout>
     </>
   );

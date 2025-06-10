@@ -1102,7 +1102,7 @@ const QuoteDetailPage: React.FC = () => {
                         const contactTotal = getContactTotal(contactId);
                         visitRows.push(
                           <tr key={`subtotal-${contactId}`} className="bg-content2/50">
-                            <td colSpan={isEditing ? 4 : 3} className="py-1 px-2 text-right text-xs font-medium text-foreground-600">
+                            <td colSpan={isEditing ? 4 : 5} className="py-1 px-2 text-right text-xs font-medium text-foreground-600">
                               Subtotaal {contact.contact_name}:
                             </td>
                             <td className="py-1 px-2 text-right text-sm font-semibold">

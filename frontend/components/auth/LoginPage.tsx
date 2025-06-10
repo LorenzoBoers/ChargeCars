@@ -134,11 +134,11 @@ const LoginPage: React.FC = () => {
           <CardHeader className="flex flex-col gap-4 px-8 pt-8 pb-0">
             {/* Logo */}
             <div className="flex justify-center">
-              <img 
+                <img 
                 src="/images/ChargeCars portal svg dark mode (1).svg" 
                 alt="ChargeCars Portal" 
                 className="h-16 w-auto"
-              />
+                />
             </div>
 
             <div className="text-center">

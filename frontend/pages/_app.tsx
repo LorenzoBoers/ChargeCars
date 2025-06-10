@@ -16,13 +16,13 @@ export default function App({ Component, pageProps }: AppProps) {
       storageKey="chargecars-theme"
       forcedTheme={undefined}
     >
-      <NextUIProvider>
+    <NextUIProvider>
         <AuthProvider>
           <div className="text-foreground bg-background min-h-screen transition-colors duration-200">
             <Component {...pageProps} />
           </div>
         </AuthProvider>
-      </NextUIProvider>
+    </NextUIProvider>
     </NextThemesProvider>
   )
 } 
