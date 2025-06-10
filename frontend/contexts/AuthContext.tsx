@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/router';
 import { User, authAPI, tokenManager, demoCredentials } from '../lib/auth';
+import { apiClient } from '../lib/api';
 
 interface AuthContextType {
   user: User | null;
@@ -59,6 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (userData) {
         // We have cached user data and valid token
+        apiClient.setToken(token); // Set token for API client
         setUser(userData);
         setIsLoading(false);
         return;
@@ -66,27 +68,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Try to fetch user data from API
       try {
-        const meData = await authAPI.getMe(token);
+        apiClient.setToken(token); // Set token first
+        const response = await apiClient.getMe();
         
-        // Convert MeResponse to User format
-        const userFromAPI: User = {
-          id: meData.id,
-          email: meData._contact.email,
-          role_id: meData.role_id,
-          contact: {
-            id: meData._contact.id,
-            first_name: meData._contact.first_name,
-            last_name: meData._contact.last_name,
-          },
-          organization: {
-            id: meData._contact.organization_id,
-            name: 'Organization', // API doesn't return org name in /me
-            type: 'unknown'
-          }
-        };
+        if (response.success && response.data) {
+          // Convert MeResponse to User format based on actual API response
+          const userFromAPI: User = {
+            id: response.data.id,
+            email: response.data.email,
+            role_id: response.data.role_id || 'user',
+            contact: {
+              id: response.data.id,
+              first_name: response.data.first_name || '',
+              last_name: response.data.last_name || '',
+            },
+            organization: {
+              id: response.data.organization_id || 'default',
+              name: response.data.organization_name || 'Organization',
+              type: 'business'
+            }
+          };
 
-        setUser(userFromAPI);
-        tokenManager.setUserData(userFromAPI);
+          setUser(userFromAPI);
+          tokenManager.setUserData(userFromAPI);
+        } else {
+          throw new Error(response.error?.message || 'Failed to fetch user data');
+        }
       } catch (error) {
         console.error('Error fetching user data:', error);
         // If API call fails, clear auth
@@ -136,28 +143,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         tokenManager.setAuthToken(mockToken);
         tokenManager.setTokenExpiry(expiry);
         tokenManager.setUserData(mockUser);
+        apiClient.setToken(mockToken); // Set token for API client
         
         setUser(mockUser);
         setIsLoading(false);
         return { success: true };
       }
 
-      // Try real Xano API
+      // Try real API
       try {
-        const response = await authAPI.login(email, password);
+        const response = await apiClient.login(email, password);
         
-        // Store auth data
-        tokenManager.setAuthToken(response.auth_token);
-        tokenManager.setTokenExpiry(response.auth_token_exp);
-        tokenManager.setRefreshToken(response.refresh_token);
-        tokenManager.setUserData(response.user);
-        
-        setUser(response.user);
-        setIsLoading(false);
-        return { success: true };
+        if (response.success && response.data) {
+          // Store auth data
+          tokenManager.setAuthToken(response.data.auth_token);
+          tokenManager.setRefreshToken(response.data.refresh_token);
+          tokenManager.setUserData(response.data.user);
+          apiClient.setToken(response.data.auth_token); // Set token for API client
+          
+          setUser(response.data.user);
+          setIsLoading(false);
+          return { success: true };
+        } else {
+          setIsLoading(false);
+          return { 
+            success: false, 
+            error: response.error?.message || 'Login failed. Please check your credentials.' 
+          };
+        }
         
       } catch (apiError) {
-        console.error('Xano API login failed:', apiError);
+        console.error('API login failed:', apiError);
         setIsLoading(false);
         return { 
           success: false, 

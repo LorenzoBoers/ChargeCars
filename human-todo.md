@@ -138,22 +138,16 @@ interface Article {
 **Added**: 2025-01-09  
 **Estimated Effort**: Medium
 
-### Backend Required: Order Management API
+### Backend Required: Dashboard Statistics API
 
 **Component**: `frontend/pages/orders.tsx`  
-**Required Endpoint**: `GET /api/orders`  
-**Xano Function**: `get_orders_list` (if applicable)
+**Required Endpoint**: `GET /api/dashboard/stats`  
 
 **Request Schema**:
 ```typescript
 {
-  page?: number;
-  per_page?: number;
-  search?: string;
+  period?: 'today' | 'week' | 'month' | 'quarter';
   business_entity?: string;
-  order_type?: string;
-  status?: string;
-  user_id?: string; // for "Mijn Orders" filter
 }
 ```
 
@@ -162,45 +156,30 @@ interface Article {
 {
   success: boolean;
   data: {
-    orders: Order[];
-    total: number;
-    page: number;
-    per_page: number;
-    total_pages: number;
+    total_revenue: number;
+    active_orders: number;
+    completed_orders: number;
+    pending_orders: number;
+    revenue_change: number; // percentage change
+    orders_change: number; // percentage change
   };
   error?: string;
-}
-
-interface Order {
-  id: string;
-  order_number: string;
-  customer_name: string;
-  business_entity: string;
-  order_type: string;
-  status: string;
-  amount: number;
-  created_at: string;
-  updated_at: string;
-  priority: 'low' | 'medium' | 'high';
-  installation_date?: string;
 }
 ```
 
 **Business Logic**: 
-- Paginated order list with search and filtering
-- Support for filtering by business entity, order type, status
-- Search across order number and customer name
-- User-specific filtering for "Mijn Orders"
-- Proper sorting by creation date (newest first)
+- Calculate revenue totals and order counts
+- Compare with previous period for change percentages
+- Filter by business entity when specified
+- Real-time calculations preferred
 
 **UI Context**:
-- Order management table with filters and search
-- Preset filter buttons for quick access
-- Pagination for large datasets
-- Real-time status updates needed
+- Dashboard cards showing key metrics
+- Change indicators with color coding
+- Period-based filtering
 
 **Priority**: HIGH  
-**Added**: 2024-12-19  
+**Added**: 2025-01-09  
 **Estimated Effort**: Medium
 
 ### Backend Required: Multichannel Inbox API
@@ -307,6 +286,30 @@ interface Conversation {
 ---
 
 ## ✅ Completed
+
+### 2025-01-09 - Order Management Xano API Integration
+- **Component**: `frontend/pages/orders.tsx`, `frontend/hooks/useOrders.ts`, `frontend/lib/api.ts`
+- **Backend Work**: Full integration with Xano API `https://api.chargecars.nl/api:V2/order`
+- **Status**: ✅ Completed - Production Ready
+- **Details**: 
+  - **API Client**: Created comprehensive API client with Xano response format handling
+  - **Response Mapping**: Implemented XanoListResponse interface for paginated data
+  - **Data Types**: Updated OrderResponse interface to match Xano schema (number IDs, timestamps)
+  - **Authentication**: Integrated auth tokens with refresh token support
+  - **Pagination**: Native Xano pagination (page, per_page, offset, has_more_items, found_count)
+  - **Filtering**: Search, business entity, order type, status, priority filters
+  - **Error Handling**: Comprehensive error states and user feedback
+  - **Real-time Updates**: Refresh functionality with loading states
+  - **Type Safety**: Full TypeScript integration with proper interfaces
+  - **Mock Data Removed**: Completely replaced static data with live API calls
+- **API Endpoints Used**:
+  - `GET /api:V2/order` - Order list with filtering and pagination
+  - `POST /api:auth/login` - Authentication with auth_token and refresh_token
+- **Technical Implementation**:
+  - Xano timestamp handling (seconds to milliseconds conversion)
+  - Optional field handling for missing customer_name, business_entity, amount
+  - Dynamic dashboard stats (ready for dedicated endpoint)
+  - Server-side pagination with proper UI pagination controls
 
 ### 2024-12-19 - Project Setup & Organization
 - **Component**: Project structure cleanup

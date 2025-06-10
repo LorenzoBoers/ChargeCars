@@ -38,66 +38,14 @@ import {
   CalendarIcon,
   DocumentDuplicateIcon,
   DocumentTextIcon,
-  TrashIcon
+  TrashIcon,
+  ArrowPathIcon
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../components/layouts/AppLayout';
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'next/router';
-
-// Mock data - will be replaced with API calls
-interface Order {
-  id: string;
-  order_number: string;
-  customer_name: string;
-  business_entity: string;
-  order_type: string;
-  status: string;
-  amount: number;
-  created_at: string;
-  updated_at: string;
-  priority: 'low' | 'medium' | 'high';
-  installation_date?: string;
-}
-
-const mockOrders: Order[] = [
-  {
-    id: '1',
-    order_number: 'ORD-2024-001',
-    customer_name: 'Jan de Vries',
-    business_entity: 'ChargeCars',
-    order_type: 'Installatie',
-    status: 'In behandeling',
-    amount: 1250.00,
-    created_at: '2024-01-15',
-    updated_at: '2024-01-16',
-    priority: 'high',
-    installation_date: '2024-01-25'
-  },
-  {
-    id: '2',
-    order_number: 'ORD-2024-002',
-    customer_name: 'Maria Janssen',
-    business_entity: 'LaderThuis',
-    order_type: 'Onderhoud',
-    status: 'Voltooid',
-    amount: 450.00,
-    created_at: '2024-01-14',
-    updated_at: '2024-01-15',
-    priority: 'medium'
-  },
-  {
-    id: '3',
-    order_number: 'ORD-2024-003',
-    customer_name: 'Peter van der Berg',
-    business_entity: 'MeterKastThuis',
-    order_type: 'Offerte',
-    status: 'Wachten op klant',
-    amount: 2100.00,
-    created_at: '2024-01-13',
-    updated_at: '2024-01-14',
-    priority: 'low'
-  }
-];
+import { useOrders } from '../hooks/useOrders';
+import { OrderResponse, handleApiError } from '../lib/api';
 
 const businessEntities = ['Alle', 'ChargeCars', 'LaderThuis', 'MeterKastThuis', 'Zaptec Shop', 'Ratio Shop'];
 const orderTypes = ['Alle', 'Installatie', 'Onderhoud', 'Offerte', 'Reparatie'];
@@ -121,14 +69,33 @@ const priorityColorMap: Record<string, "default" | "primary" | "secondary" | "su
 
 export default function OrdersPage() {
   const { user } = useAuth();
-  const [searchValue, setSearchValue] = useState('');
-  const [selectedBusinessEntity, setSelectedBusinessEntity] = useState('Alle');
-  const [selectedOrderType, setSelectedOrderType] = useState('Alle');
-  const [selectedStatus, setSelectedStatus] = useState('Alle');
-  const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const rowsPerPage = 10;
   const router = useRouter();
+  
+  // Use the dynamic orders hook
+  const {
+    orders,
+    filteredOrders,
+    dashboardStats,
+    loading,
+    error,
+    pagination,
+    searchValue,
+    setSearchValue,
+    selectedBusinessEntity,
+    setSelectedBusinessEntity,
+    selectedOrderType,
+    setSelectedOrderType,
+    selectedStatus,
+    setSelectedStatus,
+    selectedPriority,
+    setSelectedPriority,
+    refreshOrders,
+    createOrder,
+    updateOrder,
+    deleteOrder,
+    currentPage,
+    setCurrentPage,
+  } = useOrders();
 
   // Preset filters
   const presetFilters = [
@@ -171,56 +138,43 @@ export default function OrdersPage() {
     }
   ];
 
-  // Filter orders based on current filters
-  const filteredOrders = useMemo(() => {
-    return mockOrders.filter(order => {
-      const matchesSearch = 
-        order.order_number.toLowerCase().includes(searchValue.toLowerCase()) ||
-        order.customer_name.toLowerCase().includes(searchValue.toLowerCase());
-      
-      const matchesBusinessEntity = selectedBusinessEntity === 'Alle' || order.business_entity === selectedBusinessEntity;
-      const matchesOrderType = selectedOrderType === 'Alle' || order.order_type === selectedOrderType;
-      const matchesStatus = selectedStatus === 'Alle' || order.status === selectedStatus;
+  // Orders are now filtered and paginated by the useOrders hook
+  const paginatedOrders = filteredOrders;
 
-      return matchesSearch && matchesBusinessEntity && matchesOrderType && matchesStatus;
-    });
-  }, [searchValue, selectedBusinessEntity, selectedOrderType, selectedStatus]);
-
-  // Paginated orders
-  const paginatedOrders = useMemo(() => {
-    const start = (page - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
-    return filteredOrders.slice(start, end);
-  }, [filteredOrders, page]);
-
-  const totalPages = Math.ceil(filteredOrders.length / rowsPerPage);
-
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount?: number) => {
+    if (!amount) return '€0,00';
     return new Intl.NumberFormat('nl-NL', {
       style: 'currency',
       currency: 'EUR'
     }).format(amount);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('nl-NL');
+  // Format timestamp (Xano returns timestamps in seconds or milliseconds)
+  const formatDate = (timestamp: number | string) => {
+    // Handle both timestamp numbers and string dates
+    if (typeof timestamp === 'string') {
+      return new Date(timestamp).toLocaleDateString('nl-NL');
+    }
+    // Xano timestamps are typically in seconds, convert to milliseconds if needed
+    const date = timestamp > 1e10 ? new Date(timestamp) : new Date(timestamp * 1000);
+    return date.toLocaleDateString('nl-NL');
   };
 
-  const handleViewOrder = (orderId: string) => {
+  const handleViewOrder = (orderId: number | string) => {
     router.push(`/orders/${orderId}`);
   };
 
-  const handleEditOrder = (orderId: string) => {
+  const handleEditOrder = (orderId: number | string) => {
     // Navigate to edit page
     console.log('Edit order:', orderId);
   };
 
-  const handleDuplicateOrder = (orderId: string) => {
+  const handleDuplicateOrder = (orderId: number | string) => {
     // Duplicate order logic
     console.log('Duplicate order:', orderId);
   };
 
-  const handleDeleteOrder = (orderId: string) => {
+  const handleDeleteOrder = (orderId: number | string) => {
     // Delete order logic
     console.log('Delete order:', orderId);
   };
@@ -239,8 +193,23 @@ export default function OrdersPage() {
             <div>
               <h1 className="text-xl font-bold text-foreground">Order Management</h1>
               <p className="text-sm text-foreground-600">Beheer en volg alle laadpaal orders</p>
+              {error && (
+                <p className="text-sm text-danger-500 mt-1">
+                  {error}
+                </p>
+              )}
             </div>
             <div className="flex gap-2">
+              <Button
+                color="default"
+                variant="bordered"
+                size="sm"
+                startContent={<ArrowPathIcon className="h-4 w-4" />}
+                onPress={refreshOrders}
+                isLoading={loading}
+              >
+                Vernieuwen
+              </Button>
               <Button
                 color="default"
                 variant="bordered"
@@ -268,10 +237,18 @@ export default function OrdersPage() {
                   <div className="w-2 h-2 rounded-full bg-success"></div>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xl font-bold text-foreground">€127.450</p>
+                  <p className="text-xl font-bold text-foreground">
+                    {dashboardStats ? formatCurrency(dashboardStats.total_revenue) : '€0'}
+                  </p>
                   <div className="flex items-center gap-1">
-                    <span className="text-xs text-success">+12.5%</span>
-                    <span className="text-xs text-foreground-500">vs vorige maand</span>
+                    {dashboardStats?.revenue_change && (
+                      <>
+                        <span className={`text-xs ${dashboardStats.revenue_change >= 0 ? 'text-success' : 'text-danger'}`}>
+                          {dashboardStats.revenue_change >= 0 ? '+' : ''}{dashboardStats.revenue_change.toFixed(1)}%
+                        </span>
+                        <span className="text-xs text-foreground-500">vs vorige maand</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -284,10 +261,18 @@ export default function OrdersPage() {
                   <div className="w-2 h-2 rounded-full bg-warning"></div>
                 </div>
                 <div className="space-y-1">
-                  <p className="text-xl font-bold text-foreground">24</p>
+                  <p className="text-xl font-bold text-foreground">
+                    {dashboardStats ? dashboardStats.active_orders : '0'}
+                  </p>
                   <div className="flex items-center gap-1">
-                    <span className="text-xs text-warning">+3</span>
-                    <span className="text-xs text-foreground-500">sinds gisteren</span>
+                    {dashboardStats?.orders_change && (
+                      <>
+                        <span className={`text-xs ${dashboardStats.orders_change >= 0 ? 'text-success' : 'text-danger'}`}>
+                          {dashboardStats.orders_change >= 0 ? '+' : ''}{dashboardStats.orders_change}
+                        </span>
+                        <span className="text-xs text-foreground-500">sinds gisteren</span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -463,7 +448,7 @@ export default function OrdersPage() {
           {/* Orders Table */}
           <Card>
             <CardBody className="p-0">
-              {isLoading ? (
+              {loading ? (
                 <div className="flex justify-center items-center p-8">
                   <Spinner size="lg" />
                 </div>
@@ -503,8 +488,8 @@ export default function OrdersPage() {
                         
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Avatar name={order.customer_name} size="sm" className="w-6 h-6 text-xs" />
-                            <span className="font-medium text-xs">{order.customer_name}</span>
+                            <Avatar name={order.customer_name || 'Unknown'} size="sm" className="w-6 h-6 text-xs" />
+                            <span className="font-medium text-xs">{order.customer_name || 'Unknown Customer'}</span>
                           </div>
                         </TableCell>
                         
@@ -515,7 +500,7 @@ export default function OrdersPage() {
                             color="primary"
                             className="text-xs h-5"
                           >
-                            {order.business_entity}
+                            {order.business_entity || 'N/A'}
                           </Chip>
                         </TableCell>
                         
@@ -623,12 +608,12 @@ export default function OrdersPage() {
           {/* Pagination */}
           <div className="flex justify-between items-center">
             <p className="text-xs text-foreground-500">
-              {filteredOrders.length} resultaten gevonden
+              {pagination.totalItems} resultaten gevonden
             </p>
             <Pagination
-              total={totalPages}
-              page={page}
-              onChange={setPage}
+              total={pagination.totalPages}
+              page={pagination.currentPage}
+              onChange={setCurrentPage}
               size="sm"
               showControls
               className="gap-2"

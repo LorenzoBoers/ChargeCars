@@ -29,7 +29,7 @@ import {
   CheckCircleIcon,
   ClockIcon,
   DocumentTextIcon,
-  CurrencyEuroIcon,
+
   WrenchScrewdriverIcon,
   ArchiveBoxIcon,
   BoltIcon,
@@ -964,7 +964,7 @@ const QuoteDetailPage: React.FC = () => {
                               <td className="py-2 px-2 text-right">
                                 {isEditing ? (
                                   <div className="flex items-center justify-end">
-                                    <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                                    <span className="text-foreground-500 mr-1">€</span>
                                     <Input
                                       size="sm"
                                       type="number"
@@ -976,14 +976,14 @@ const QuoteDetailPage: React.FC = () => {
                                   </div>
                                 ) : (
                                   <div className="flex items-center justify-end text-sm">
-                                    <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                                    <span className="text-foreground-500 mr-1">€</span>
                                     <span>{item.unit_price.toFixed(2)}</span>
                                   </div>
                                 )}
                               </td>
                               <td className="py-2 px-2 text-right">
                                 <div className="flex items-center justify-end text-sm font-medium">
-                                  <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                                  <span className="text-foreground-500 mr-1">€</span>
                                   <span>{item.total_price.toFixed(2)}</span>
                                 </div>
                               </td>
@@ -1051,7 +1051,7 @@ const QuoteDetailPage: React.FC = () => {
                               </td>
                               <td className="py-2 px-2 text-right">
                                 <div className="flex items-center justify-end">
-                                  <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                                  <span className="text-foreground-500 mr-1">€</span>
                                   <Input
                                     size="sm"
                                     type="number"
@@ -1064,7 +1064,7 @@ const QuoteDetailPage: React.FC = () => {
                               </td>
                               <td className="py-2 px-2 text-right">
                                 <div className="flex items-center justify-end text-sm font-medium">
-                                  <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                                  <span className="text-foreground-500 mr-1">€</span>
                                   {((newItem.quantity || 1) * (newItem.unit_price || 0)).toFixed(2)}
                                 </div>
                               </td>
@@ -1099,16 +1099,18 @@ const QuoteDetailPage: React.FC = () => {
                         if (isEditing) {
                           visitRows.push(
                             <tr key={`add-${contactId}`} className="border-b border-divider">
-                              <td colSpan={isEditing ? 7 : 6} className="py-1 px-2 text-center">
-                                <Button
-                                  size="sm"
-                                  variant="flat"
-                                  className="h-6 px-3 text-xs"
-                                  startContent={<PlusIcon className="h-3 w-3" />}
-                                  onPress={() => addLineItem(visitId, contactId)}
-                                >
-                                  Regel toevoegen voor {contact.contact_name}
-                                </Button>
+                              <td colSpan={isEditing ? 7 : 6} className="py-2 px-2">
+                                <div className="flex items-center justify-center">
+                                  <Button
+                                    size="sm"
+                                    variant="flat"
+                                    className="h-7 px-4 text-xs"
+                                    startContent={<PlusIcon className="h-3 w-3" />}
+                                    onPress={() => addLineItem(visitId, contactId)}
+                                  >
+                                    Regel toevoegen voor {contact.contact_name}
+                                  </Button>
+                                </div>
                               </td>
                             </tr>
                           );
@@ -1123,7 +1125,7 @@ const QuoteDetailPage: React.FC = () => {
                             </td>
                             <td className="py-1 px-2 text-right text-sm font-semibold">
                               <div className="flex items-center justify-end">
-                                <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                                <span className="text-foreground-500 mr-1">€</span>
                                 <span>{contactTotal.toFixed(2)}</span>
                               </div>
                             </td>
@@ -1145,6 +1147,26 @@ const QuoteDetailPage: React.FC = () => {
                     })}
                   </tbody>
                 </table>
+              </div>
+            </Card>
+
+            {/* Totals */}
+            <Card className="p-4">
+              <h3 className="text-base font-semibold mb-3">Totaaloverzicht</h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Subtotaal:</span>
+                  <span>€{(quote.customer_amount + quote.partner_amount - (quote.customer_amount + quote.partner_amount) * 0.21).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>BTW (21%):</span>
+                  <span>€{((quote.customer_amount + quote.partner_amount) * 0.21).toFixed(2)}</span>
+                </div>
+                <Divider />
+                <div className="flex justify-between font-semibold text-base">
+                  <span>Totaal:</span>
+                  <span>€{(quote.customer_amount + quote.partner_amount).toFixed(2)}</span>
+                </div>
               </div>
             </Card>
           </div>
@@ -1231,25 +1253,7 @@ const QuoteDetailPage: React.FC = () => {
               );
             })}
 
-            {/* Totals */}
-            <Card className="p-3">
-              <h3 className="text-sm font-semibold mb-2">Totaaloverzicht</h3>
-              <div className="space-y-1 text-xs">
-                <div className="flex justify-between">
-                  <span>Subtotaal:</span>
-                  <span>€{(quote.customer_amount + quote.partner_amount - (quote.customer_amount + quote.partner_amount) * 0.21).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>BTW (21%):</span>
-                  <span>€{((quote.customer_amount + quote.partner_amount) * 0.21).toFixed(2)}</span>
-                </div>
-                <Divider />
-                <div className="flex justify-between font-semibold text-sm">
-                  <span>Totaal:</span>
-                  <span>€{(quote.customer_amount + quote.partner_amount).toFixed(2)}</span>
-                </div>
-              </div>
-            </Card>
+
           </div>
         </div>
 
