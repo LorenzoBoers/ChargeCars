@@ -594,10 +594,10 @@ const QuoteDetailPage: React.FC = () => {
 
         {/* Status and Quote Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Status Timeline - 50% */}
+          {/* Status Timeline - 50% but full width content */}
           <Card className="p-4">
             <h3 className="text-base font-semibold mb-3">Status</h3>
-            <div className="flex items-center gap-3 overflow-x-auto">
+            <div className="flex items-center gap-3 overflow-x-auto w-full">
               {quote.statuses.map((status, index) => (
                 <React.Fragment key={status.id}>
                   <div className="flex flex-col items-center gap-1 min-w-fit">
@@ -610,7 +610,7 @@ const QuoteDetailPage: React.FC = () => {
                        status.current ? <ClockIcon className="h-3 w-3" /> :
                        index + 1}
                     </div>
-                    <div className="text-xs font-medium text-center">{status.name}</div>
+                    <div className="text-xs font-medium text-center whitespace-nowrap">{status.name}</div>
                     {status.date && (
                       <div className="text-xs text-foreground-500 text-center">{status.date}</div>
                     )}
@@ -649,34 +649,109 @@ const QuoteDetailPage: React.FC = () => {
           </Card>
         </div>
 
-        {/* Intake Information */}
-        <Card className="p-4">
-          <h3 className="text-base font-semibold mb-3">Intake Informatie</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <span className="text-foreground-500">Woningtype:</span>
-              <p className="font-medium">{quote.intake.property_type}</p>
-            </div>
-            <div>
-              <span className="text-foreground-500">Voertuig:</span>
-              <p className="font-medium">{quote.intake.vehicle_type}</p>
-            </div>
-            <div>
-              <span className="text-foreground-500">Laadcapaciteit:</span>
-              <p className="font-medium">{quote.intake.charging_preference}</p>
-            </div>
-            <div>
-              <span className="text-foreground-500">Urgentie:</span>
-              <p className="font-medium">{quote.intake.installation_urgency}</p>
-            </div>
-            {quote.intake.special_requirements && (
-              <div className="col-span-2 md:col-span-4">
-                <span className="text-foreground-500">Bijzonderheden:</span>
-                <p className="font-medium">{quote.intake.special_requirements}</p>
+        {/* Intake Information and Contact Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Intake Information - 1/3 */}
+          <Card className="p-4">
+            <h3 className="text-base font-semibold mb-3">Intake Informatie</h3>
+            <div className="space-y-3 text-sm">
+              <div>
+                <span className="text-foreground-500">Woningtype:</span>
+                <p className="font-medium">{quote.intake.property_type}</p>
               </div>
-            )}
-          </div>
-        </Card>
+              <div>
+                <span className="text-foreground-500">Laadcapaciteit:</span>
+                <p className="font-medium">{quote.intake.charging_preference}</p>
+              </div>
+              <div>
+                <span className="text-foreground-500">Urgentie:</span>
+                <p className="font-medium">{quote.intake.installation_urgency}</p>
+              </div>
+              <div>
+                <span className="text-foreground-500">Elektrische capaciteit:</span>
+                <p className="font-medium">{quote.intake.electrical_capacity}</p>
+              </div>
+              {quote.intake.special_requirements && (
+                <div>
+                  <span className="text-foreground-500">Bijzonderheden:</span>
+                  <p className="font-medium">{quote.intake.special_requirements}</p>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          {/* Customer Card - 1/3 */}
+          {quote.contacts.filter(c => c.role === 'end_customer').map(contact => (
+            <Card 
+              key={contact.id} 
+              className="p-4 cursor-pointer hover:bg-content2/50 transition-colors"
+              onPress={() => router.push(`/contacts/${contact.id}`)}
+              isPressable
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-semibold">Klant</h3>
+                <Chip size="sm" color="success" variant="flat">
+                  Eindklant
+                </Chip>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Avatar name={contact.name} size="sm" />
+                  <div>
+                    <p className="font-medium text-sm">{contact.name}</p>
+                    <p className="text-xs text-foreground-500">€{quote.customer_amount.toFixed(2)}</p>
+                  </div>
+                </div>
+                <div className="space-y-1 text-xs text-foreground-600">
+                  <div className="flex items-center gap-2">
+                    <EnvelopeIcon className="h-3 w-3" />
+                    <span>{contact.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <PhoneIcon className="h-3 w-3" />
+                    <span>{contact.phone}</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+
+          {/* Account Card - 1/3 */}
+          {quote.contacts.filter(c => c.role === 'account').map(contact => (
+            <Card 
+              key={contact.id} 
+              className="p-4 cursor-pointer hover:bg-content2/50 transition-colors"
+              onPress={() => router.push(`/contacts/${contact.id}`)}
+              isPressable
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-base font-semibold">Account</h3>
+                <Chip size="sm" color="primary" variant="flat">
+                  Account
+                </Chip>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Avatar name={contact.name} size="sm" />
+                  <div>
+                    <p className="font-medium text-sm">{contact.name}</p>
+                    <p className="text-xs text-foreground-500">€{quote.partner_amount.toFixed(2)}</p>
+                  </div>
+                </div>
+                <div className="space-y-1 text-xs text-foreground-600">
+                  <div className="flex items-center gap-2">
+                    <EnvelopeIcon className="h-3 w-3" />
+                    <span>{contact.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <PhoneIcon className="h-3 w-3" />
+                    <span>{contact.phone}</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
 
         {/* Main Content Layout */}
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
@@ -712,7 +787,7 @@ const QuoteDetailPage: React.FC = () => {
                       let itemNumber = 1;
                       const visitRows: JSX.Element[] = [];
                       let isFirstVisitRow = true;
-                      const totalContactRows = Object.values(visit.contacts).reduce((sum, c) => sum + c.items.length + 1, Object.keys(visit.contacts).length);
+                      const totalContactRows = Object.values(visit.contacts).reduce((sum, c) => sum + c.items.length + 2, Object.keys(visit.contacts).length);
                       
                       Object.entries(visit.contacts).forEach(([contactId, contact]) => {
                         // Contact header
@@ -729,24 +804,11 @@ const QuoteDetailPage: React.FC = () => {
                               </td>
                             )}
                             <td colSpan={isEditing ? 5 : 4} className="py-2 px-2">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <Chip size="sm" color={getContactColor(contact.contact_role)} variant="flat">
-                                    {getContactLabel(contact.contact_role)}
-                                  </Chip>
-                                  <span className="text-sm font-medium">{contact.contact_name}</span>
-                                </div>
-                                {isEditing && (
-                                  <Button
-                                    size="sm"
-                                    variant="flat"
-                                    className="h-6 px-2 text-xs"
-                                    startContent={<PlusIcon className="h-3 w-3" />}
-                                    onPress={() => addLineItem(visitId, contactId)}
-                                  >
-                                    +
-                                  </Button>
-                                )}
+                              <div className="flex items-center gap-2">
+                                <Chip size="sm" color={getContactColor(contact.contact_role)} variant="flat">
+                                  {getContactLabel(contact.contact_role)}
+                                </Chip>
+                                <span className="text-sm font-medium">{contact.contact_name}</span>
                               </div>
                             </td>
                             {isEditing && <td></td>}
@@ -764,7 +826,7 @@ const QuoteDetailPage: React.FC = () => {
                               <td className="py-2 px-2">
                                 <div className="flex items-start gap-2">
                                   <div className="flex-shrink-0">{getCategoryIcon(item.category)}</div>
-                                  <div className="min-w-0">
+                                  <div className="min-w-0 flex-1">
                                     {isEditing && editingItem === item.id ? (
                                       <Input
                                         size="sm"
@@ -802,7 +864,7 @@ const QuoteDetailPage: React.FC = () => {
                                     min="1"
                                   />
                                 ) : (
-                                  <span className="text-sm">{item.quantity}</span>
+                                  <span className="text-sm text-right block">{item.quantity}</span>
                                 )}
                               </td>
                               <td className="py-2 px-2 text-right">
@@ -821,14 +883,14 @@ const QuoteDetailPage: React.FC = () => {
                                 ) : (
                                   <div className="flex items-center justify-end text-sm">
                                     <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
-                                    {item.unit_price.toFixed(2)}
+                                    <span>{item.unit_price.toFixed(2)}</span>
                                   </div>
                                 )}
                               </td>
                               <td className="py-2 px-2 text-right">
                                 <div className="flex items-center justify-end text-sm font-medium">
                                   <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
-                                  {item.total_price.toFixed(2)}
+                                  <span>{item.total_price.toFixed(2)}</span>
                                 </div>
                               </td>
                               {isEditing && (
@@ -936,6 +998,26 @@ const QuoteDetailPage: React.FC = () => {
                             </tr>
                           );
                         }
+
+                        // Add new line item button row
+                        if (isEditing) {
+                          visitRows.push(
+                            <tr key={`add-${contactId}`} className="border-b border-divider">
+                              <td colSpan={isEditing ? 6 : 5} className="py-1 px-2 text-center">
+                                <Button
+                                  size="sm"
+                                  variant="flat"
+                                  className="h-6 px-3 text-xs"
+                                  startContent={<PlusIcon className="h-3 w-3" />}
+                                  onPress={() => addLineItem(visitId, contactId)}
+                                >
+                                  Regel toevoegen voor {contact.contact_name}
+                                </Button>
+                              </td>
+                              {isEditing && <td></td>}
+                            </tr>
+                          );
+                        }
                         
                         // Contact subtotal
                         const contactTotal = getContactTotal(contactId);
@@ -947,7 +1029,7 @@ const QuoteDetailPage: React.FC = () => {
                             <td className="py-1 px-2 text-right text-sm font-semibold">
                               <div className="flex items-center justify-end">
                                 <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
-                                {contactTotal.toFixed(2)}
+                                <span>{contactTotal.toFixed(2)}</span>
                               </div>
                             </td>
                             {isEditing && <td></td>}
