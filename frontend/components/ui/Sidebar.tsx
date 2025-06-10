@@ -20,7 +20,8 @@ import {
   CogIcon,
   ArrowRightOnRectangleIcon,
   BoltIcon,
-  UserIcon
+  UserIcon,
+  InboxIcon
 } from "@heroicons/react/24/outline";
 import Logo from './Logo';
 import { useAuth } from '../../contexts/AuthContext';
@@ -54,6 +55,13 @@ export function Sidebar({ className = "" }: SidebarProps) {
       href: '/dashboard',
       icon: HomeIcon,
       isActive: router.pathname === '/dashboard'
+    },
+    {
+      label: 'Inbox',
+      href: '/inbox',
+      icon: InboxIcon,
+      isActive: router.pathname === '/inbox',
+      badge: '17'
     },
     {
       label: 'Order Beheer',

@@ -203,6 +203,95 @@ interface Order {
 **Added**: 2024-12-19  
 **Estimated Effort**: Medium
 
+### Backend Required: Multichannel Inbox API
+
+**Component**: `frontend/pages/inbox.tsx`  
+**Required Endpoints**: 
+- `GET /api/inbox/conversations` - Get filtered conversations
+- `GET /api/inbox/messages/{conversation_id}` - Get conversation messages  
+- `POST /api/inbox/messages/{conversation_id}` - Send message
+- `PUT /api/inbox/conversations/{conversation_id}/assign` - Assign conversation
+- `GET /api/inbox/entities/counts` - Get channel counts per entity
+
+**Request Schemas**:
+```typescript
+// Get Conversations
+{
+  entity_id?: string;
+  channel?: 'email' | 'whatsapp' | 'phone' | 'livechat' | 'support_ticket' | 'sales_ticket';
+  status?: 'new' | 'open' | 'pending' | 'resolved';
+  assigned_to?: string;
+  search?: string;
+  page?: number;
+  per_page?: number;
+}
+
+// Send Message
+{
+  content: string;
+  is_internal: boolean;
+  attachments?: string[];
+  message_type?: 'text' | 'template' | 'system';
+}
+
+// Assign Conversation  
+{
+  assigned_to: string;
+  department?: string;
+}
+```
+
+**Response Schema**:
+```typescript
+{
+  success: boolean;
+  data: {
+    conversations?: Conversation[];
+    messages?: Message[];
+    entity_counts?: EntityChannelCounts[];
+    total?: number;
+    page?: number;
+    per_page?: number;
+  };
+  error?: string;
+}
+
+interface Conversation {
+  id: string;
+  subject: string;
+  customer: ContactInfo;
+  channel: ChannelType;
+  status: ConversationStatus;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  last_message: string;
+  last_message_time: string;
+  unread_count: number;
+  assigned_to?: string;
+  sla_deadline?: string;
+  business_entity_id: string;
+  order_id?: string;
+}
+```
+
+**Business Logic**: 
+- Real-time message routing per business entity
+- SLA deadline calculations and monitoring
+- Automatic channel detection and categorization  
+- Cross-entity conversation assignment
+- Notification triggers for urgent messages
+- Template management for standard responses
+
+**UI Context**:
+- 4-column layout: folders → conversations → chat → contact info
+- Real-time updates via WebSocket for new messages
+- Entity switching with context preservation
+- Channel filtering with badge counts
+- Contact/order integration for context
+
+**Priority**: HIGH  
+**Added**: 2025-01-09  
+**Estimated Effort**: Large
+
 ---
 
 ## 🟡 Medium Priority
@@ -294,7 +383,7 @@ interface Order {
 
 | Priority | Items | Status |
 |----------|--------|---------|
-| 🔥 High | 3 | Quote Builder & Order Management |
+| 🔥 High | 4 | Quote Builder, Order Management, Multichannel Inbox |
 | 🟡 Medium | 0 | Clean |
 | 🟢 Low | 0 | Clean |
 | ✅ Completed | 1 | Setup done |
