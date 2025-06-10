@@ -24,7 +24,12 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PlusIcon,
-  UserPlusIcon
+  UserPlusIcon,
+  BellIcon,
+  ExclamationTriangleIcon,
+  CogIcon,
+  HomeIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 import { AppLayout } from '../components/layouts/AppLayout';
 
@@ -33,7 +38,7 @@ interface Team {
   id: string;
   name: string;
   members: TeamMember[];
-  status: 'available' | 'busy' | 'break';
+  status: 'complete' | 'incomplete';
   currentLocation?: string;
   skills: string[];
 }
@@ -68,6 +73,14 @@ interface RouteItem {
   orderNumber: number;
 }
 
+interface FSNNotification {
+  id: string;
+  type: 'warning' | 'error' | 'info';
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+}
+
 export default function PlanningPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState('route-planner');
@@ -75,7 +88,34 @@ export default function PlanningPage() {
   const [viewMode, setViewMode] = useState<'teams' | 'visits'>('teams');
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
 
-  // Mock data
+  // FSN Notifications
+  const fsnNotifications: FSNNotification[] = [
+    {
+      id: 'fsn-1',
+      type: 'warning',
+      message: 'Team Alpha - Vertraging verwacht',
+      timestamp: '10:15',
+      isRead: false
+    },
+    {
+      id: 'fsn-2',
+      type: 'error',
+      message: 'Urgent: Storing gemeld CHC-2024-001',
+      timestamp: '09:45',
+      isRead: false
+    },
+    {
+      id: 'fsn-3',
+      type: 'info',
+      message: 'Route optimalisatie voltooid',
+      timestamp: '09:30',
+      isRead: true
+    }
+  ];
+
+  const unreadFSNCount = fsnNotifications.filter(n => !n.isRead).length;
+
+  // Mock data - updated team status logic
   const teams: Team[] = [
     {
       id: 'team-1',
@@ -84,7 +124,7 @@ export default function PlanningPage() {
         { id: 'jan', name: 'Jan Petersma', isAvailable: true },
         { id: 'piet', name: 'Piet de Vries', isAvailable: true, currentTask: 'task-1' }
       ],
-      status: 'available',
+      status: 'complete', // All members available
       currentLocation: 'Amsterdam Noord',
       skills: ['Laadpaal installatie', 'Meterkast', 'Elektriek']
     },
@@ -95,7 +135,7 @@ export default function PlanningPage() {
         { id: 'marie', name: 'Marie Jansen', isAvailable: true, currentTask: 'task-2' },
         { id: 'erik', name: 'Erik van Dam', isAvailable: false }
       ],
-      status: 'busy',
+      status: 'incomplete', // Not all members available
       currentLocation: 'Haarlem',
       skills: ['Laadpaal onderhoud', 'Diagnose', 'Reparatie']
     },
@@ -105,7 +145,7 @@ export default function PlanningPage() {
       members: [
         { id: 'lisa', name: 'Lisa Wong', isAvailable: false }
       ],
-      status: 'break',
+      status: 'incomplete', // Not all members available
       currentLocation: 'Utrecht',
       skills: ['Advies', 'Inspectie', 'Metingen']
     }
@@ -192,20 +232,19 @@ export default function PlanningPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'available': return 'success';
-      case 'busy': return 'warning';
-      case 'break': return 'default';
+      case 'complete': return 'success';
+      case 'incomplete': return 'warning';
       default: return 'default';
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'installation': return '🔧';
-      case 'maintenance': return '⚙️';
-      case 'repair': return '🛠️';
-      case 'inspection': return '🔍';
-      default: return '📋';
+      case 'installation': return <WrenchScrewdriverIcon className="h-4 w-4" />;
+      case 'maintenance': return <CogIcon className="h-4 w-4" />;
+      case 'repair': return <ExclamationTriangleIcon className="h-4 w-4" />;
+      case 'inspection': return <MagnifyingGlassIcon className="h-4 w-4" />;
+      default: return <WrenchScrewdriverIcon className="h-4 w-4" />;
     }
   };
 
@@ -219,6 +258,24 @@ export default function PlanningPage() {
     }
   };
 
+  const getFSNIcon = (type: string) => {
+    switch (type) {
+      case 'warning': return <ExclamationTriangleIcon className="h-4 w-4" />;
+      case 'error': return <ExclamationTriangleIcon className="h-4 w-4" />;
+      case 'info': return <BellIcon className="h-4 w-4" />;
+      default: return <BellIcon className="h-4 w-4" />;
+    }
+  };
+
+  const getFSNColor = (type: string) => {
+    switch (type) {
+      case 'warning': return 'warning';
+      case 'error': return 'danger';
+      case 'info': return 'primary';
+      default: return 'default';
+    }
+  };
+
   const changeDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate);
     newDate.setDate(selectedDate.getDate() + (direction === 'next' ? 1 : -1));
@@ -229,272 +286,431 @@ export default function PlanningPage() {
     return team.members.filter(member => member.isAvailable);
   };
 
+  const isTeamComplete = (team: Team) => {
+    return team.members.every(member => member.isAvailable);
+  };
+
   return (
     <AppLayout>
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <div className="bg-content1 border-b border-divider p-6">
+      <div className="h-full flex flex-col bg-background">
+        {/* Top Header with Date Navigation and FSN */}
+        <div className="p-4 border-b border-divider bg-content1">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold">Planning & Route Beheer</h1>
-              <p className="text-foreground-600 mt-1">
-                Beheer teams, routes en planning
-              </p>
+            {/* Left: Date Navigation */}
+            <div className="flex items-center gap-4">
+              <h1 className="text-xl font-bold">Planning Dashboard</h1>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="flat"
+                  isIconOnly
+                  onPress={() => changeDate('prev')}
+                >
+                  <ChevronLeftIcon className="h-4 w-4" />
+                </Button>
+                <div className="text-sm font-medium px-3">
+                  {formatDate(selectedDate)}
+                </div>
+                <Button
+                  size="sm"
+                  variant="flat"
+                  isIconOnly
+                  onPress={() => changeDate('next')}
+                >
+                  <ChevronRightIcon className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
+
+            {/* Right: FSN Notifications */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-foreground-600">FSN:</span>
+                {fsnNotifications.slice(0, 2).map(notification => (
+                  <Chip
+                    key={notification.id}
+                    size="sm"
+                    color={getFSNColor(notification.type)}
+                    variant={notification.isRead ? "flat" : "solid"}
+                    startContent={getFSNIcon(notification.type)}
+                    className="text-xs"
+                  >
+                    {notification.message}
+                  </Chip>
+                ))}
+                {unreadFSNCount > 0 && (
+                  <Badge content={unreadFSNCount} color="danger" size="sm">
+                    <Button size="sm" variant="flat" isIconOnly>
+                      <BellIcon className="h-4 w-4" />
+                    </Button>
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="mt-4">
+            <Tabs
+              selectedKey={activeTab}
+              onSelectionChange={(key) => setActiveTab(key as string)}
+              variant="underlined"
+              color="primary"
+            >
+              <Tab
+                key="route-planner"
+                title={
+                  <div className="flex items-center gap-2">
+                    <MapIcon className="h-4 w-4" />
+                    Route Planner
+                  </div>
+                }
+              />
+              <Tab
+                key="agenda"
+                title={
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4" />
+                    Agenda
+                  </div>
+                }
+              />
+              <Tab
+                key="capacity"
+                title={
+                  <div className="flex items-center gap-2">
+                    <ClockIcon className="h-4 w-4" />
+                    Capaciteit
+                  </div>
+                }
+              />
+              <Tab
+                key="teams"
+                title={
+                  <div className="flex items-center gap-2">
+                    <UsersIcon className="h-4 w-4" />
+                    Teams
+                  </div>
+                }
+              />
+            </Tabs>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="p-6">
-          <Tabs 
-            selectedKey={activeTab} 
-            onSelectionChange={(key) => setActiveTab(key as string)}
-            color="primary"
-            variant="underlined"
-            className="mb-6"
-          >
-            <Tab
-              key="agenda"
-              title={
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4" />
-                  Agenda
-                </div>
-              }
-            >
-              <Card>
-                <CardBody className="p-8 text-center">
-                  <CalendarIcon className="h-16 w-16 text-foreground-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground-500">Agenda View</h3>
-                  <p className="text-foreground-400">Agenda functionaliteit komt binnenkort beschikbaar</p>
-                </CardBody>
-              </Card>
-            </Tab>
-
-            <Tab
-              key="route-planner"
-              title={
-                <div className="flex items-center gap-2">
-                  <MapIcon className="h-4 w-4" />
-                  Route Planner
-                </div>
-              }
-            >
-              {/* Route Planner Content */}
-              <div className="space-y-6">
-                {/* Date Navigation */}
-                <Card>
-                  <CardBody className="p-4">
-                    <div className="flex items-center justify-between">
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        startContent={<ChevronLeftIcon className="h-4 w-4" />}
-                        onPress={() => changeDate('prev')}
-                      >
-                        Vorige dag
-                      </Button>
-                      
-                      <div className="text-center">
-                        <h2 className="text-lg font-semibold">{formatDate(selectedDate)}</h2>
-                        <p className="text-sm text-foreground-600">
-                          {selectedDate.toLocaleDateString() === new Date().toLocaleDateString() ? 'Vandaag' : ''}
-                        </p>
-                      </div>
-
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        endContent={<ChevronRightIcon className="h-4 w-4" />}
-                        onPress={() => changeDate('next')}
-                      >
-                        Volgende dag
-                      </Button>
-                    </div>
-                  </CardBody>
-                </Card>
-
-                <div className="grid grid-cols-12 gap-6">
-                  {/* Map and Teams Section */}
-                  <div className="col-span-9 space-y-6">
-                    {/* Map Placeholder */}
-                    <Card>
-                      <CardBody className="p-0">
-                        <div className="h-[500px] bg-content2 rounded-lg flex items-center justify-center">
-                          <div className="text-center">
-                            <MapIcon className="h-16 w-16 text-foreground-300 mx-auto mb-4" />
-                            <h3 className="text-lg font-semibold text-foreground-500">Kaart Weergave</h3>
-                            <p className="text-foreground-400">Google Maps integratie wordt binnenkort toegevoegd</p>
-                          </div>
+        <div className="flex-1 p-6">
+          {activeTab === 'route-planner' && (
+            <div className="h-full">
+              <div className="grid grid-cols-12 gap-6 h-full">
+                {/* Map and Teams Section */}
+                <div className="col-span-9 space-y-6 h-full flex flex-col">
+                  {/* Map Placeholder */}
+                  <Card className="flex-1">
+                    <CardBody className="p-0">
+                      <div className="h-full bg-content2 rounded-lg flex items-center justify-center">
+                        <div className="text-center">
+                          <MapIcon className="h-16 w-16 text-foreground-300 mx-auto mb-4" />
+                          <h3 className="text-lg font-semibold text-foreground-500">Kaart Weergave</h3>
+                          <p className="text-foreground-400">Google Maps integratie wordt binnenkort toegevoegd</p>
                         </div>
-                      </CardBody>
-                    </Card>
+                      </div>
+                    </CardBody>
+                  </Card>
 
-                    {/* Team Swimlanes */}
-                    <Card>
-                      <CardBody className="p-6">
-                        <h3 className="text-lg font-semibold mb-4">Team Routes</h3>
-                        <div className="space-y-4">
-                          {teams.map(team => {
-                            const availableMembers = getAvailableMembers(team);
-                            
-                            return (
-                              <div key={team.id} className="border border-divider rounded-lg p-4">
-                                <div className="flex items-start gap-4">
-                                  {/* Team Info - Left Side */}
-                                  <div className="flex items-start gap-3 min-w-0 w-72 flex-shrink-0">
-                                    <div className="flex -space-x-2">
-                                      {team.members.map((member, index) => (
-                                        <Avatar
-                                          key={index}
-                                          name={member.name}
-                                          size="sm"
-                                          className={`border-2 border-background ${
-                                            member.isAvailable ? '' : 'opacity-50 grayscale'
-                                          }`}
-                                        />
-                                      ))}
-                                      <Button
-                                        isIconOnly
+                  {/* Team Swimlanes */}
+                  <Card>
+                    <CardBody className="p-4">
+                      <h3 className="text-base font-semibold mb-3">Team Routes</h3>
+                      <div className="space-y-3">
+                        {teams.map(team => {
+                          const availableMembers = getAvailableMembers(team);
+                          const teamStatus = isTeamComplete(team) ? 'complete' : 'incomplete';
+                          
+                          return (
+                            <div key={team.id} className="border border-divider rounded-lg p-3">
+                              <div className="flex items-start gap-3">
+                                {/* Team Info - Left Side */}
+                                <div className="flex items-start gap-2 min-w-0 w-64 flex-shrink-0">
+                                  <div className="flex -space-x-1">
+                                    {team.members.map((member, index) => (
+                                      <Avatar
+                                        key={index}
+                                        name={member.name}
                                         size="sm"
-                                        variant="bordered"
-                                        className="rounded-full w-8 h-8 min-w-0"
+                                        className={`border-2 border-background ${
+                                          member.isAvailable ? '' : 'opacity-50 grayscale'
+                                        }`}
+                                      />
+                                    ))}
+                                    <Button
+                                      isIconOnly
+                                      size="sm"
+                                      variant="bordered"
+                                      className="rounded-full w-6 h-6 min-w-0"
+                                    >
+                                      <UserPlusIcon className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <h4 className="font-medium text-sm">{team.name}</h4>
+                                      <Chip
+                                        size="sm"
+                                        color={getStatusColor(teamStatus)}
+                                        variant="flat"
                                       >
-                                        <UserPlusIcon className="h-4 w-4" />
-                                      </Button>
+                                        {teamStatus === 'complete' ? 'Compleet' : 'Incompleet'}
+                                      </Chip>
                                     </div>
-                                    <div className="min-w-0 flex-1">
-                                      <div className="flex items-center gap-2 mb-1">
-                                        <h4 className="font-semibold text-sm">{team.name}</h4>
-                                        <Chip
-                                          size="sm"
-                                          color={getStatusColor(team.status)}
-                                          variant="flat"
-                                        >
-                                          {team.status === 'available' ? 'Beschikbaar' :
-                                           team.status === 'busy' ? 'Bezet' : 'Pauze'}
-                                        </Chip>
-                                      </div>
-                                      <p className="text-xs text-foreground-500 mb-2">{team.currentLocation}</p>
-                                      
-                                      {/* Available Members Today */}
-                                      <div className="space-y-1">
-                                        <p className="text-xs font-medium text-foreground-700">Beschikbaar vandaag:</p>
-                                        {availableMembers.length > 0 ? (
-                                          <div className="space-y-1">
-                                            {availableMembers.map(member => (
-                                              <div key={member.id} className="flex items-center gap-2">
-                                                <div className="w-2 h-2 bg-success rounded-full flex-shrink-0"></div>
-                                                <span className="text-xs text-foreground-600">{member.name}</span>
-                                                {member.currentTask && (
-                                                  <Chip size="sm" variant="flat" color="primary" className="text-xs">
-                                                    Actief
-                                                  </Chip>
-                                                )}
-                                              </div>
-                                            ))}
-                                          </div>
-                                        ) : (
-                                          <p className="text-xs text-foreground-400">Niemand beschikbaar</p>
-                                        )}
+                                    <p className="text-xs text-foreground-500">{team.currentLocation}</p>
+                                    
+                                    {/* Available Members Today */}
+                                    <div className="mt-1">
+                                      <p className="text-xs font-medium text-foreground-700">Beschikbaar:</p>
+                                      <div className="flex flex-wrap gap-1 mt-1">
+                                        {availableMembers.map(member => (
+                                          <Chip key={member.id} size="sm" variant="flat" color="success" className="text-xs">
+                                            {member.name.split(' ')[0]}
+                                          </Chip>
+                                        ))}
                                       </div>
                                     </div>
                                   </div>
-                                  
-                                  {/* Route Items - Right Side */}
-                                  <div className="flex-1 flex gap-3 overflow-x-auto pb-2">
-                                    {routeItems
-                                      .filter(route => route.teamId === team.id)
-                                      .map(route => {
-                                        const task = availableTasks.find(t => t.id === route.taskId);
-                                        if (!task) return null;
-                                        
-                                        const tooltipContent = (
-                                          <div className="p-2 max-w-xs">
-                                            <div className="space-y-2">
-                                              <div>
-                                                <p className="font-semibold text-sm">{task.title}</p>
-                                                <p className="text-xs text-foreground-600">Order: #{task.orderNumber}</p>
-                                              </div>
-                                              
-                                              <Divider />
-                                              
-                                              <div className="space-y-1">
-                                                <p className="text-xs"><span className="font-medium">Klant:</span> {task.customer}</p>
-                                                <p className="text-xs"><span className="font-medium">Adres:</span> {task.address}, {task.city}</p>
-                                                <p className="text-xs"><span className="font-medium">Tijd:</span> {route.scheduledTime} ({Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m)</p>
-                                                <p className="text-xs"><span className="font-medium">Prioriteit:</span> {task.priority}</p>
-                                              </div>
-                                              
-                                              <Divider />
-                                              
-                                              <div>
-                                                <p className="text-xs font-medium mb-1">Vereisten:</p>
-                                                <div className="flex flex-wrap gap-1">
-                                                  {task.requirements.map((req, index) => (
-                                                    <Chip key={index} size="sm" variant="flat" color="secondary" className="text-xs">
-                                                      {req}
-                                                    </Chip>
-                                                  ))}
-                                                </div>
+                                </div>
+                                
+                                {/* Route Items - Right Side */}
+                                <div className="flex-1 flex gap-2 overflow-x-auto pb-1">
+                                  {routeItems
+                                    .filter(route => route.teamId === team.id)
+                                    .map(route => {
+                                      const task = availableTasks.find(t => t.id === route.taskId);
+                                      if (!task) return null;
+                                      
+                                      const tooltipContent = (
+                                        <div className="p-2 max-w-xs">
+                                          <div className="space-y-2">
+                                            <div>
+                                              <p className="font-semibold text-sm">{task.title}</p>
+                                              <p className="text-xs text-foreground-600">Order: #{task.orderNumber}</p>
+                                            </div>
+                                            
+                                            <Divider />
+                                            
+                                            <div className="space-y-1">
+                                              <p className="text-xs"><span className="font-medium">Klant:</span> {task.customer}</p>
+                                              <p className="text-xs"><span className="font-medium">Adres:</span> {task.address}, {task.city}</p>
+                                              <p className="text-xs"><span className="font-medium">Tijd:</span> {route.scheduledTime} ({Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m)</p>
+                                              <p className="text-xs"><span className="font-medium">Prioriteit:</span> {task.priority}</p>
+                                            </div>
+                                            
+                                            <Divider />
+                                            
+                                            <div>
+                                              <p className="text-xs font-medium mb-1">Vereisten:</p>
+                                              <div className="flex flex-wrap gap-1">
+                                                {task.requirements.map((req, index) => (
+                                                  <Chip key={index} size="sm" variant="flat" color="secondary" className="text-xs">
+                                                    {req}
+                                                  </Chip>
+                                                ))}
                                               </div>
                                             </div>
                                           </div>
-                                        );
-                                        
-                                        return (
-                                          <Tooltip
-                                            key={route.id}
-                                            content={tooltipContent}
-                                            placement="top"
-                                            className="bg-content1 border border-divider shadow-lg"
-                                          >
-                                            <div className="bg-content1 border border-divider rounded-lg p-3 min-w-36 max-w-36 flex-shrink-0 cursor-pointer transition-all duration-200 hover:border-primary/50 hover:shadow-md relative">
-                                              {/* Order Number Badge */}
-                                              <Badge 
-                                                content={route.orderNumber} 
-                                                color="primary" 
-                                                className="absolute -top-2 -right-2"
-                                                size="sm"
-                                              >
-                                                <div></div>
-                                              </Badge>
+                                        </div>
+                                      );
+                                      
+                                      return (
+                                        <Tooltip
+                                          key={route.id}
+                                          content={tooltipContent}
+                                          placement="top"
+                                          className="bg-content1 border border-divider shadow-lg"
+                                        >
+                                          <div className="bg-content1 border border-divider rounded-lg p-2 min-w-32 max-w-32 flex-shrink-0 cursor-pointer transition-all duration-200 hover:border-primary/50 hover:shadow-md relative">
+                                            {/* Order Number Badge */}
+                                            <Badge 
+                                              content={route.orderNumber} 
+                                              color="primary" 
+                                              className="absolute -top-1 -right-1"
+                                              size="sm"
+                                            >
+                                              <div></div>
+                                            </Badge>
+                                            
+                                            <div className="space-y-1">
+                                              {/* Time */}
+                                              <div className="text-center">
+                                                <span className="text-sm font-bold text-primary">{route.scheduledTime}</span>
+                                              </div>
                                               
-                                              <div className="space-y-2">
-                                                {/* Time */}
-                                                <div className="text-center">
-                                                  <span className="text-lg font-bold text-primary">{route.scheduledTime}</span>
+                                              {/* Type with Icon */}
+                                              <div className="text-center">
+                                                <div className="flex items-center justify-center mb-1">
+                                                  {getTypeIcon(task.type)}
                                                 </div>
-                                                
-                                                {/* Type with Icon */}
-                                                <div className="text-center">
-                                                  <div className="flex items-center justify-center gap-1 mb-1">
-                                                    <span className="text-lg">{getTypeIcon(task.type)}</span>
-                                                  </div>
-                                                  <p className="text-xs font-medium text-foreground-700">{getTypeLabel(task.type)}</p>
-                                                </div>
-                                                
-                                                {/* City */}
-                                                <div className="text-center">
-                                                  <p className="text-sm font-semibold text-foreground-900">{task.city}</p>
-                                                </div>
+                                                <p className="text-xs font-medium text-foreground-700">{getTypeLabel(task.type)}</p>
+                                              </div>
+                                              
+                                              {/* City */}
+                                              <div className="text-center">
+                                                <p className="text-xs font-medium text-foreground-900">{task.city}</p>
                                               </div>
                                             </div>
-                                          </Tooltip>
-                                        );
-                                      })}
-                                    
-                                    {/* Add Task Button */}
-                                    <Button
-                                      variant="bordered"
-                                      className="min-w-36 max-w-36 h-20 flex-shrink-0"
-                                      size="sm"
-                                    >
-                                      <div className="flex flex-col items-center gap-1">
-                                        <PlusIcon className="h-5 w-5" />
-                                        <span className="text-xs">Taak</span>
-                                      </div>
-                                    </Button>
+                                          </div>
+                                        </Tooltip>
+                                      );
+                                    })}
+                                  
+                                  {/* Add Task Button */}
+                                  <Button
+                                    variant="bordered"
+                                    className="min-w-32 max-w-32 h-16 flex-shrink-0"
+                                    size="sm"
+                                  >
+                                    <div className="flex flex-col items-center gap-1">
+                                      <PlusIcon className="h-4 w-4" />
+                                      <span className="text-xs">Taak</span>
+                                    </div>
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardBody>
+                  </Card>
+                </div>
+
+                {/* Right Sidebar - Planned Visits and Teams */}
+                <div className="col-span-3 space-y-6">
+                  {/* View Toggle */}
+                  <Card>
+                    <CardBody className="p-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium">Weergave:</span>
+                        <Switch
+                          size="sm"
+                          isSelected={viewMode === 'teams'}
+                          onValueChange={(checked) => setViewMode(checked ? 'teams' : 'visits')}
+                        >
+                          {viewMode === 'teams' ? 'Teams' : 'Bezoeken'}
+                        </Switch>
+                      </div>
+                    </CardBody>
+                  </Card>
+
+                  {viewMode === 'visits' ? (
+                    <Card>
+                      <CardBody className="p-3">
+                        <h3 className="text-base font-semibold mb-3">Geplande Bezoeken</h3>
+                        <div className="space-y-2">
+                          {/* Today's scheduled visits */}
+                          {routeItems.map(route => {
+                            const task = availableTasks.find(t => t.id === route.taskId);
+                            const team = teams.find(t => t.id === route.teamId);
+                            if (!task || !team) return null;
+                            
+                            return (
+                              <div key={route.id} className="border border-divider rounded-lg p-2">
+                                <div className="flex items-center justify-between mb-1">
+                                  <span className="text-xs font-medium">{route.scheduledTime}</span>
+                                  <Chip
+                                    size="sm"
+                                    color={getPriorityColor(task.priority)}
+                                    variant="dot"
+                                  >
+                                    {task.priority}
+                                  </Chip>
+                                </div>
+                                <h4 className="font-medium text-xs mb-1">{task.title}</h4>
+                                <p className="text-xs text-foreground-600 mb-1">{task.customer}</p>
+                                <p className="text-xs text-foreground-500 mb-1 truncate">{task.address}, {task.city}</p>
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-1">
+                                    <ClockIcon className="h-3 w-3 text-foreground-400" />
+                                    <span className="text-xs text-foreground-500">
+                                      {Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m
+                                    </span>
+                                  </div>
+                                  <Chip size="sm" variant="flat" color="primary" className="text-xs">
+                                    {team.name}
+                                  </Chip>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          
+                          {routeItems.length === 0 && (
+                            <div className="text-center py-4">
+                              <p className="text-sm text-foreground-500">Geen bezoeken gepland</p>
+                            </div>
+                          )}
+                        </div>
+                      </CardBody>
+                    </Card>
+                  ) : (
+                    <Card>
+                      <CardBody className="p-3">
+                        <h3 className="text-base font-semibold mb-3">Teams</h3>
+                        <div className="space-y-3">
+                          {teams.map(team => {
+                            const availableMembers = getAvailableMembers(team);
+                            const teamStatus = isTeamComplete(team) ? 'complete' : 'incomplete';
+                            
+                            return (
+                              <div key={team.id} className="border border-divider rounded-lg p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                  <h4 className="font-medium text-sm">{team.name}</h4>
+                                  <Chip
+                                    size="sm"
+                                    color={getStatusColor(teamStatus)}
+                                    variant="flat"
+                                  >
+                                    {teamStatus === 'complete' ? 'Compleet' : 'Incompleet'}
+                                  </Chip>
+                                </div>
+                                
+                                <div className="space-y-2">
+                                  <div className="text-xs text-foreground-600">
+                                    <span className="font-medium">Locatie:</span> {team.currentLocation}
+                                  </div>
+                                  
+                                  <div>
+                                    <p className="text-xs font-medium text-foreground-700 mb-1">Team leden:</p>
+                                    <div className="space-y-1">
+                                      {team.members.map(member => (
+                                        <div key={member.id} className="flex items-center gap-2">
+                                          <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                                            member.isAvailable ? 'bg-success' : 'bg-default-300'
+                                          }`}></div>
+                                          <span className={`text-xs ${
+                                            member.isAvailable ? 'text-foreground-600' : 'text-foreground-400'
+                                          }`}>{member.name}</span>
+                                          {member.currentTask && (
+                                            <Chip size="sm" variant="flat" color="primary" className="text-xs">
+                                              Actief
+                                            </Chip>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  
+                                  <div>
+                                    <p className="text-xs font-medium text-foreground-700 mb-1">Vaardigheden:</p>
+                                    <div className="flex flex-wrap gap-1">
+                                      {team.skills.slice(0, 2).map((skill, index) => (
+                                        <Chip key={index} size="sm" variant="flat" color="secondary" className="text-xs">
+                                          {skill}
+                                        </Chip>
+                                      ))}
+                                      {team.skills.length > 2 && (
+                                        <Chip size="sm" variant="flat" color="default" className="text-xs">
+                                          +{team.skills.length - 2}
+                                        </Chip>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -503,187 +719,41 @@ export default function PlanningPage() {
                         </div>
                       </CardBody>
                     </Card>
-                  </div>
-
-                  {/* Right Sidebar - Planned Visits and Teams */}
-                  <div className="col-span-3 space-y-6">
-                    {/* View Toggle */}
-                    <Card>
-                      <CardBody className="p-4">
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm font-medium">Weergave:</span>
-                          <Switch
-                            size="sm"
-                            isSelected={viewMode === 'teams'}
-                            onValueChange={(checked) => setViewMode(checked ? 'teams' : 'visits')}
-                          >
-                            {viewMode === 'teams' ? 'Teams' : 'Bezoeken'}
-                          </Switch>
-                        </div>
-                      </CardBody>
-                    </Card>
-
-                    {viewMode === 'visits' ? (
-                      <Card>
-                        <CardBody className="p-4">
-                          <h3 className="text-base font-semibold mb-3">Geplande Bezoeken</h3>
-                          <div className="space-y-2">
-                            {/* Today's scheduled visits */}
-                            {routeItems.map(route => {
-                              const task = availableTasks.find(t => t.id === route.taskId);
-                              const team = teams.find(t => t.id === route.teamId);
-                              if (!task || !team) return null;
-                              
-                              return (
-                                <div key={route.id} className="border border-divider rounded-lg p-2">
-                                  <div className="flex items-center justify-between mb-1">
-                                    <span className="text-xs font-medium">{route.scheduledTime}</span>
-                                    <Chip
-                                      size="sm"
-                                      color={getPriorityColor(task.priority)}
-                                      variant="dot"
-                                    >
-                                      {task.priority}
-                                    </Chip>
-                                  </div>
-                                  <h4 className="font-medium text-xs mb-1">{task.title}</h4>
-                                  <p className="text-xs text-foreground-600 mb-1">{task.customer}</p>
-                                  <p className="text-xs text-foreground-500 mb-1 truncate">{task.address}, {task.city}</p>
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-1">
-                                      <ClockIcon className="h-3 w-3 text-foreground-400" />
-                                      <span className="text-xs text-foreground-500">
-                                        {Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m
-                                      </span>
-                                    </div>
-                                    <Chip size="sm" variant="flat" color="primary" className="text-xs">
-                                      {team.name}
-                                    </Chip>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                            
-                            {routeItems.length === 0 && (
-                              <div className="text-center py-4">
-                                <p className="text-sm text-foreground-500">Geen bezoeken gepland</p>
-                              </div>
-                            )}
-                          </div>
-                        </CardBody>
-                      </Card>
-                    ) : (
-                      <Card>
-                        <CardBody className="p-4">
-                          <h3 className="text-base font-semibold mb-3">Teams</h3>
-                          <div className="space-y-3">
-                            {teams.map(team => {
-                              const availableMembers = getAvailableMembers(team);
-                              
-                              return (
-                                <div key={team.id} className="border border-divider rounded-lg p-3">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <h4 className="font-medium text-sm">{team.name}</h4>
-                                    <Chip
-                                      size="sm"
-                                      color={getStatusColor(team.status)}
-                                      variant="flat"
-                                    >
-                                      {team.status === 'available' ? 'Beschikbaar' :
-                                       team.status === 'busy' ? 'Bezet' : 'Pauze'}
-                                    </Chip>
-                                  </div>
-                                  
-                                  <div className="space-y-2">
-                                    <div className="text-xs text-foreground-600">
-                                      <span className="font-medium">Locatie:</span> {team.currentLocation}
-                                    </div>
-                                    
-                                    <div>
-                                      <p className="text-xs font-medium text-foreground-700 mb-1">Team leden:</p>
-                                      <div className="space-y-1">
-                                        {team.members.map(member => (
-                                          <div key={member.id} className="flex items-center gap-2">
-                                            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                                              member.isAvailable ? 'bg-success' : 'bg-default-300'
-                                            }`}></div>
-                                            <span className={`text-xs ${
-                                              member.isAvailable ? 'text-foreground-600' : 'text-foreground-400'
-                                            }`}>{member.name}</span>
-                                            {member.currentTask && (
-                                              <Chip size="sm" variant="flat" color="primary" className="text-xs">
-                                                Actief
-                                              </Chip>
-                                            )}
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
-                                    
-                                    <div>
-                                      <p className="text-xs font-medium text-foreground-700 mb-1">Vaardigheden:</p>
-                                      <div className="flex flex-wrap gap-1">
-                                        {team.skills.slice(0, 2).map((skill, index) => (
-                                          <Chip key={index} size="sm" variant="flat" color="secondary" className="text-xs">
-                                            {skill}
-                                          </Chip>
-                                        ))}
-                                        {team.skills.length > 2 && (
-                                          <Chip size="sm" variant="flat" color="default" className="text-xs">
-                                            +{team.skills.length - 2}
-                                          </Chip>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </CardBody>
-                      </Card>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
-            </Tab>
+            </div>
+          )}
 
-            <Tab
-              key="capacity"
-              title={
-                <div className="flex items-center gap-2">
-                  <ClockIcon className="h-4 w-4" />
-                  Capaciteit
-                </div>
-              }
-            >
-              <Card>
-                <CardBody className="p-8 text-center">
-                  <ClockIcon className="h-16 w-16 text-foreground-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground-500">Capaciteit Beheer</h3>
-                  <p className="text-foreground-400">Capaciteit planning komt binnenkort beschikbaar</p>
-                </CardBody>
-              </Card>
-            </Tab>
+          {activeTab === 'agenda' && (
+            <Card>
+              <CardBody className="p-8 text-center">
+                <CalendarIcon className="h-16 w-16 text-foreground-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground-500">Agenda Weergave</h3>
+                <p className="text-foreground-400">Agenda functionaliteit komt binnenkort beschikbaar</p>
+              </CardBody>
+            </Card>
+          )}
 
-            <Tab
-              key="teams"
-              title={
-                <div className="flex items-center gap-2">
-                  <UsersIcon className="h-4 w-4" />
-                  Teams
-                </div>
-              }
-            >
-              <Card>
-                <CardBody className="p-8 text-center">
-                  <UsersIcon className="h-16 w-16 text-foreground-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground-500">Team Beheer</h3>
-                  <p className="text-foreground-400">Team beheer functionaliteit komt binnenkort beschikbaar</p>
-                </CardBody>
-              </Card>
-            </Tab>
-          </Tabs>
+          {activeTab === 'capacity' && (
+            <Card>
+              <CardBody className="p-8 text-center">
+                <ClockIcon className="h-16 w-16 text-foreground-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground-500">Capaciteit Beheer</h3>
+                <p className="text-foreground-400">Capaciteit planning komt binnenkort beschikbaar</p>
+              </CardBody>
+            </Card>
+          )}
+
+          {activeTab === 'teams' && (
+            <Card>
+              <CardBody className="p-8 text-center">
+                <UsersIcon className="h-16 w-16 text-foreground-300 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground-500">Team Beheer</h3>
+                <p className="text-foreground-400">Team beheer functionaliteit komt binnenkort beschikbaar</p>
+              </CardBody>
+            </Card>
+          )}
         </div>
       </div>
     </AppLayout>
