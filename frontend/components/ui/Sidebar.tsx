@@ -94,8 +94,8 @@ export function Sidebar({ className = "" }: SidebarProps) {
     <Card className={`h-screen w-64 rounded-none border-r border-divider bg-content1 ${className}`}>
       <CardBody className="p-0 flex flex-col h-full">
         {/* Logo Header */}
-        <div className="p-6 border-b border-divider flex justify-center">
-          <Logo size="md" />
+        <div className="p-4 border-b border-divider flex justify-center">
+          <Logo size="sm" />
         </div>
 
         {/* Navigation */}

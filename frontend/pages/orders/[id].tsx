@@ -606,60 +606,62 @@ const OrderDetailPage: React.FC = () => {
                   Adressen
                 </h3>
                 
-                {order.addresses.map((address, index) => (
-                  <Card key={index}>
-                    <CardBody className="p-0">
-                      <div className="grid grid-cols-1 lg:grid-cols-2">
-                        {/* Address Info */}
-                        <div className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <Chip 
-                              size="sm" 
-                              color={address.type === 'installation' ? 'primary' : 'secondary'} 
-                              variant="flat"
-                              className="text-xs"
-                            >
-                              {address.type === 'installation' ? 'Installatie' : 'Factuur'}
-                            </Chip>
-                            <Button
-                              size="sm"
-                              variant="light"
-                              isIconOnly
-                              className="h-6 w-6"
-                            >
-                              <PencilIcon className="h-3 w-3" />
-                            </Button>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {order.addresses.map((address, index) => (
+                    <Card key={index}>
+                      <CardBody className="p-0">
+                        <div className="flex">
+                          {/* Address Info */}
+                          <div className="flex-1 p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <Chip 
+                                size="sm" 
+                                color={address.type === 'installation' ? 'primary' : 'secondary'} 
+                                variant="flat"
+                                className="text-xs"
+                              >
+                                {address.type === 'installation' ? 'Installatie' : 'Factuur'}
+                              </Chip>
+                              <Button
+                                size="sm"
+                                variant="light"
+                                isIconOnly
+                                className="h-6 w-6"
+                              >
+                                <PencilIcon className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <div className="space-y-2">
+                              <p className="font-medium text-sm">{address.street}</p>
+                              <p className="text-sm text-foreground-600">{address.zipCode} {address.city}</p>
+                              <p className="text-xs text-foreground-500">{address.country}</p>
+                            </div>
                           </div>
-                          <div className="space-y-2">
-                            <p className="font-medium text-sm">{address.street}</p>
-                            <p className="text-sm text-foreground-600">{address.zipCode} {address.city}</p>
-                            <p className="text-xs text-foreground-500">{address.country}</p>
-                          </div>
-                          <div className="mt-4">
-                            <Button
-                              size="sm"
-                              variant="flat"
-                              color="primary"
-                              className="text-xs h-6"
-                              startContent={<MapPinIcon className="h-3 w-3" />}
-                            >
-                              Route
-                            </Button>
+                          
+                          {/* Mock Map Image */}
+                          <div className="relative w-[150px] h-32 bg-content2 rounded-r-lg overflow-hidden flex-shrink-0">
+                            <img
+                              src="/images/Schermafbeelding 2025-06-10 022658.png"
+                              alt="Kaart weergave"
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute top-2 right-2">
+                              <Button
+                                size="sm"
+                                variant="flat"
+                                color="primary"
+                                className="text-xs h-6"
+                                startContent={<MapPinIcon className="h-3 w-3" />}
+                              >
+                                Route
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                        
-                        {/* Mock Map Image */}
-                        <div className="relative h-32 lg:h-auto bg-content2 rounded-r-lg overflow-hidden">
-                          <img
-                            src="/images/Schermafbeelding 2025-06-10 022658.png"
-                            alt="Kaart weergave"
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                      </div>
-                    </CardBody>
-                  </Card>
-                ))}
+                      </CardBody>
+                    </Card>
+                  ))}
+                </div>
               </div>
 
               {/* Grouped Related Items */}
@@ -709,7 +711,7 @@ const OrderDetailPage: React.FC = () => {
                                         size="sm" 
                                         color="primary" 
                                         variant="flat"
-                                        onPress={() => router.push(`/quotes/${item.id}/build`)}
+                                        onPress={() => router.push(`/quotes/${item.id}`)}
                                       >
                                         Bewerken
                                       </Button>

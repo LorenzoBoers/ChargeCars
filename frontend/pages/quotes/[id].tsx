@@ -1,75 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import {
   Card,
-  CardBody,
-  CardHeader,
   Button,
   Chip,
-  Avatar,
   Divider,
-  Progress,
-  Textarea,
-  Input,
-  Select,
-  SelectItem,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-  Tooltip,
-  Badge,
-  Switch,
-  Tabs,
-  Tab,
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell
+  Input
 } from "@nextui-org/react";
 import {
   ArrowLeftIcon,
-  PencilIcon,
   PrinterIcon,
-  ShareIcon,
   EllipsisVerticalIcon,
-  ChevronRightIcon,
   CheckCircleIcon,
   ClockIcon,
-  ExclamationTriangleIcon,
-  UserIcon,
-  BuildingOfficeIcon,
-  MapPinIcon,
-  PhoneIcon,
-  EnvelopeIcon,
   DocumentTextIcon,
-  CalendarDaysIcon,
   CurrencyEuroIcon,
-  ChatBubbleLeftRightIcon,
-  ClipboardDocumentListIcon,
-  PaperClipIcon,
-  EyeIcon,
-  EyeSlashIcon,
-  CloudArrowUpIcon,
-  TruckIcon,
-  BoltIcon,
-  CreditCardIcon,
-  TicketIcon,
-  InboxIcon,
-  PlusIcon,
-  TrashIcon,
-  Bars3Icon,
-  DocumentDuplicateIcon,
-  BookmarkIcon,
-  XMarkIcon,
   WrenchScrewdriverIcon,
   ArchiveBoxIcon,
-  CogIcon,
-  PaperAirplaneIcon,
-  DocumentArrowDownIcon
+  BoltIcon,
+  DocumentArrowDownIcon,
+  DocumentDuplicateIcon,
+  TrashIcon,
+  PlusIcon,
+  XMarkIcon,
+  CheckIcon
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../../components/layouts/AppLayout';
 
@@ -96,6 +55,8 @@ interface QuoteLineItem {
   contact_name: string;
   contact_role: 'account' | 'end_customer' | 'intermediary';
   is_customer_responsible: boolean;
+  article_id?: string;
+  article_code?: string;
 }
 
 interface QuoteContact {
@@ -105,6 +66,17 @@ interface QuoteContact {
   email: string;
   phone: string;
   avatar?: string;
+}
+
+interface Article {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  unit_price: number;
+  category: string;
+  brand?: string;
+  supplier?: string;
 }
 
 interface QuoteDetail {
@@ -130,34 +102,43 @@ interface QuoteDetail {
   warranty_period?: string;
 }
 
+// Mock articles database
+const mockArticles: Article[] = [
+  { id: '1', code: 'ZAP-HOME-7.4', name: 'Zaptec Go 7.4kW', description: 'Zaptec Go laadpaal 7.4kW enkelfase', unit_price: 599.00, category: 'laadpaal', brand: 'Zaptec' },
+  { id: '2', code: 'ZAP-HOME-22', name: 'Zaptec Go 22kW', description: 'Zaptec Go laadpaal 22kW driefase', unit_price: 799.00, category: 'laadpaal', brand: 'Zaptec' },
+  { id: '3', code: 'INST-BASIC', name: 'Basis Installatie', description: 'Standaard installatie laadpaal', unit_price: 450.00, category: 'service', brand: 'ChargeCars' },
+  { id: '4', code: 'INST-ADVANCED', name: 'Uitgebreide Installatie', description: 'Installatie met meterkast aanpassingen', unit_price: 650.00, category: 'service', brand: 'ChargeCars' },
+  { id: '5', code: 'CABLE-TYPE2-5M', name: 'Type 2 Kabel 5m', description: 'Type 2 laadkabel 5 meter', unit_price: 89.00, category: 'accessoire', brand: 'Generic' },
+  { id: '6', code: 'CABLE-TYPE2-7M', name: 'Type 2 Kabel 7m', description: 'Type 2 laadkabel 7 meter', unit_price: 109.00, category: 'accessoire', brand: 'Generic' },
+  { id: '7', code: 'MOUNT-WALL', name: 'Wandmontage', description: 'Wandmontage voor laadpaal', unit_price: 45.00, category: 'accessoire', brand: 'ChargeCars' },
+  { id: '8', code: 'SMART-MODULE', name: 'Smart Module', description: 'Smart charging module voor dynamisch laden', unit_price: 199.00, category: 'upgrade', brand: 'Zaptec' }
+];
+
 // Mock data
 const mockQuote: QuoteDetail = {
-  id: 'QUO-002',
-  quote_number: 'QUO-2024-002',
-  order_id: 'ORD-001',
+  id: 'QUO-2024-002',
+  quote_number: 'CHC-QUO-2024-002',
+  order_id: 'ORD-2024-001',
   order_number: 'CHC-2024-001',
-  status: 'sent',
-  total_amount: 3250.00,
-  customer_amount: 2850.00,
-  partner_amount: 400.00,
+  status: 'draft',
+  total_amount: 2850.00,
+  customer_amount: 2400.00,
+  partner_amount: 450.00,
   valid_until: '2024-02-15',
   business_entity: 'ChargeCars',
-  created_at: '2024-01-20',
-  updated_at: '2024-01-22',
+  created_at: '2024-01-15',
+  updated_at: '2024-01-16',
   customer_name: 'Henk van der Berg',
   partner_name: 'EnergieDirect B.V.',
   delivery_time: '2-3 weken',
-  warranty_period: '5 jaar garantie',
-  terms_conditions: 'Standaard ChargeCars voorwaarden van toepassing. Betaling binnen 30 dagen na levering.',
-  
+  warranty_period: '2 jaar',
+  terms_conditions: 'Standaard algemene voorwaarden van toepassing.',
   statuses: [
-    { id: '1', name: 'Concept', date: '2024-01-20', color: 'success', completed: true, current: false },
-    { id: '2', name: 'Ter Review', date: '2024-01-21', color: 'success', completed: true, current: false },
-    { id: '3', name: 'Verzonden', date: '2024-01-22', color: 'primary', completed: false, current: true },
-    { id: '4', name: 'Geaccepteerd', date: '', color: 'success', completed: false, current: false },
-    { id: '5', name: 'Naar Order', date: '', color: 'secondary', completed: false, current: false }
+    { id: '1', name: 'Concept', date: '2024-01-15', color: 'secondary', completed: true, current: false },
+    { id: '2', name: 'Review', date: '2024-01-16', color: 'warning', completed: false, current: true },
+    { id: '3', name: 'Verzonden', date: '', color: 'primary', completed: false, current: false },
+    { id: '4', name: 'Goedgekeurd', date: '', color: 'success', completed: false, current: false }
   ],
-
   contacts: [
     {
       id: 'CONT-001',
@@ -167,138 +148,61 @@ const mockQuote: QuoteDetail = {
       phone: '+31 6 12345678'
     },
     {
-      id: 'CONT-002',
-      name: 'EnergieDirect B.V.',
+      id: 'CONT-002', 
+      name: 'Jan Petersma',
       role: 'account',
-      email: 'orders@energiedirect.nl', 
+      email: 'j.petersma@energiedirect.nl',
       phone: '+31 20 1234567'
-    },
-    {
-      id: 'CONT-003',
-      name: 'Maria Adviseur',
-      role: 'intermediary',
-      email: 'm.adviseur@intermediair.nl',
-      phone: '+31 30 9876543'
     }
   ],
-  
   line_items: [
-    // Visit 1 items
     {
       id: 'LI-001',
-      description: 'Locatie inspectie en technische meting',
+      description: 'Zaptec Go 22kW laadpaal',
       quantity: 1,
-      unit_price: 125.00,
-      total_price: 125.00,
-      category: 'service',
-      visit_id: 'VIS-001',
-      visit_name: 'Locatie Inspectie',
+      unit_price: 799.00,
+      total_price: 799.00,
+      category: 'product',
+      visit_id: 'V-001',
+      visit_name: 'Locatie inspectie',
       contact_id: 'CONT-001',
       contact_name: 'Henk van der Berg',
       contact_role: 'end_customer',
-      is_customer_responsible: true
+      is_customer_responsible: true,
+      article_id: '2',
+      article_code: 'ZAP-HOME-22'
     },
     {
       id: 'LI-002',
-      description: 'Rapportage technische haalbaarheid',
+      description: 'Standaard installatie werkzaamheden',
       quantity: 1,
-      unit_price: 75.00,
-      total_price: 75.00,
+      unit_price: 450.00,
+      total_price: 450.00,
       category: 'service',
-      visit_id: 'VIS-001',
-      visit_name: 'Locatie Inspectie',
+      visit_id: 'V-002',
+      visit_name: 'Installatie',
       contact_id: 'CONT-002',
-      contact_name: 'EnergieDirect B.V.',
+      contact_name: 'Jan Petersma',
       contact_role: 'account',
-      is_customer_responsible: false
+      is_customer_responsible: false,
+      article_id: '3',
+      article_code: 'INST-BASIC'
     },
-    
-    // Visit 2 items
     {
       id: 'LI-003',
-      description: 'ChargeCars Pro 22kW Laadpaal',
+      description: 'Type 2 laadkabel 7 meter',
       quantity: 1,
-      unit_price: 1850.00,
-      total_price: 1850.00,
+      unit_price: 109.00,
+      total_price: 109.00,
       category: 'product',
-      visit_id: 'VIS-002',
+      visit_id: 'V-002',
       visit_name: 'Installatie',
       contact_id: 'CONT-001',
       contact_name: 'Henk van der Berg',
       contact_role: 'end_customer',
-      is_customer_responsible: true
-    },
-    {
-      id: 'LI-004',
-      description: 'Installatie materiaal (kabels, beugels)',
-      quantity: 1,
-      unit_price: 275.00,
-      total_price: 275.00,
-      category: 'product',
-      visit_id: 'VIS-002',
-      visit_name: 'Installatie',
-      contact_id: 'CONT-001',
-      contact_name: 'Henk van der Berg',
-      contact_role: 'end_customer',
-      is_customer_responsible: true
-    },
-    {
-      id: 'LI-005',
-      description: 'Installatie werkzaamheden (8 uur)',
-      quantity: 8,
-      unit_price: 85.00,
-      total_price: 680.00,
-      category: 'installation',
-      visit_id: 'VIS-002',
-      visit_name: 'Installatie',
-      contact_id: 'CONT-001',
-      contact_name: 'Henk van der Berg',
-      contact_role: 'end_customer',
-      is_customer_responsible: true
-    },
-    {
-      id: 'LI-006',
-      description: 'Partner commissie installatie',
-      quantity: 1,
-      unit_price: 200.00,
-      total_price: 200.00,
-      category: 'service',
-      visit_id: 'VIS-002',
-      visit_name: 'Installatie',
-      contact_id: 'CONT-002',
-      contact_name: 'EnergieDirect B.V.',
-      contact_role: 'account',
-      is_customer_responsible: false
-    },
-    
-    // Visit 3 items
-    {
-      id: 'LI-007',
-      description: 'Eindcontrole en test laadpaal',
-      quantity: 1,
-      unit_price: 120.00,
-      total_price: 120.00,
-      category: 'service',
-      visit_id: 'VIS-003',
-      visit_name: 'Afronding',
-      contact_id: 'CONT-001',
-      contact_name: 'Henk van der Berg',
-      contact_role: 'end_customer',
-      is_customer_responsible: true
-    },
-    {
-      id: 'LI-008',
-      description: 'Oplevering documentatie',
-      quantity: 1,
-      unit_price: 50.00,
-      total_price: 50.00,
-      category: 'service',
-      visit_id: 'VIS-003',
-      visit_name: 'Afronding',
-      contact_id: 'CONT-003',
-      contact_name: 'Maria Adviseur',
-      contact_role: 'intermediary',
-      is_customer_responsible: false
+      is_customer_responsible: true,
+      article_id: '6',
+      article_code: 'CABLE-TYPE2-7M'
     }
   ]
 };
@@ -306,540 +210,681 @@ const mockQuote: QuoteDetail = {
 const QuoteDetailPage: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
+  
+  // State
+  const [quote, setQuote] = useState<QuoteDetail>(mockQuote);
+  const [editingItem, setEditingItem] = useState<string | null>(null);
+  const [newItemVisitId, setNewItemVisitId] = useState<string | null>(null);
+  const [newItemContactId, setNewItemContactId] = useState<string | null>(null);
+  const [isAddingItem, setIsAddingItem] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [newItem, setNewItem] = useState<Partial<QuoteLineItem>>({
+    description: '',
+    quantity: 1,
+    unit_price: 0,
+    total_price: 0
+  });
 
-  // Mock loading state
-  if (!id) {
-    return (
-      <AppLayout>
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <div className="w-8 h-8 bg-primary rounded animate-pulse mx-auto mb-4" />
-            <p className="text-foreground-500">Loading quote...</p>
-          </div>
-        </div>
-      </AppLayout>
-    );
-  }
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const quote = mockQuote; // In real app, fetch based on id
+  // Group items by visit and contact
+  const groupedItems = React.useMemo(() => {
+    const groups: Record<string, { visit_name: string; contacts: Record<string, { contact_name: string; contact_role: string; items: QuoteLineItem[] }> }> = {};
+    
+    quote.line_items.forEach(item => {
+      if (!groups[item.visit_id]) {
+        groups[item.visit_id] = { visit_name: item.visit_name, contacts: {} };
+      }
+      if (!groups[item.visit_id].contacts[item.contact_id]) {
+        groups[item.visit_id].contacts[item.contact_id] = {
+          contact_name: item.contact_name,
+          contact_role: item.contact_role,
+          items: []
+        };
+      }
+      groups[item.visit_id].contacts[item.contact_id].items.push(item);
+    });
+    
+    return groups;
+  }, [quote.line_items]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'draft': return 'warning';
-      case 'sent': return 'primary';
-      case 'accepted': return 'success';
-      case 'rejected': return 'danger';
-      case 'expired': return 'default';
-      default: return 'default';
+  // Filter articles based on search
+  useEffect(() => {
+    if (searchQuery.length > 0) {
+      const filtered = mockArticles.filter(article =>
+        article.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.description.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredArticles(filtered);
+    } else {
+      setFilteredArticles([]);
     }
+  }, [searchQuery]);
+
+  // Update line item
+  const updateLineItem = (itemId: string, updates: Partial<QuoteLineItem>) => {
+    setQuote(prev => ({
+      ...prev,
+      line_items: prev.line_items.map(item => {
+        if (item.id === itemId) {
+          const updated = { ...item, ...updates };
+          // Recalculate total price
+          updated.total_price = updated.quantity * updated.unit_price;
+          return updated;
+        }
+        return item;
+      })
+    }));
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'draft': return 'Concept';
-      case 'sent': return 'Verzonden';
-      case 'accepted': return 'Geaccepteerd';
-      case 'rejected': return 'Afgewezen';
-      case 'expired': return 'Verlopen';
-      default: return status;
+  // Add new line item
+  const addLineItem = (visitId: string, contactId: string) => {
+    setNewItemVisitId(visitId);
+    setNewItemContactId(contactId);
+    setIsAddingItem(true);
+    setNewItem({
+      description: '',
+      quantity: 1,
+      unit_price: 0,
+      total_price: 0
+    });
+    setSearchQuery('');
+    setSelectedArticle(null);
+    
+    // Focus on input after render
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
+  };
+
+  // Save new line item
+  const saveNewLineItem = () => {
+    if (!newItemVisitId || !newItemContactId || !newItem.description) return;
+    
+    const visit = Object.entries(groupedItems).find(([vId]) => vId === newItemVisitId);
+    const contact = quote.contacts.find(c => c.id === newItemContactId);
+    
+    if (!visit || !contact) return;
+
+    const lineItem: QuoteLineItem = {
+      id: `LI-${Date.now()}`,
+      description: newItem.description,
+      quantity: newItem.quantity || 1,
+      unit_price: newItem.unit_price || 0,
+      total_price: (newItem.quantity || 1) * (newItem.unit_price || 0),
+      category: selectedArticle?.category as any || 'product',
+      visit_id: newItemVisitId,
+      visit_name: visit[1].visit_name,
+      contact_id: newItemContactId,
+      contact_name: contact.name,
+      contact_role: contact.role,
+      is_customer_responsible: contact.role === 'end_customer',
+      article_id: selectedArticle?.id,
+      article_code: selectedArticle?.code
+    };
+
+    setQuote(prev => ({
+      ...prev,
+      line_items: [...prev.line_items, lineItem]
+    }));
+
+    // Reset form
+    setIsAddingItem(false);
+    setNewItemVisitId(null);
+    setNewItemContactId(null);
+    setNewItem({});
+    setSearchQuery('');
+    setSelectedArticle(null);
+  };
+
+  // Cancel new line item
+  const cancelNewLineItem = () => {
+    setIsAddingItem(false);
+    setNewItemVisitId(null);
+    setNewItemContactId(null);
+    setNewItem({});
+    setSearchQuery('');
+    setSelectedArticle(null);
+  };
+
+  // Remove line item
+  const removeLineItem = (itemId: string) => {
+    setQuote(prev => ({
+      ...prev,
+      line_items: prev.line_items.filter(item => item.id !== itemId)
+    }));
+  };
+
+  // Select article from autocomplete
+  const selectArticle = (article: Article) => {
+    setSelectedArticle(article);
+    setNewItem({
+      description: article.description,
+      quantity: 1,
+      unit_price: article.unit_price,
+      total_price: article.unit_price
+    });
+    setSearchQuery(article.description);
+    setFilteredArticles([]);
+  };
+
+  // Keyboard navigation for autocomplete
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!isAddingItem) return;
+
+    if (e.key === 'Enter') {
+      if (filteredArticles.length > 0) {
+        selectArticle(filteredArticles[0]);
+      } else {
+        saveNewLineItem();
+      }
+    } else if (e.key === 'Escape') {
+      cancelNewLineItem();
     }
   };
 
   const getContactColor = (role: string) => {
     switch (role) {
-      case 'end_customer': return 'success';
       case 'account': return 'primary';
+      case 'end_customer': return 'success';
       case 'intermediary': return 'warning';
-      default: return 'default';
+      default: return 'secondary';
     }
   };
 
   const getContactLabel = (role: string) => {
     switch (role) {
-      case 'end_customer': return 'Eindklant';
       case 'account': return 'Account';
-      case 'intermediary': return 'Tussenpersoon';
+      case 'end_customer': return 'Klant';
+      case 'intermediary': return 'Intermediair';
       default: return role;
     }
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'product': return <ArchiveBoxIcon className="h-4 w-4 text-primary" />;
-      case 'service': return <WrenchScrewdriverIcon className="h-4 w-4 text-success" />;
-      case 'installation': return <BoltIcon className="h-4 w-4 text-warning" />;
-      case 'other': return <DocumentTextIcon className="h-4 w-4 text-default-500" />;
-      default: return <DocumentTextIcon className="h-4 w-4 text-default-500" />;
+      case 'product': return <ArchiveBoxIcon className="h-4 w-4" />;
+      case 'service': return <WrenchScrewdriverIcon className="h-4 w-4" />;
+      case 'installation': return <BoltIcon className="h-4 w-4" />;
+      default: return <DocumentTextIcon className="h-4 w-4" />;
     }
   };
 
-  // Group line items by visit and then by contact
-  const groupedItems = quote.line_items.reduce((acc, item) => {
-    if (!acc[item.visit_id]) {
-      acc[item.visit_id] = {
-        visit_name: item.visit_name,
-        contacts: {}
-      };
-    }
-    if (!acc[item.visit_id].contacts[item.contact_id]) {
-      acc[item.visit_id].contacts[item.contact_id] = {
-        contact_name: item.contact_name,
-        contact_role: item.contact_role,
-        items: []
-      };
-    }
-    acc[item.visit_id].contacts[item.contact_id].items.push(item);
-    return acc;
-  }, {} as Record<string, { visit_name: string; contacts: Record<string, { contact_name: string; contact_role: string; items: QuoteLineItem[] }> }>);
-
-  // Calculate totals per contact
   const getContactTotal = (contactId: string) => {
     return quote.line_items
       .filter(item => item.contact_id === contactId)
       .reduce((sum, item) => sum + item.total_price, 0);
   };
 
-  return (
-    <>
-      <Head>
-        <title>Quote {quote.quote_number} - ChargeCars Portal</title>
-      </Head>
-
+  // Mock loading state
+  if (!id) {
+    return (
       <AppLayout>
-        <div className="p-4 space-y-4">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button
-                isIconOnly
-                variant="light"
-                size="sm"
-                onPress={() => router.back()}
-              >
-                <ArrowLeftIcon className="h-4 w-4" />
-              </Button>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">Quote {quote.quote_number}</h1>
-                <p className="text-sm text-foreground-600">Order {quote.order_number} • {quote.business_entity}</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button 
-                color="primary" 
-                size="sm"
-                startContent={<WrenchScrewdriverIcon className="h-4 w-4" />}
-                onPress={() => router.push(`/quotes/${quote.id}/build`)}
-              >
-                Bewerken
-              </Button>
-              <Button variant="bordered" size="sm" startContent={<PrinterIcon className="h-4 w-4" />}>
-                Print
-              </Button>
-              <Dropdown>
-                <DropdownTrigger>
-                  <Button isIconOnly variant="bordered" size="sm">
-                    <EllipsisVerticalIcon className="h-4 w-4" />
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu>
-                  <DropdownItem key="duplicate">Quote Dupliceren</DropdownItem>
-                  <DropdownItem key="pdf">Export PDF</DropdownItem>
-                  <DropdownItem key="email">Email Verzenden</DropdownItem>
-                  <DropdownItem key="convert">Naar Order</DropdownItem>
-                  <DropdownItem key="delete" className="text-danger" color="danger">
-                    Verwijderen
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-            </div>
-          </div>
-
-          {/* Status Timeline */}
-          <Card>
-            <CardHeader className="pb-2">
-              <h2 className="text-base font-semibold">Quote Status</h2>
-            </CardHeader>
-            <CardBody className="pt-0">
-              <div className="flex items-center justify-between w-full overflow-x-auto pb-2">
-                {quote.statuses.map((status, index) => (
-                  <React.Fragment key={status.id}>
-                    <div className="flex flex-col items-center min-w-[100px]">
-                      <div className={`
-                        w-8 h-8 rounded-full flex items-center justify-center border-2 mb-2 transition-all duration-200
-                        ${status.completed 
-                          ? 'bg-success border-success text-white shadow-md' 
-                          : status.current 
-                            ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary/20' 
-                            : 'border-default-300 bg-default-100 text-default-400'
-                        }
-                      `}>
-                        {status.completed ? (
-                          <CheckCircleIcon className="h-4 w-4" />
-                        ) : status.current ? (
-                          <div className="w-2 h-2 rounded-full bg-primary" />
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-current opacity-50" />
-                        )}
-                      </div>
-                      <Chip
-                        size="sm"
-                        color={status.completed ? 'success' : status.current ? 'primary' : 'default'}
-                        variant={status.current ? 'solid' : status.completed ? 'flat' : 'light'}
-                        className="mb-1 text-xs"
-                      >
-                        {status.name}
-                      </Chip>
-                      {status.date && (
-                        <span className="text-xs text-foreground-500">{status.date}</span>
-                      )}
-                    </div>
-                    {index < quote.statuses.length - 1 && (
-                      <div className="flex items-center justify-center flex-1 mx-1">
-                        <div className={`
-                          h-0.5 flex-1 rounded-full transition-colors duration-300
-                          ${status.completed ? 'bg-success' : 'bg-default-200'}
-                        `} />
-                        <ChevronRightIcon className={`
-                          h-4 w-4 mx-1 transition-colors duration-300
-                          ${status.completed ? 'text-success' : 'text-default-300'}
-                        `} />
-                      </div>
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
-
-          {/* Quote Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="p-3">
-              <div className="space-y-2">
-                <h3 className="text-xs font-medium text-foreground-600 uppercase tracking-wide">Quote Gegevens</h3>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span>Geldig tot:</span>
-                    <span className="font-medium">{quote.valid_until}</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span>Levertijd:</span>
-                    <span className="font-medium">{quote.delivery_time}</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-3">
-              <div className="space-y-2">
-                <h3 className="text-xs font-medium text-foreground-600 uppercase tracking-wide">Klant</h3>
-                {quote.contacts.filter(c => c.role === 'end_customer').map(contact => (
-                  <div key={contact.id} className="flex items-center gap-2">
-                    <Avatar name={contact.name} size="sm" className="w-6 h-6 text-xs" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate">{contact.name}</p>
-                      <p className="text-xs text-foreground-500 truncate">{contact.email}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="p-3">
-              <div className="space-y-2">
-                <h3 className="text-xs font-medium text-foreground-600 uppercase tracking-wide">Account</h3>
-                {quote.contacts.filter(c => c.role === 'account').map(contact => (
-                  <div key={contact.id} className="flex items-center gap-2">
-                    <Avatar name={contact.name} size="sm" className="w-6 h-6 text-xs" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate">{contact.name}</p>
-                      <p className="text-xs text-foreground-500 truncate">{contact.email}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="p-3">
-              <div className="space-y-2">
-                <h3 className="text-xs font-medium text-foreground-600 uppercase tracking-wide">Totaal</h3>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span>Klant:</span>
-                    <span className="font-semibold text-success">€{quote.customer_amount.toLocaleString('nl-NL')}</span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span>Partner:</span>
-                    <span className="font-semibold text-primary">€{quote.partner_amount.toLocaleString('nl-NL')}</span>
-                  </div>
-                  <Divider className="my-1" />
-                  <div className="flex justify-between">
-                    <span className="text-xs font-semibold">Totaal:</span>
-                    <span className="text-sm font-bold text-foreground">€{quote.total_amount.toLocaleString('nl-NL')}</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          {/* Line Items and Contact Cards */}
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
-            {/* Line Items Table - Left Side */}
-            <div className="xl:col-span-3">
-              <Card>
-                <CardHeader className="flex justify-between items-center p-4">
-                  <h3 className="text-base font-semibold">Line Items per Bezoek</h3>
-                  <Button 
-                    size="sm" 
-                    variant="bordered"
-                    startContent={<PencilIcon className="h-3 w-3" />}
-                    onPress={() => router.push(`/quotes/${quote.id}/build`)}
-                  >
-                    Bewerken
-                  </Button>
-                </CardHeader>
-                <CardBody className="p-0">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-content2 border-b border-divider">
-                        <tr>
-                          <th className="text-left py-2 px-3 font-semibold text-sm text-foreground min-w-[400px]">Beschrijving</th>
-                          <th className="text-left py-2 px-3 font-semibold text-sm text-foreground min-w-[80px]">Aantal</th>
-                          <th className="text-right py-2 px-3 font-semibold text-sm text-foreground min-w-[100px]">Prijs</th>
-                          <th className="text-right py-2 px-3 font-semibold text-sm text-foreground min-w-[100px]">Totaal</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {Object.entries(groupedItems).map(([visitId, visitData], visitIndex) => {
-                          const visitTotal = Object.values(visitData.contacts).reduce((sum, contact) => 
-                            sum + contact.items.reduce((itemSum, item) => itemSum + item.total_price, 0), 0
-                          );
-                          
-                          return (
-                            <React.Fragment key={visitId}>
-                              {/* Visit header row */}
-                              <tr className="bg-primary/10 border-b border-divider">
-                                <td className="py-2 px-3 font-semibold text-sm text-primary" colSpan={4}>
-                                  <div className="flex items-center gap-2">
-                                    <CalendarDaysIcon className="h-4 w-4" />
-                                    {visitData.visit_name}
-                                    <div className="flex items-center gap-2 ml-auto">
-                                      <Button size="sm" variant="flat" color="primary" className="text-xs h-6">
-                                        <CogIcon className="h-3 w-3 mr-1" />
-                                        Configureer
-                                      </Button>
-                                      <Chip size="sm" variant="flat" color="primary" className="text-xs">
-                                        €{visitTotal.toLocaleString('nl-NL')}
-                                      </Chip>
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
-                              
-                              {Object.entries(visitData.contacts).map(([contactId, contactData], contactIndex) => {
-                                const contactItems = contactData.items;
-                                const contactTotal = contactItems.reduce((sum, item) => sum + item.total_price, 0);
-                                
-                                return (
-                                  <React.Fragment key={contactId}>
-                                    {/* Contact header row */}
-                                    <tr className="bg-content2/40 border-b border-divider border-l-4 border-l-primary/30">
-                                      <td className="py-1.5 px-3" colSpan={4}>
-                                        <div className="flex items-center justify-between">
-                                          <div className="flex items-center gap-2">
-                                            <span className="font-medium text-sm">{contactData.contact_name}</span>
-                                            <Chip 
-                                              size="sm" 
-                                              color={getContactColor(contactData.contact_role)} 
-                                              variant="flat" 
-                                              className="text-xs"
-                                            >
-                                              {getContactLabel(contactData.contact_role)}
-                                            </Chip>
-                                          </div>
-                                          <span className="text-xs text-foreground-600 font-medium">€{contactTotal.toLocaleString('nl-NL')}</span>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                    
-                                    {/* Line items for this contact */}
-                                    {contactItems.map((item, itemIndex) => (
-                                      <tr key={item.id} className="border-b border-divider/30 hover:bg-content2/10 transition-colors">
-                                        {/* Line item description */}
-                                        <td className="py-1.5 px-3">
-                                          <div className="pl-4">
-                                            <p className="text-sm font-medium text-foreground">{item.description}</p>
-                                          </div>
-                                        </td>
-                                        
-                                        {/* Quantity */}
-                                        <td className="py-1.5 px-3 text-left">
-                                          <span className="text-sm font-medium">{item.quantity}x</span>
-                                        </td>
-                                        
-                                        {/* Unit price */}
-                                        <td className="py-1.5 px-3 text-right">
-                                          <span className="text-sm font-medium">€{item.unit_price.toLocaleString('nl-NL')}</span>
-                                        </td>
-                                        
-                                        {/* Total price */}
-                                        <td className="py-1.5 px-3 text-right">
-                                          <span className="text-sm font-semibold">€{item.total_price.toLocaleString('nl-NL')}</span>
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </React.Fragment>
-                                );
-                              })}
-                            </React.Fragment>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardBody>
-              </Card>
-
-              {/* Totals Breakdown */}
-              <Card className="mt-4">
-                <CardHeader className="pb-2">
-                  <h3 className="text-base font-semibold">Totaaloverzicht</h3>
-                </CardHeader>
-                <CardBody className="pt-0">
-                  <div className="space-y-3">
-                    {/* Per Contact Totals */}
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-medium text-foreground-600">Per Contact:</h4>
-                      {quote.contacts.map(contact => {
-                        const contactTotal = getContactTotal(contact.id);
-                        if (contactTotal === 0) return null;
-                        
-                        return (
-                          <div key={contact.id} className="flex justify-between items-center py-1 px-2 bg-content2/20 rounded">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm">{contact.name}</span>
-                              <Chip size="sm" color={getContactColor(contact.role)} variant="flat" className="text-xs">
-                                {getContactLabel(contact.role)}
-                              </Chip>
-                            </div>
-                            <span className="text-sm font-medium">€{contactTotal.toLocaleString('nl-NL')}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    
-                    <Divider />
-                    
-                    {/* VAT Breakdown */}
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span>Subtotaal (excl. BTW):</span>
-                        <span className="font-medium">€{(quote.total_amount / 1.21).toLocaleString('nl-NL', { maximumFractionDigits: 2 })}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span>BTW (21%):</span>
-                        <span className="font-medium">€{(quote.total_amount - (quote.total_amount / 1.21)).toLocaleString('nl-NL', { maximumFractionDigits: 2 })}</span>
-                      </div>
-                      <Divider />
-                      <div className="flex justify-between font-bold text-base">
-                        <span>Totaal (incl. BTW):</span>
-                        <span className="text-primary">€{quote.total_amount.toLocaleString('nl-NL')}</span>
-                      </div>
-                    </div>
-                  </div>
-                </CardBody>
-              </Card>
-            </div>
-
-            {/* Contact Cards - Right Side */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold">Contact Acties</h3>
-              
-              {quote.contacts.map(contact => {
-                const contactTotal = getContactTotal(contact.id);
-                if (contactTotal === 0) return null;
-                
-                return (
-                  <Card key={contact.id} className="p-3">
-                    <div className="space-y-2">
-                      {/* Contact Header */}
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between">
-                          <h4 className="font-semibold text-sm">{contact.name}</h4>
-                          <Chip size="sm" color={getContactColor(contact.role)} variant="flat" className="text-xs">
-                            {getContactLabel(contact.role)}
-                          </Chip>
-                        </div>
-                        <p className="text-xs text-foreground-600">{contact.email}</p>
-                        <Divider />
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs">QUO-2024-002-1</span>
-                          <span className="font-bold text-xs">€{contactTotal.toLocaleString('nl-NL')}</span>
-                        </div>
-                      </div>
-
-                      <Divider />
-
-                      {/* Documents */}
-                      <div className="space-y-1">
-                        <h5 className="text-xs font-medium text-foreground-600 uppercase">Documenten</h5>
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between p-1.5 bg-content2/30 rounded text-xs">
-                            <span>Offerte PDF v1</span>
-                            <Button size="sm" isIconOnly variant="light" className="h-5 w-5">
-                              <DocumentArrowDownIcon className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Online Quote Link */}
-                      <div className="space-y-1">
-                        <h5 className="text-xs font-medium text-foreground-600 uppercase">Online Offerte</h5>
-                        <div className="flex gap-1">
-                          <Button size="sm" color="primary" variant="flat" className="flex-1 text-xs h-6">
-                            <EyeIcon className="h-3 w-3 mr-1" />
-                            Bekijk Offerte
-                          </Button>
-                          <Button size="sm" variant="bordered" isIconOnly className="h-6 w-6">
-                            <DocumentDuplicateIcon className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Signature Status */}
-                      <div className="space-y-1">
-                        <h5 className="text-xs font-medium text-foreground-600 uppercase">Ondertekening</h5>
-                        <div className="flex items-center gap-2 text-xs">
-                          <ClockIcon className="h-3 w-3 text-warning" />
-                          <span>Wacht op ondertekening</span>
-                        </div>
-                        <Button size="sm" color="success" variant="flat" className="w-full text-xs h-6">
-                          <PaperAirplaneIcon className="h-3 w-3 mr-1" />
-                          Verstuur voor Akkoord
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Terms and Conditions */}
-          {quote.terms_conditions && (
-            <Card>
-              <CardHeader className="pb-2">
-                <h3 className="text-base font-semibold">Voorwaarden</h3>
-              </CardHeader>
-              <CardBody className="pt-0">
-                <p className="text-xs text-foreground-600">{quote.terms_conditions}</p>
-              </CardBody>
-            </Card>
-          )}
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">Loading...</div>
         </div>
       </AppLayout>
-    </>
+    );
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'draft': return 'secondary';
+      case 'sent': return 'primary';
+      case 'accepted': return 'success';
+      case 'rejected': return 'danger';
+      case 'expired': return 'warning';
+      default: return 'secondary';
+    }
+  };
+
+  return (
+    <AppLayout>
+      <Head>
+        <title>Offerte {quote.quote_number} - ChargeCars</title>
+      </Head>
+
+      <div className="p-4 space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button
+              isIconOnly
+              variant="flat"
+              size="sm"
+              onPress={() => router.back()}
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold">Offerte {quote.quote_number}</h1>
+              <p className="text-sm text-foreground-500">Order: {quote.order_number}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Chip color={getStatusColor(quote.status)} variant="flat" size="sm">
+              {quote.status === 'draft' ? 'Concept' : 
+               quote.status === 'sent' ? 'Verzonden' :
+               quote.status === 'accepted' ? 'Geaccepteerd' :
+               quote.status === 'rejected' ? 'Afgewezen' : 'Verlopen'}
+            </Chip>
+            <Dropdown>
+              <DropdownTrigger>
+                <Button isIconOnly variant="flat" size="sm">
+                  <EllipsisVerticalIcon className="h-4 w-4" />
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu>
+                <DropdownItem key="print" startContent={<PrinterIcon className="h-4 w-4" />}>
+                  Print Offerte
+                </DropdownItem>
+                <DropdownItem key="pdf" startContent={<DocumentArrowDownIcon className="h-4 w-4" />}>
+                  Download PDF
+                </DropdownItem>
+                <DropdownItem key="duplicate" startContent={<DocumentDuplicateIcon className="h-4 w-4" />}>
+                  Dupliceer
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        </div>
+
+        {/* Status Timeline */}
+        <Card className="p-4">
+          <div className="flex items-center gap-4 overflow-x-auto">
+            {quote.statuses.map((status, index) => (
+              <React.Fragment key={status.id}>
+                <div className="flex flex-col items-center gap-1 min-w-fit">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
+                    status.completed ? 'bg-success text-white' :
+                    status.current ? 'bg-primary text-white' :
+                    'bg-default-200 text-default-500'
+                  }`}>
+                    {status.completed ? <CheckCircleIcon className="h-4 w-4" /> :
+                     status.current ? <ClockIcon className="h-4 w-4" /> :
+                     index + 1}
+                  </div>
+                  <div className="text-xs font-medium text-center">{status.name}</div>
+                  {status.date && (
+                    <div className="text-xs text-foreground-500 text-center">{status.date}</div>
+                  )}
+                </div>
+                {index < quote.statuses.length - 1 && (
+                  <div className={`h-0.5 w-12 ${
+                    status.completed ? 'bg-success' : 'bg-default-200'
+                  }`} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </Card>
+
+        {/* Quote Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card className="p-4">
+            <h3 className="text-base font-semibold mb-2">Quote Details</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-foreground-500">Geldig tot:</span>
+                <span>{quote.valid_until}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-foreground-500">Levertijd:</span>
+                <span>{quote.delivery_time}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-foreground-500">Garantie:</span>
+                <span>{quote.warranty_period}</span>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <h3 className="text-base font-semibold mb-2">Klant</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-foreground-500">Naam:</span>
+                <span>{quote.customer_name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-foreground-500">Bedrag:</span>
+                <span className="font-medium">€{quote.customer_amount.toFixed(2)}</span>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <h3 className="text-base font-semibold mb-2">Partner</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-foreground-500">Naam:</span>
+                <span>{quote.partner_name}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-foreground-500">Bedrag:</span>
+                <span className="font-medium">€{quote.partner_amount.toFixed(2)}</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Line Items Table */}
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-base font-semibold">Regelitems</h3>
+            <Button
+              size="sm"
+              color="primary"
+              startContent={<PlusIcon className="h-4 w-4" />}
+              onPress={() => addLineItem('V-001', 'CONT-001')}
+            >
+              Regel Toevoegen
+            </Button>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-divider">
+                  <th className="text-left text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[100px]">Bezoek</th>
+                  <th className="text-left text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[60px]">#</th>
+                  <th className="text-left text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[300px]">Omschrijving</th>
+                  <th className="text-right text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[80px]">Aantal</th>
+                  <th className="text-right text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[100px]">Prijs</th>
+                  <th className="text-right text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[100px]">Totaal</th>
+                  <th className="text-center text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[60px]">Acties</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(groupedItems).map(([visitId, visit], visitIndex) => {
+                  let itemNumber = 1;
+                  const visitRows: JSX.Element[] = [];
+                  let isFirstVisitRow = true;
+                  
+                  Object.entries(visit.contacts).forEach(([contactId, contact]) => {
+                    // Contact header
+                    visitRows.push(
+                      <tr key={`contact-${contactId}`} className="bg-content2/30">
+                        {isFirstVisitRow && (
+                          <td rowSpan={Object.values(visit.contacts).reduce((sum, c) => sum + c.items.length + 1, Object.keys(visit.contacts).length)} 
+                              className="border-r border-divider bg-gradient-to-b from-primary/10 to-primary/5">
+                            <div className="p-2 text-center">
+                              <div className="transform -rotate-90 whitespace-nowrap text-xs font-semibold text-primary">
+                                {visit.visit_name}
+                              </div>
+                            </div>
+                          </td>
+                        )}
+                        <td colSpan={5} className="py-2 px-2">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Chip size="sm" color={getContactColor(contact.contact_role)} variant="flat">
+                                {getContactLabel(contact.contact_role)}
+                              </Chip>
+                              <span className="text-sm font-medium">{contact.contact_name}</span>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="flat"
+                              startContent={<PlusIcon className="h-3 w-3" />}
+                              onPress={() => addLineItem(visitId, contactId)}
+                            >
+                              Toevoegen
+                            </Button>
+                          </div>
+                        </td>
+                        <td></td>
+                      </tr>
+                    );
+                    isFirstVisitRow = false;
+                    
+                    // Contact items
+                    contact.items.forEach((item, itemIndex) => {
+                      visitRows.push(
+                        <tr key={item.id} className="border-b border-divider hover:bg-content2/20">
+                          <td className="py-2 px-2 text-center text-xs text-foreground-500">
+                            {itemNumber}
+                          </td>
+                          <td className="py-2 px-2">
+                            <div className="flex items-start gap-2">
+                              <div className="flex-shrink-0">{getCategoryIcon(item.category)}</div>
+                              <div className="min-w-0">
+                                {editingItem === item.id ? (
+                                  <Input
+                                    size="sm"
+                                    value={item.description}
+                                    onChange={(e) => updateLineItem(item.id, { description: e.target.value })}
+                                    onBlur={() => setEditingItem(null)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') setEditingItem(null);
+                                      if (e.key === 'Escape') setEditingItem(null);
+                                    }}
+                                    autoFocus
+                                  />
+                                ) : (
+                                  <div 
+                                    className="text-sm cursor-pointer hover:bg-content2 rounded p-1 -m-1"
+                                    onClick={() => setEditingItem(item.id)}
+                                  >
+                                    {item.description}
+                                    {item.article_code && (
+                                      <div className="text-xs text-foreground-500">{item.article_code}</div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-2 px-2 text-right">
+                            <Input
+                              size="sm"
+                              type="number"
+                              value={item.quantity.toString()}
+                              onChange={(e) => updateLineItem(item.id, { quantity: parseInt(e.target.value) || 1 })}
+                              className="w-16 text-right"
+                              min="1"
+                            />
+                          </td>
+                          <td className="py-2 px-2 text-right">
+                            <div className="flex items-center justify-end">
+                              <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                              <Input
+                                size="sm"
+                                type="number"
+                                value={item.unit_price.toFixed(2)}
+                                onChange={(e) => updateLineItem(item.id, { unit_price: parseFloat(e.target.value) || 0 })}
+                                className="w-20 text-right"
+                                step="0.01"
+                              />
+                            </div>
+                          </td>
+                          <td className="py-2 px-2 text-right">
+                            <div className="flex items-center justify-end text-sm font-medium">
+                              <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                              {item.total_price.toFixed(2)}
+                            </div>
+                          </td>
+                          <td className="py-2 px-2 text-center">
+                            <Button
+                              isIconOnly
+                              size="sm"
+                              variant="flat"
+                              color="danger"
+                              onPress={() => removeLineItem(item.id)}
+                            >
+                              <TrashIcon className="h-3 w-3" />
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                      itemNumber++;
+                    });
+                    
+                    // Add new item row if this is the target contact
+                    if (isAddingItem && newItemVisitId === visitId && newItemContactId === contactId) {
+                      visitRows.push(
+                        <tr key="new-item" className="border-b border-divider bg-warning/10">
+                          <td className="py-2 px-2 text-center text-xs text-foreground-500">
+                            {itemNumber}
+                          </td>
+                          <td className="py-2 px-2 relative">
+                            <div className="space-y-2">
+                              <Input
+                                ref={inputRef}
+                                size="sm"
+                                placeholder="Begin met typen voor suggesties..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                autoFocus
+                              />
+                              {filteredArticles.length > 0 && (
+                                <div className="absolute z-10 w-full bg-content1 border border-divider rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                                  {filteredArticles.map((article) => (
+                                    <div
+                                      key={article.id}
+                                      className="p-2 hover:bg-content2 cursor-pointer border-b border-divider last:border-0"
+                                      onClick={() => selectArticle(article)}
+                                    >
+                                      <div className="text-sm font-medium">{article.name}</div>
+                                      <div className="text-xs text-foreground-500">{article.code} - €{article.unit_price.toFixed(2)}</div>
+                                      <div className="text-xs text-foreground-400">{article.description}</div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-2 px-2 text-right">
+                            <Input
+                              size="sm"
+                              type="number"
+                              value={newItem.quantity?.toString() || '1'}
+                              onChange={(e) => setNewItem({...newItem, quantity: parseInt(e.target.value) || 1})}
+                              className="w-16 text-right"
+                              min="1"
+                            />
+                          </td>
+                          <td className="py-2 px-2 text-right">
+                            <div className="flex items-center justify-end">
+                              <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                              <Input
+                                size="sm"
+                                type="number"
+                                value={newItem.unit_price?.toFixed(2) || '0.00'}
+                                onChange={(e) => setNewItem({...newItem, unit_price: parseFloat(e.target.value) || 0})}
+                                className="w-20 text-right"
+                                step="0.01"
+                              />
+                            </div>
+                          </td>
+                          <td className="py-2 px-2 text-right">
+                            <div className="flex items-center justify-end text-sm font-medium">
+                              <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                              {((newItem.quantity || 1) * (newItem.unit_price || 0)).toFixed(2)}
+                            </div>
+                          </td>
+                          <td className="py-2 px-2 text-center">
+                            <div className="flex gap-1">
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                color="success"
+                                variant="flat"
+                                onPress={saveNewLineItem}
+                              >
+                                <CheckIcon className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                isIconOnly
+                                size="sm"
+                                variant="flat"
+                                onPress={cancelNewLineItem}
+                              >
+                                <XMarkIcon className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    }
+                    
+                    // Contact subtotal
+                    const contactTotal = getContactTotal(contactId);
+                    visitRows.push(
+                      <tr key={`subtotal-${contactId}`} className="bg-content2/50">
+                        <td colSpan={4} className="py-1 px-2 text-right text-xs font-medium text-foreground-600">
+                          Subtotaal {contact.contact_name}:
+                        </td>
+                        <td className="py-1 px-2 text-right text-sm font-semibold">
+                          <div className="flex items-center justify-end">
+                            <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                            {contactTotal.toFixed(2)}
+                          </div>
+                        </td>
+                        <td></td>
+                      </tr>
+                    );
+                  });
+                  
+                  return visitRows;
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+
+        {/* Totals */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card className="p-4">
+            <h3 className="text-base font-semibold mb-3">Totaaloverzicht</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Subtotaal:</span>
+                <span>€{(quote.customer_amount + quote.partner_amount - (quote.customer_amount + quote.partner_amount) * 0.21).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>BTW (21%):</span>
+                <span>€{((quote.customer_amount + quote.partner_amount) * 0.21).toFixed(2)}</span>
+              </div>
+              <Divider />
+              <div className="flex justify-between font-semibold">
+                <span>Totaal:</span>
+                <span>€{(quote.customer_amount + quote.partner_amount).toFixed(2)}</span>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="p-4">
+            <h3 className="text-base font-semibold mb-3">Verdeling</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span>Klant:</span>
+                <span className="font-medium">€{quote.customer_amount.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Partner:</span>
+                <span className="font-medium">€{quote.partner_amount.toFixed(2)}</span>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        {/* Terms & Conditions */}
+        {quote.terms_conditions && (
+          <Card className="p-4">
+            <h3 className="text-base font-semibold mb-2">Voorwaarden</h3>
+            <p className="text-sm text-foreground-600">{quote.terms_conditions}</p>
+          </Card>
+        )}
+      </div>
+    </AppLayout>
   );
 };
 
