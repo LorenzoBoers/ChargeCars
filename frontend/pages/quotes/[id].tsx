@@ -866,14 +866,26 @@ const QuoteDetailPage: React.FC = () => {
                       let itemNumber = 1;
                       const visitRows: JSX.Element[] = [];
                       let isFirstVisitRow = true;
-                      const totalContactRows = Object.values(visit.contacts).reduce((sum, c) => sum + c.items.length + 2, Object.keys(visit.contacts).length);
                       
-                      Object.entries(visit.contacts).forEach(([contactId, contact]) => {
+                      // Calculate total rows for this visit more accurately
+                      const contactEntries = Object.entries(visit.contacts);
+                      let totalRowsForVisit = 0;
+                      
+                      contactEntries.forEach(([contactId, contact]) => {
+                        totalRowsForVisit += 1; // Contact header row
+                        totalRowsForVisit += contact.items.length; // Item rows
+                        if (isEditing) {
+                          totalRowsForVisit += 1; // Add item button row
+                        }
+                        totalRowsForVisit += 1; // Subtotal row
+                      });
+                      
+                      Object.entries(visit.contacts).forEach(([contactId, contact], contactIndex) => {
                         // Contact header
                         visitRows.push(
                           <tr key={`contact-${contactId}`} className="bg-content2/30">
                             {isFirstVisitRow && (
-                              <td rowSpan={totalContactRows} 
+                              <td rowSpan={totalRowsForVisit} 
                                   className="border-r border-divider bg-gradient-to-b from-primary/10 to-primary/5 align-top">
                                 <div className="p-2 text-center">
                                   <div className="transform -rotate-90 whitespace-nowrap text-xs font-semibold text-primary">
@@ -882,7 +894,7 @@ const QuoteDetailPage: React.FC = () => {
                                 </div>
                               </td>
                             )}
-                            <td colSpan={isEditing ? 5 : 5} className="py-2 px-2">
+                            <td colSpan={isEditing ? 6 : 5} className="py-2 px-2">
                               <div className="flex items-center gap-2">
                                 <Chip size="sm" color={getContactColor(contact.contact_role)} variant="flat">
                                   {getContactLabel(contact.contact_role)}
@@ -890,7 +902,6 @@ const QuoteDetailPage: React.FC = () => {
                                 <span className="text-sm font-medium">{contact.contact_name}</span>
                               </div>
                             </td>
-                            {isEditing && <td></td>}
                           </tr>
                         );
                         isFirstVisitRow = false;
@@ -1053,27 +1064,29 @@ const QuoteDetailPage: React.FC = () => {
                                   {((newItem.quantity || 1) * (newItem.unit_price || 0)).toFixed(2)}
                                 </div>
                               </td>
-                              <td className="py-2 px-2 text-center">
-                                <div className="flex gap-1">
-                                  <Button
-                                    isIconOnly
-                                    size="sm"
-                                    color="success"
-                                    variant="flat"
-                                    onPress={saveNewLineItem}
-                                  >
-                                    <CheckIcon className="h-3 w-3" />
-                                  </Button>
-                                  <Button
-                                    isIconOnly
-                                    size="sm"
-                                    variant="flat"
-                                    onPress={cancelNewLineItem}
-                                  >
-                                    <XMarkIcon className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              </td>
+                              {isEditing && (
+                                <td className="py-2 px-2 text-center">
+                                  <div className="flex gap-1">
+                                    <Button
+                                      isIconOnly
+                                      size="sm"
+                                      color="success"
+                                      variant="flat"
+                                      onPress={saveNewLineItem}
+                                    >
+                                      <CheckIcon className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      isIconOnly
+                                      size="sm"
+                                      variant="flat"
+                                      onPress={cancelNewLineItem}
+                                    >
+                                      <XMarkIcon className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </td>
+                              )}
                             </tr>
                           );
                         }
@@ -1082,7 +1095,7 @@ const QuoteDetailPage: React.FC = () => {
                         if (isEditing) {
                           visitRows.push(
                             <tr key={`add-${contactId}`} className="border-b border-divider">
-                              <td colSpan={isEditing ? 6 : 5} className="py-1 px-2 text-center">
+                              <td colSpan={isEditing ? 7 : 6} className="py-1 px-2 text-center">
                                 <Button
                                   size="sm"
                                   variant="flat"
@@ -1093,7 +1106,6 @@ const QuoteDetailPage: React.FC = () => {
                                   Regel toevoegen voor {contact.contact_name}
                                 </Button>
                               </td>
-                              {isEditing && <td></td>}
                             </tr>
                           );
                         }
@@ -1102,7 +1114,7 @@ const QuoteDetailPage: React.FC = () => {
                         const contactTotal = getContactTotal(contactId);
                         visitRows.push(
                           <tr key={`subtotal-${contactId}`} className="bg-content2/50">
-                            <td colSpan={isEditing ? 4 : 5} className="py-1 px-2 text-right text-xs font-medium text-foreground-600">
+                            <td colSpan={4} className="py-1 px-2 text-right text-xs font-medium text-foreground-600">
                               Subtotaal {contact.contact_name}:
                             </td>
                             <td className="py-1 px-2 text-right text-sm font-semibold">
