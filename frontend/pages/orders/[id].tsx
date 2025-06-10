@@ -640,19 +640,13 @@ const OrderDetailPage: React.FC = () => {
                       ))}
                     </div>
                     
-                    {/* Google Maps Embed */}
-                    <div className="relative">
-                      <div className="w-full h-48 bg-content2 rounded-lg overflow-hidden">
-                        <iframe
-                          width="100%"
-                          height="100%"
-                          style={{ border: 0 }}
-                          loading="lazy"
-                          allowFullScreen
-                          referrerPolicy="no-referrer-when-downgrade"
-                          src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBDaeWicvigtP9xPv919E-RNoxfvC-Hqik&q=${encodeURIComponent(order.addresses[0]?.street + ', ' + order.addresses[0]?.city + ', ' + order.addresses[0]?.country)}`}
-                        />
-                      </div>
+                    {/* Mock Map Image */}
+                    <div className="relative h-48 bg-content2 rounded-lg overflow-hidden">
+                      <img
+                        src="/images/Schermafbeelding 2025-06-10 022658.png"
+                        alt="Kaart weergave"
+                        className="w-full h-full object-cover"
+                      />
                       <div className="absolute top-2 right-2">
                         <Button
                           size="sm"
