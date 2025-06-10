@@ -251,7 +251,17 @@ export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
             isIconOnly
             size="sm"
             variant="light"
-            onPress={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            onPress={() => {
+              const newTheme = theme === 'dark' ? 'light' : 'dark';
+              console.log('Switching theme from', theme, 'to', newTheme);
+              setTheme(newTheme);
+              // Force update localStorage for persistence
+              if (typeof window !== 'undefined') {
+                localStorage.setItem('theme', newTheme);
+                document.documentElement.classList.remove('light', 'dark');
+                document.documentElement.classList.add(newTheme);
+              }
+            }}
             isDisabled={!mounted}
           >
             {!mounted ? (

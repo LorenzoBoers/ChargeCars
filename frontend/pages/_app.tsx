@@ -7,7 +7,15 @@ import '../styles/globals.css'
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
-    <NextThemesProvider attribute="class" defaultTheme="dark">
+    <NextThemesProvider 
+      attribute="class" 
+      defaultTheme="dark" 
+      themes={['light', 'dark']}
+      enableSystem={false}
+      disableTransitionOnChange={false}
+      storageKey="chargecars-theme"
+      forcedTheme={undefined}
+    >
       <NextUIProvider>
         <AuthProvider>
           <div className="text-foreground bg-background min-h-screen transition-colors duration-200">

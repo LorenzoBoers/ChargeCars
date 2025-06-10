@@ -43,7 +43,7 @@ module.exports = {
   },
   darkMode: "class",
   plugins: [nextui({
-    defaultTheme: "dark",
+    defaultTheme: "system",
     themes: {
       light: {
         colors: {
