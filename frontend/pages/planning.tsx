@@ -24,12 +24,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PlusIcon,
-  UserPlusIcon,
-  BellIcon,
-  ExclamationTriangleIcon,
-  CogIcon,
-  HomeIcon,
-  MagnifyingGlassIcon
+  UserPlusIcon
 } from '@heroicons/react/24/outline';
 import { AppLayout } from '../components/layouts/AppLayout';
 
@@ -73,47 +68,12 @@ interface RouteItem {
   orderNumber: number;
 }
 
-interface FSNNotification {
-  id: string;
-  type: 'warning' | 'error' | 'info';
-  message: string;
-  timestamp: string;
-  isRead: boolean;
-}
-
 export default function PlanningPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState('route-planner');
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'teams' | 'visits'>('teams');
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
-
-  // FSN Notifications
-  const fsnNotifications: FSNNotification[] = [
-    {
-      id: 'fsn-1',
-      type: 'warning',
-      message: 'Team Alpha - Vertraging verwacht',
-      timestamp: '10:15',
-      isRead: false
-    },
-    {
-      id: 'fsn-2',
-      type: 'error',
-      message: 'Urgent: Storing gemeld CHC-2024-001',
-      timestamp: '09:45',
-      isRead: false
-    },
-    {
-      id: 'fsn-3',
-      type: 'info',
-      message: 'Route optimalisatie voltooid',
-      timestamp: '09:30',
-      isRead: true
-    }
-  ];
-
-  const unreadFSNCount = fsnNotifications.filter(n => !n.isRead).length;
 
   // Mock data - updated team status logic
   const teams: Team[] = [
@@ -238,16 +198,6 @@ export default function PlanningPage() {
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'installation': return <WrenchScrewdriverIcon className="h-4 w-4" />;
-      case 'maintenance': return <CogIcon className="h-4 w-4" />;
-      case 'repair': return <ExclamationTriangleIcon className="h-4 w-4" />;
-      case 'inspection': return <MagnifyingGlassIcon className="h-4 w-4" />;
-      default: return <WrenchScrewdriverIcon className="h-4 w-4" />;
-    }
-  };
-
   const getTypeLabel = (type: string) => {
     switch (type) {
       case 'installation': return 'Installatie';
@@ -255,24 +205,6 @@ export default function PlanningPage() {
       case 'repair': return 'Reparatie';
       case 'inspection': return 'Inspectie';
       default: return 'Taak';
-    }
-  };
-
-  const getFSNIcon = (type: string) => {
-    switch (type) {
-      case 'warning': return <ExclamationTriangleIcon className="h-4 w-4" />;
-      case 'error': return <ExclamationTriangleIcon className="h-4 w-4" />;
-      case 'info': return <BellIcon className="h-4 w-4" />;
-      default: return <BellIcon className="h-4 w-4" />;
-    }
-  };
-
-  const getFSNColor = (type: string) => {
-    switch (type) {
-      case 'warning': return 'warning';
-      case 'error': return 'danger';
-      case 'info': return 'primary';
-      default: return 'default';
     }
   };
 
@@ -293,12 +225,13 @@ export default function PlanningPage() {
   return (
     <AppLayout>
       <div className="h-full flex flex-col bg-background">
-        {/* Top Header with Date Navigation and FSN */}
+        {/* Top Header with Tabs */}
         <div className="p-4 border-b border-divider bg-content1">
-          <div className="flex items-center justify-between">
-            {/* Left: Date Navigation */}
-            <div className="flex items-center gap-4">
-              <h1 className="text-xl font-bold">Planning Dashboard</h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-xl font-bold">Planning Dashboard</h1>
+            
+            {/* Day Switcher - Compact */}
+            {activeTab === 'route-planner' && (
               <div className="flex items-center gap-2">
                 <Button
                   size="sm"
@@ -306,9 +239,9 @@ export default function PlanningPage() {
                   isIconOnly
                   onPress={() => changeDate('prev')}
                 >
-                  <ChevronLeftIcon className="h-4 w-4" />
+                  <ChevronLeftIcon className="h-3 w-3" />
                 </Button>
-                <div className="text-sm font-medium px-3">
+                <div className="text-sm font-medium px-2">
                   {formatDate(selectedDate)}
                 </div>
                 <Button
@@ -317,84 +250,56 @@ export default function PlanningPage() {
                   isIconOnly
                   onPress={() => changeDate('next')}
                 >
-                  <ChevronRightIcon className="h-4 w-4" />
+                  <ChevronRightIcon className="h-3 w-3" />
                 </Button>
               </div>
-            </div>
-
-            {/* Right: FSN Notifications */}
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-foreground-600">FSN:</span>
-                {fsnNotifications.slice(0, 2).map(notification => (
-                  <Chip
-                    key={notification.id}
-                    size="sm"
-                    color={getFSNColor(notification.type)}
-                    variant={notification.isRead ? "flat" : "solid"}
-                    startContent={getFSNIcon(notification.type)}
-                    className="text-xs"
-                  >
-                    {notification.message}
-                  </Chip>
-                ))}
-                {unreadFSNCount > 0 && (
-                  <Badge content={unreadFSNCount} color="danger" size="sm">
-                    <Button size="sm" variant="flat" isIconOnly>
-                      <BellIcon className="h-4 w-4" />
-                    </Button>
-                  </Badge>
-                )}
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Tabs */}
-          <div className="mt-4">
-            <Tabs
-              selectedKey={activeTab}
-              onSelectionChange={(key) => setActiveTab(key as string)}
-              variant="underlined"
-              color="primary"
-            >
-              <Tab
-                key="route-planner"
-                title={
-                  <div className="flex items-center gap-2">
-                    <MapIcon className="h-4 w-4" />
-                    Route Planner
-                  </div>
-                }
-              />
-              <Tab
-                key="agenda"
-                title={
-                  <div className="flex items-center gap-2">
-                    <CalendarIcon className="h-4 w-4" />
-                    Agenda
-                  </div>
-                }
-              />
-              <Tab
-                key="capacity"
-                title={
-                  <div className="flex items-center gap-2">
-                    <ClockIcon className="h-4 w-4" />
-                    Capaciteit
-                  </div>
-                }
-              />
-              <Tab
-                key="teams"
-                title={
-                  <div className="flex items-center gap-2">
-                    <UsersIcon className="h-4 w-4" />
-                    Teams
-                  </div>
-                }
-              />
-            </Tabs>
-          </div>
+          <Tabs
+            selectedKey={activeTab}
+            onSelectionChange={(key) => setActiveTab(key as string)}
+            variant="underlined"
+            color="primary"
+          >
+            <Tab
+              key="route-planner"
+              title={
+                <div className="flex items-center gap-2">
+                  <MapIcon className="h-4 w-4" />
+                  Route Planner
+                </div>
+              }
+            />
+            <Tab
+              key="agenda"
+              title={
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="h-4 w-4" />
+                  Agenda
+                </div>
+              }
+            />
+            <Tab
+              key="capacity"
+              title={
+                <div className="flex items-center gap-2">
+                  <ClockIcon className="h-4 w-4" />
+                  Capaciteit
+                </div>
+              }
+            />
+            <Tab
+              key="teams"
+              title={
+                <div className="flex items-center gap-2">
+                  <UsersIcon className="h-4 w-4" />
+                  Teams
+                </div>
+              }
+            />
+          </Tabs>
         </div>
 
         {/* Main Content */}
@@ -404,10 +309,10 @@ export default function PlanningPage() {
               <div className="grid grid-cols-12 gap-6 h-full">
                 {/* Map and Teams Section */}
                 <div className="col-span-9 space-y-6 h-full flex flex-col">
-                  {/* Map Placeholder */}
-                  <Card className="flex-1">
+                  {/* Map Placeholder - 500px */}
+                  <Card>
                     <CardBody className="p-0">
-                      <div className="h-full bg-content2 rounded-lg flex items-center justify-center">
+                      <div className="h-[500px] bg-content2 rounded-lg flex items-center justify-center">
                         <div className="text-center">
                           <MapIcon className="h-16 w-16 text-foreground-300 mx-auto mb-4" />
                           <h3 className="text-lg font-semibold text-foreground-500">Kaart Weergave</h3>
@@ -468,10 +373,15 @@ export default function PlanningPage() {
                                     <div className="mt-1">
                                       <p className="text-xs font-medium text-foreground-700">Beschikbaar:</p>
                                       <div className="flex flex-wrap gap-1 mt-1">
-                                        {availableMembers.map(member => (
-                                          <Chip key={member.id} size="sm" variant="flat" color="success" className="text-xs">
-                                            {member.name.split(' ')[0]}
-                                          </Chip>
+                                        {team.members.map(member => (
+                                          <div key={member.id} className="flex items-center gap-1">
+                                            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                                              member.isAvailable ? 'bg-success' : 'bg-danger'
+                                            }`}></div>
+                                            <span className="text-xs text-foreground-600">
+                                              {member.name.split(' ')[0]}
+                                            </span>
+                                          </div>
                                         ))}
                                       </div>
                                     </div>
@@ -486,85 +396,41 @@ export default function PlanningPage() {
                                       const task = availableTasks.find(t => t.id === route.taskId);
                                       if (!task) return null;
                                       
-                                      const tooltipContent = (
-                                        <div className="p-2 max-w-xs">
-                                          <div className="space-y-2">
-                                            <div>
-                                              <p className="font-semibold text-sm">{task.title}</p>
-                                              <p className="text-xs text-foreground-600">Order: #{task.orderNumber}</p>
+                                      return (
+                                        <div 
+                                          key={route.id} 
+                                          className="bg-content1 border border-divider rounded-lg p-2 min-w-28 max-w-28 flex-shrink-0 cursor-pointer transition-all duration-200 hover:border-primary/50 hover:shadow-md relative"
+                                        >
+                                          {/* Order Number Badge */}
+                                          <Badge 
+                                            content={route.orderNumber} 
+                                            color="primary" 
+                                            className="absolute -top-1 -right-1"
+                                            size="sm"
+                                          >
+                                            <div></div>
+                                          </Badge>
+                                          
+                                          {/* Only Text - Vertical Layout */}
+                                          <div className="text-center space-y-1">
+                                            <div className="text-sm font-bold text-primary">
+                                              {route.scheduledTime}
                                             </div>
-                                            
-                                            <Divider />
-                                            
-                                            <div className="space-y-1">
-                                              <p className="text-xs"><span className="font-medium">Klant:</span> {task.customer}</p>
-                                              <p className="text-xs"><span className="font-medium">Adres:</span> {task.address}, {task.city}</p>
-                                              <p className="text-xs"><span className="font-medium">Tijd:</span> {route.scheduledTime} ({Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m)</p>
-                                              <p className="text-xs"><span className="font-medium">Prioriteit:</span> {task.priority}</p>
+                                            <div className="text-xs text-foreground-700">
+                                              {getTypeLabel(task.type)}
                                             </div>
-                                            
-                                            <Divider />
-                                            
-                                            <div>
-                                              <p className="text-xs font-medium mb-1">Vereisten:</p>
-                                              <div className="flex flex-wrap gap-1">
-                                                {task.requirements.map((req, index) => (
-                                                  <Chip key={index} size="sm" variant="flat" color="secondary" className="text-xs">
-                                                    {req}
-                                                  </Chip>
-                                                ))}
-                                              </div>
+                                            <div className="text-xs text-foreground-900">
+                                              {task.city}
                                             </div>
                                           </div>
                                         </div>
-                                      );
-                                      
-                                      return (
-                                        <Tooltip
-                                          key={route.id}
-                                          content={tooltipContent}
-                                          placement="top"
-                                          className="bg-content1 border border-divider shadow-lg"
-                                        >
-                                          <div className="bg-content1 border border-divider rounded-lg p-2 min-w-32 max-w-32 flex-shrink-0 cursor-pointer transition-all duration-200 hover:border-primary/50 hover:shadow-md relative">
-                                            {/* Order Number Badge */}
-                                            <Badge 
-                                              content={route.orderNumber} 
-                                              color="primary" 
-                                              className="absolute -top-1 -right-1"
-                                              size="sm"
-                                            >
-                                              <div></div>
-                                            </Badge>
-                                            
-                                            <div className="space-y-1">
-                                              {/* Time */}
-                                              <div className="text-center">
-                                                <span className="text-sm font-bold text-primary">{route.scheduledTime}</span>
-                                              </div>
-                                              
-                                              {/* Type with Icon */}
-                                              <div className="text-center">
-                                                <div className="flex items-center justify-center mb-1">
-                                                  {getTypeIcon(task.type)}
-                                                </div>
-                                                <p className="text-xs font-medium text-foreground-700">{getTypeLabel(task.type)}</p>
-                                              </div>
-                                              
-                                              {/* City */}
-                                              <div className="text-center">
-                                                <p className="text-xs font-medium text-foreground-900">{task.city}</p>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </Tooltip>
                                       );
                                     })}
                                   
                                   {/* Add Task Button */}
                                   <Button
                                     variant="bordered"
-                                    className="min-w-32 max-w-32 h-16 flex-shrink-0"
+                                    className="min-w-28 max-w-28 h-14 flex-shrink-0"
                                     size="sm"
                                   >
                                     <div className="flex flex-col items-center gap-1">
@@ -682,16 +548,11 @@ export default function PlanningPage() {
                                       {team.members.map(member => (
                                         <div key={member.id} className="flex items-center gap-2">
                                           <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                                            member.isAvailable ? 'bg-success' : 'bg-default-300'
+                                            member.isAvailable ? 'bg-success' : 'bg-danger'
                                           }`}></div>
                                           <span className={`text-xs ${
                                             member.isAvailable ? 'text-foreground-600' : 'text-foreground-400'
                                           }`}>{member.name}</span>
-                                          {member.currentTask && (
-                                            <Chip size="sm" variant="flat" color="primary" className="text-xs">
-                                              Actief
-                                            </Chip>
-                                          )}
                                         </div>
                                       ))}
                                     </div>

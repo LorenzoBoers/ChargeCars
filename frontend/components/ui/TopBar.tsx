@@ -41,9 +41,30 @@ export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
 
   // Mock field service notifications
   const fieldServiceNotifications = [
-    { id: 1, message: "Team 3 loopt uit", type: 'warning', time: '5 min' },
-    { id: 2, message: "Team 1 heeft hulp nodig", type: 'danger', time: '12 min' }
+    { id: 1, message: "Team Alpha - Vertraging verwacht", type: 'warning', time: '5 min' },
+    { id: 2, message: "Urgent: Storing gemeld CHC-2024-001", type: 'danger', time: '12 min' },
+    { id: 3, message: "Route optimalisatie voltooid", type: 'info', time: '15 min' }
   ];
+
+  const unreadFSNCount = fieldServiceNotifications.filter(n => n.type !== 'info').length;
+
+  const getFSNIcon = (type: string) => {
+    switch (type) {
+      case 'warning': return <ExclamationTriangleIcon className="h-4 w-4" />;
+      case 'danger': return <ExclamationTriangleIcon className="h-4 w-4" />;
+      case 'info': return <BellIcon className="h-4 w-4" />;
+      default: return <BellIcon className="h-4 w-4" />;
+    }
+  };
+
+  const getFSNColor = (type: string) => {
+    switch (type) {
+      case 'warning': return 'warning';
+      case 'danger': return 'danger';
+      case 'info': return 'primary';
+      default: return 'default';
+    }
+  };
 
   const getUserStatusColor = (status: string) => {
     switch (status) {
@@ -81,70 +102,66 @@ export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
   if (!mounted) {
     return (
       <div className="w-full">
-        {/* Field Service Notifications Bar */}
-        {fieldServiceNotifications.length > 0 && (
-          <div className="bg-warning/10 border-b border-warning/20 px-6 py-2">
-            <div className="flex items-center gap-4 overflow-x-auto">
-              {fieldServiceNotifications.map((notification) => (
-                <div key={notification.id} className="flex items-center gap-2 text-sm whitespace-nowrap">
-                  {notification.type === 'warning' ? (
-                    <ClockIcon className="h-4 w-4 text-warning" />
-                  ) : (
-                    <ExclamationTriangleIcon className="h-4 w-4 text-danger" />
-                  )}
-                  <span className="text-foreground-700">{notification.message}</span>
-                  <Chip size="sm" variant="flat" color={notification.type as any} className="text-xs">
-                    {notification.time}
-                  </Chip>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Main Top Bar */}
-        <div className={`h-12 bg-content1 border-b border-divider flex items-center justify-end px-6 gap-4 w-full ${className}`}>
-          {/* Status Indicators */}
+        <div className={`h-12 bg-content1 border-b border-divider flex items-center justify-between px-6 w-full ${className}`}>
+          {/* Left: FSN Notifications */}
           <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-foreground-600">FSN:</span>
+            {fieldServiceNotifications.slice(0, 2).map(notification => (
+              <Chip
+                key={notification.id}
+                size="sm"
+                color={getFSNColor(notification.type)}
+                variant="solid"
+                startContent={getFSNIcon(notification.type)}
+                className="text-xs"
+              >
+                {notification.message}
+              </Chip>
+            ))}
+            {unreadFSNCount > 0 && (
+              <Badge content={unreadFSNCount} color="danger" size="sm">
+                <Button size="sm" variant="flat" isIconOnly>
+                  <BellIcon className="h-4 w-4" />
+                </Button>
+              </Badge>
+            )}
+          </div>
+
+          {/* Right: Status Indicators */}
+          <div className="flex items-center gap-4">
             {/* FSN Toggle */}
-            <Tooltip content={fsnEnabled ? "Field Service Notifications aan" : "Field Service Notifications uit"}>
-              <div className="flex items-center gap-2">
-                <WifiIcon className="h-4 w-4 text-foreground-600" />
-                <Chip
-                  size="sm"
-                  color={fsnEnabled ? 'success' : 'default'}
-                  variant="dot"
-                  className="text-xs"
-                >
-                  FSN
-                </Chip>
-              </div>
-            </Tooltip>
+            <div className="flex items-center gap-2">
+              <WifiIcon className="h-4 w-4 text-foreground-600" />
+              <Chip
+                size="sm"
+                color={fsnEnabled ? 'success' : 'default'}
+                variant="dot"
+                className="text-xs"
+              >
+                FSN
+              </Chip>
+            </div>
 
             {/* User Status */}
-            <Tooltip content={getUserStatusText(userStatus)}>
-              <div className="flex items-center gap-2">
-                <UserIcon className="h-4 w-4 text-foreground-600" />
-                <Chip
-                  size="sm"
-                  color={getUserStatusColor(userStatus)}
-                  variant="dot"
-                  className="text-xs"
-                >
-                  {getUserStatusText(userStatus)}
-                </Chip>
-              </div>
-            </Tooltip>
+            <div className="flex items-center gap-2">
+              <UserIcon className="h-4 w-4 text-foreground-600" />
+              <Chip
+                size="sm"
+                color={getUserStatusColor(userStatus)}
+                variant="dot"
+                className="text-xs"
+              >
+                {getUserStatusText(userStatus)}
+              </Chip>
+            </div>
+
+            {/* Placeholder for theme toggle and notifications */}
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-6" />
+              <div className="w-8 h-6" />
+            </div>
           </div>
-
-          {/* Divider */}
-          <div className="h-6 w-px bg-divider" />
-
-          {/* Placeholder for theme toggle */}
-          <div className="w-8 h-6" />
-
-          {/* Notifications */}
-          <div className="w-8 h-6" />
         </div>
       </div>
     );
@@ -152,31 +169,34 @@ export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
 
   return (
     <div className="w-full">
-      {/* Field Service Notifications Bar */}
-      {fieldServiceNotifications.length > 0 && (
-        <div className="bg-warning/10 border-b border-warning/20 px-6 py-2">
-          <div className="flex items-center gap-4 overflow-x-auto">
-            {fieldServiceNotifications.map((notification) => (
-              <div key={notification.id} className="flex items-center gap-2 text-sm whitespace-nowrap">
-                {notification.type === 'warning' ? (
-                  <ClockIcon className="h-4 w-4 text-warning" />
-                ) : (
-                  <ExclamationTriangleIcon className="h-4 w-4 text-danger" />
-                )}
-                <span className="text-foreground-700">{notification.message}</span>
-                <Chip size="sm" variant="flat" color={notification.type as any} className="text-xs">
-                  {notification.time}
-                </Chip>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Main Top Bar */}
-      <div className={`h-12 bg-content1 border-b border-divider flex items-center justify-end px-6 gap-4 w-full ${className}`}>
-        {/* Status Indicators */}
+      <div className={`h-12 bg-content1 border-b border-divider flex items-center justify-between px-6 w-full ${className}`}>
+        {/* Left: FSN Notifications */}
         <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-foreground-600">FSN:</span>
+          {fieldServiceNotifications.slice(0, 2).map(notification => (
+            <Chip
+              key={notification.id}
+              size="sm"
+              color={getFSNColor(notification.type)}
+              variant="solid"
+              startContent={getFSNIcon(notification.type)}
+              className="text-xs"
+            >
+              {notification.message}
+            </Chip>
+          ))}
+          {unreadFSNCount > 0 && (
+            <Badge content={unreadFSNCount} color="danger" size="sm">
+              <Button size="sm" variant="flat" isIconOnly>
+                <BellIcon className="h-4 w-4" />
+              </Button>
+            </Badge>
+          )}
+        </div>
+
+        {/* Right: Status Indicators */}
+        <div className="flex items-center gap-4">
           {/* FSN Toggle */}
           <Tooltip content={fsnEnabled ? "Field Service Notifications aan" : "Field Service Notifications uit"}>
             <Button
@@ -198,189 +218,99 @@ export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
           </Tooltip>
 
           {/* User Status */}
-          <Dropdown>
-            <DropdownTrigger>
-              <Button
-                size="sm"
-                variant="light"
-                className="flex items-center gap-2 px-2"
-              >
-                <UserIcon className="h-4 w-4 text-foreground-600" />
-                <Chip
+          <Tooltip content={getUserStatusText(userStatus)}>
+            <Dropdown>
+              <DropdownTrigger>
+                <Button
                   size="sm"
-                  color={getUserStatusColor(userStatus)}
-                  variant="dot"
-                  className="text-xs"
+                  variant="light"
+                  className="flex items-center gap-2 px-2"
                 >
-                  {getUserStatusText(userStatus)}
-                </Chip>
-              </Button>
-            </DropdownTrigger>
-            <DropdownMenu
-              aria-label="Status wijzigen"
-              onAction={(key) => setUserStatus(key as any)}
-            >
-              <DropdownItem key="available" className="text-success">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-success rounded-full" />
-                  Beschikbaar
-                </div>
-              </DropdownItem>
-              <DropdownItem key="busy" className="text-danger">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-danger rounded-full" />
-                  Bezet
-                </div>
-              </DropdownItem>
-              <DropdownItem key="away" className="text-warning">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-warning rounded-full" />
-                  Afwezig
-                </div>
-              </DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
-        </div>
-
-        {/* Divider */}
-        <div className="h-6 w-px bg-divider" />
-
-        {/* Dark/Light Mode Toggle Button (Converted from Sync) */}
-        <Tooltip content={theme === 'dark' ? 'Schakel naar licht thema' : 'Schakel naar donker thema'}>
-          <Button
-            isIconOnly
-            size="sm"
-            variant="light"
-            onPress={() => {
-              const newTheme = theme === 'dark' ? 'light' : 'dark';
-              console.log('Switching theme from', theme, 'to', newTheme);
-              setTheme(newTheme);
-              // Force update localStorage for persistence
-              if (typeof window !== 'undefined') {
-                localStorage.setItem('theme', newTheme);
-                document.documentElement.classList.remove('light', 'dark');
-                document.documentElement.classList.add(newTheme);
-              }
-            }}
-            isDisabled={!mounted}
-          >
-            {!mounted ? (
-              <div className="w-4 h-4 bg-foreground/20 rounded animate-pulse" />
-            ) : theme === 'dark' ? (
-              <SunIcon className="h-4 w-4 text-foreground-600" />
-            ) : (
-              <MoonIcon className="h-4 w-4 text-foreground-600" />
-            )}
-          </Button>
-        </Tooltip>
-
-        {/* Notifications */}
-        <Dropdown placement="bottom-end">
-          <DropdownTrigger>
-            <Button
-              isIconOnly
-              variant="light"
-              size="sm"
-              className="relative"
-            >
-              <Badge
-                content={notificationCount > 0 ? notificationCount : ''}
-                color="danger"
-                size="sm"
-                isInvisible={notificationCount === 0}
-                placement="top-right"
-              >
-                <BellIcon className="h-5 w-5 text-foreground-600" />
-              </Badge>
-            </Button>
-          </DropdownTrigger>
-          <DropdownMenu
-            aria-label="Notificaties"
-            className="w-80"
-            variant="flat"
-          >
-            <DropdownItem 
-              key="header" 
-              className="h-14 gap-2"
-              textValue="Notificaties header"
-            >
-              <div className="flex justify-between items-center w-full">
-                <p className="font-semibold text-foreground">Notificaties</p>
-                {notificationCount > 0 && (
-                  <Button
+                  <UserIcon className="h-4 w-4 text-foreground-600" />
+                  <Chip
                     size="sm"
-                    variant="light"
-                    color="primary"
-                    onPress={() => setNotificationCount(0)}
+                    color={getUserStatusColor(userStatus)}
+                    variant="dot"
                     className="text-xs"
                   >
-                    Alles markeren als gelezen
-                  </Button>
-                )}
-              </div>
-            </DropdownItem>
-            
-            <DropdownItem
-              key="notification-1"
-              className="h-auto py-3"
-              textValue="Nieuwe order ontvangen"
-            >
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium text-foreground">
-                  Nieuwe order ontvangen
-                </p>
-                <p className="text-xs text-foreground-500">
-                  2 min geleden
-                </p>
-              </div>
-            </DropdownItem>
-            
-            <DropdownItem
-              key="notification-2"
-              className="h-auto py-3"
-              textValue="Installatie voltooid"
-            >
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium text-foreground">
-                  Installatie voltooid
-                </p>
-                <p className="text-xs text-foreground-500">
-                  1 uur geleden
-                </p>
-              </div>
-            </DropdownItem>
-            
-            <DropdownItem
-              key="notification-3"
-              className="h-auto py-3"
-              textValue="Factuur gegenereerd"
-            >
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium text-foreground">
-                  Factuur gegenereerd
-                </p>
-                <p className="text-xs text-foreground-500">
-                  3 uur geleden
-                </p>
-              </div>
-            </DropdownItem>
-            
-            <DropdownItem 
-              key="view-all" 
-              className="text-center"
-              textValue="Alle notificaties bekijken"
-            >
-              <Button
-                variant="light"
-                color="primary"
-                size="sm"
-                className="w-full"
+                    {getUserStatusText(userStatus)}
+                  </Chip>
+                </Button>
+              </DropdownTrigger>
+              <DropdownMenu
+                selectedKeys={[userStatus]}
+                onSelectionChange={(keys) => {
+                  const selectedStatus = Array.from(keys)[0] as string;
+                  setUserStatus(selectedStatus as 'available' | 'busy' | 'away');
+                }}
               >
-                Alle notificaties bekijken
-              </Button>
-            </DropdownItem>
-          </DropdownMenu>
-        </Dropdown>
+                <DropdownItem key="available">Beschikbaar</DropdownItem>
+                <DropdownItem key="busy">Bezet</DropdownItem>
+                <DropdownItem key="away">Afwezig</DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </Tooltip>
+
+          {/* Divider */}
+          <div className="h-6 w-px bg-divider" />
+
+          {/* Theme Toggle */}
+          <Tooltip content={theme === 'dark' ? 'Schakel naar licht thema' : 'Schakel naar donker thema'}>
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              onPress={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            >
+              {theme === 'dark' ? (
+                <SunIcon className="h-4 w-4 text-foreground-600" />
+              ) : (
+                <MoonIcon className="h-4 w-4 text-foreground-600" />
+              )}
+            </Button>
+          </Tooltip>
+
+          {/* Notifications */}
+          <Tooltip content="Notificaties">
+            <Dropdown>
+              <DropdownTrigger>
+                <Button isIconOnly size="sm" variant="light">
+                  <Badge
+                    content={notificationCount}
+                    color="danger"
+                    size="sm"
+                    isInvisible={notificationCount === 0}
+                  >
+                    <BellIcon className="h-4 w-4 text-foreground-600" />
+                  </Badge>
+                </Button>
+              </DropdownTrigger>
+                             <DropdownMenu>
+                 <DropdownItem key="notification-1" textValue="Nieuwe order ontvangen">
+                   <div className="flex flex-col gap-1">
+                     <span className="text-sm font-medium">Nieuwe order ontvangen</span>
+                     <span className="text-xs text-foreground-500">2 min geleden</span>
+                   </div>
+                 </DropdownItem>
+                 <DropdownItem key="notification-2" textValue="Installatie voltooid">
+                   <div className="flex flex-col gap-1">
+                     <span className="text-sm font-medium">Installatie voltooid</span>
+                     <span className="text-xs text-foreground-500">1 uur geleden</span>
+                   </div>
+                 </DropdownItem>
+                 <DropdownItem key="notification-3" textValue="Factuur gegenereerd">
+                   <div className="flex flex-col gap-1">
+                     <span className="text-sm font-medium">Factuur gegenereerd</span>
+                     <span className="text-xs text-foreground-500">3 uur geleden</span>
+                   </div>
+                 </DropdownItem>
+                 <DropdownItem key="view-all" textValue="Bekijk alle notificaties">
+                   <span className="text-primary">Bekijk alle notificaties</span>
+                 </DropdownItem>
+               </DropdownMenu>
+            </Dropdown>
+          </Tooltip>
+        </div>
       </div>
     </div>
   );

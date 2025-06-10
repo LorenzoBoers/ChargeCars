@@ -328,38 +328,13 @@ export default function OrdersPage() {
 
           {/* Performance Indicators */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <Card className="lg:col-span-2">
-              <CardHeader className="pb-2">
-                <h3 className="text-base font-semibold">Pipeline Overzicht</h3>
-              </CardHeader>
-              <CardBody className="pt-0">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center p-3 bg-primary/10 rounded-lg">
-                    <p className="text-lg font-bold text-primary">€45.2K</p>
-                    <p className="text-xs text-foreground-600">Offertes Open</p>
-                    <p className="text-xs text-foreground-500">12 orders</p>
-                  </div>
-                  <div className="text-center p-3 bg-warning/10 rounded-lg">
-                    <p className="text-lg font-bold text-warning">€32.8K</p>
-                    <p className="text-xs text-foreground-600">In Behandeling</p>
-                    <p className="text-xs text-foreground-500">8 orders</p>
-                  </div>
-                  <div className="text-center p-3 bg-success/10 rounded-lg">
-                    <p className="text-lg font-bold text-success">€89.4K</p>
-                    <p className="text-xs text-foreground-600">Deze Maand</p>
-                    <p className="text-xs text-foreground-500">31 orders</p>
-                  </div>
-                </div>
-              </CardBody>
-            </Card>
-
-            <Card>
+            <Card className="lg:col-span-3">
               <CardHeader className="pb-2">
                 <h3 className="text-base font-semibold">Business Entities</h3>
               </CardHeader>
               <CardBody className="pt-0">
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="flex items-center justify-between p-3 border border-divider rounded-lg">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                       <span className="text-sm">ChargeCars</span>
@@ -369,7 +344,7 @@ export default function OrdersPage() {
                       <p className="text-xs text-foreground-500">42%</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 border border-divider rounded-lg">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-green-500"></div>
                       <span className="text-sm">LaderThuis</span>
@@ -379,7 +354,7 @@ export default function OrdersPage() {
                       <p className="text-xs text-foreground-500">24%</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 border border-divider rounded-lg">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-purple-500"></div>
                       <span className="text-sm">MeterKastThuis</span>
@@ -389,7 +364,7 @@ export default function OrdersPage() {
                       <p className="text-xs text-foreground-500">14%</p>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-3 border border-divider rounded-lg">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-orange-500"></div>
                       <span className="text-sm">Overig</span>
