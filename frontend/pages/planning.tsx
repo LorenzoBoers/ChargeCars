@@ -58,7 +58,7 @@ export default function PlanningPage() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState('route-planner');
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'teams' | 'tasks'>('teams');
+  const [viewMode, setViewMode] = useState<'teams' | 'visits'>('teams');
 
   // Mock data
   const teams: Team[] = [
@@ -261,11 +261,11 @@ export default function PlanningPage() {
 
                 <div className="grid grid-cols-12 gap-6">
                   {/* Map and Teams Section */}
-                  <div className="col-span-8 space-y-6">
+                  <div className="col-span-9 space-y-6">
                     {/* Map Placeholder */}
                     <Card>
                       <CardBody className="p-0">
-                        <div className="h-96 bg-content2 rounded-lg flex items-center justify-center">
+                        <div className="h-80 bg-content2 rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <MapIcon className="h-16 w-16 text-foreground-300 mx-auto mb-4" />
                             <h3 className="text-lg font-semibold text-foreground-500">Kaart Weergave</h3>
@@ -279,11 +279,12 @@ export default function PlanningPage() {
                     <Card>
                       <CardBody className="p-6">
                         <h3 className="text-lg font-semibold mb-4">Team Routes</h3>
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           {teams.map(team => (
-                            <div key={team.id} className="border border-divider rounded-lg p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-3">
+                            <div key={team.id} className="border border-divider rounded-lg p-3">
+                              <div className="flex items-center gap-4">
+                                {/* Team Info - Left Side */}
+                                <div className="flex items-center gap-3 min-w-0 w-64">
                                   <div className="flex -space-x-2">
                                     {team.members.map((member, index) => (
                                       <Avatar
@@ -294,93 +295,10 @@ export default function PlanningPage() {
                                       />
                                     ))}
                                   </div>
-                                  <div>
-                                    <h4 className="font-semibold">{team.name}</h4>
-                                    <p className="text-xs text-foreground-500">{team.currentLocation}</p>
+                                  <div className="min-w-0 flex-1">
+                                    <h4 className="font-semibold text-sm">{team.name}</h4>
+                                    <p className="text-xs text-foreground-500 truncate">{team.currentLocation}</p>
                                   </div>
-                                </div>
-                                <Chip
-                                  size="sm"
-                                  color={getStatusColor(team.status)}
-                                  variant="flat"
-                                >
-                                  {team.status === 'available' ? 'Beschikbaar' :
-                                   team.status === 'busy' ? 'Bezet' : 'Pauze'}
-                                </Chip>
-                              </div>
-                              
-                              {/* Route Items for this team */}
-                              <div className="flex gap-2 overflow-x-auto">
-                                {routeItems
-                                  .filter(route => route.teamId === team.id)
-                                  .map(route => {
-                                    const task = availableTasks.find(t => t.id === route.taskId);
-                                    if (!task) return null;
-                                    
-                                    return (
-                                      <div key={route.id} className="bg-content1 border border-divider rounded-lg p-3 min-w-64">
-                                        <div className="flex items-center justify-between mb-2">
-                                          <span className="text-sm font-medium">{route.scheduledTime}</span>
-                                          <Chip size="sm" color={getPriorityColor(task.priority)} variant="dot">
-                                            {task.priority}
-                                          </Chip>
-                                        </div>
-                                        <h5 className="font-medium text-sm">{task.title}</h5>
-                                        <p className="text-xs text-foreground-600">{task.customer}</p>
-                                        <p className="text-xs text-foreground-500 mt-1">{task.address}</p>
-                                        <div className="flex items-center gap-2 mt-2">
-                                          <ClockIcon className="h-3 w-3 text-foreground-400" />
-                                          <span className="text-xs text-foreground-500">
-                                            {Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m
-                                          </span>
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-                                
-                                {/* Add Task Button */}
-                                <Button
-                                  variant="bordered"
-                                  className="min-w-64 h-full"
-                                  size="lg"
-                                >
-                                  + Taak Toevoegen
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </CardBody>
-                    </Card>
-                  </div>
-
-                  {/* Right Sidebar - Teams and Tasks */}
-                  <div className="col-span-4 space-y-6">
-                    {/* View Toggle */}
-                    <Card>
-                      <CardBody className="p-4">
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm font-medium">Weergave:</span>
-                          <Switch
-                            size="sm"
-                            isSelected={viewMode === 'tasks'}
-                            onValueChange={(checked) => setViewMode(checked ? 'tasks' : 'teams')}
-                          >
-                            {viewMode === 'teams' ? 'Teams' : 'Taken'}
-                          </Switch>
-                        </div>
-                      </CardBody>
-                    </Card>
-
-                    {viewMode === 'teams' ? (
-                      <Card>
-                        <CardBody className="p-6">
-                          <h3 className="text-lg font-semibold mb-4">Beschikbare Teams</h3>
-                          <div className="space-y-3">
-                            {teams.map(team => (
-                              <div key={team.id} className="border border-divider rounded-lg p-3">
-                                <div className="flex items-center justify-between mb-2">
-                                  <h4 className="font-medium">{team.name}</h4>
                                   <Chip
                                     size="sm"
                                     color={getStatusColor(team.status)}
@@ -390,15 +308,102 @@ export default function PlanningPage() {
                                      team.status === 'busy' ? 'Bezet' : 'Pauze'}
                                   </Chip>
                                 </div>
-                                <div className="text-xs text-foreground-600 mb-2">
+                                
+                                {/* Route Items - Right Side */}
+                                <div className="flex-1 flex gap-2 overflow-x-auto">
+                                  {routeItems
+                                    .filter(route => route.teamId === team.id)
+                                    .map(route => {
+                                      const task = availableTasks.find(t => t.id === route.taskId);
+                                      if (!task) return null;
+                                      
+                                      return (
+                                        <div key={route.id} className="bg-content1 border border-divider rounded-lg p-2 min-w-48 flex-shrink-0">
+                                          <div className="flex items-center justify-between mb-1">
+                                            <span className="text-xs font-medium">{route.scheduledTime}</span>
+                                            <Chip size="sm" color={getPriorityColor(task.priority)} variant="dot">
+                                              {task.priority}
+                                            </Chip>
+                                          </div>
+                                          <h5 className="font-medium text-xs mb-1 truncate">{task.title}</h5>
+                                          <p className="text-xs text-foreground-600 truncate">{task.customer}</p>
+                                          <div className="flex items-center gap-1 mt-1">
+                                            <ClockIcon className="h-3 w-3 text-foreground-400 flex-shrink-0" />
+                                            <span className="text-xs text-foreground-500">
+                                              {Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m
+                                            </span>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  
+                                  {/* Add Task Button */}
+                                  <Button
+                                    variant="bordered"
+                                    className="min-w-32 h-16 flex-shrink-0"
+                                    size="sm"
+                                  >
+                                    + Taak
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardBody>
+                    </Card>
+                  </div>
+
+                  {/* Right Sidebar - Teams and Planned Visits */}
+                  <div className="col-span-3 space-y-6">
+                    {/* View Toggle */}
+                    <Card>
+                      <CardBody className="p-4">
+                        <div className="flex items-center gap-4">
+                          <span className="text-sm font-medium">Weergave:</span>
+                          <Switch
+                            size="sm"
+                            isSelected={viewMode === 'visits'}
+                            onValueChange={(checked) => setViewMode(checked ? 'visits' : 'teams')}
+                          >
+                            {viewMode === 'teams' ? 'Teams' : 'Bezoeken'}
+                          </Switch>
+                        </div>
+                      </CardBody>
+                    </Card>
+
+                    {viewMode === 'teams' ? (
+                      <Card>
+                        <CardBody className="p-4">
+                          <h3 className="text-base font-semibold mb-3">Teams</h3>
+                          <div className="space-y-2">
+                            {teams.map(team => (
+                              <div key={team.id} className="border border-divider rounded-lg p-2">
+                                <div className="flex items-center justify-between mb-1">
+                                  <h4 className="font-medium text-sm">{team.name}</h4>
+                                  <Chip
+                                    size="sm"
+                                    color={getStatusColor(team.status)}
+                                    variant="flat"
+                                  >
+                                    {team.status === 'available' ? 'Beschikbaar' :
+                                     team.status === 'busy' ? 'Bezet' : 'Pauze'}
+                                  </Chip>
+                                </div>
+                                <div className="text-xs text-foreground-600 mb-1">
                                   {team.members.join(', ')}
                                 </div>
                                 <div className="flex flex-wrap gap-1">
-                                  {team.skills.map(skill => (
-                                    <Chip key={skill} size="sm" variant="flat" color="secondary">
+                                  {team.skills.slice(0, 2).map(skill => (
+                                    <Chip key={skill} size="sm" variant="flat" color="secondary" className="text-xs">
                                       {skill}
                                     </Chip>
                                   ))}
+                                  {team.skills.length > 2 && (
+                                    <Chip size="sm" variant="flat" color="default" className="text-xs">
+                                      +{team.skills.length - 2}
+                                    </Chip>
+                                  )}
                                 </div>
                               </div>
                             ))}
@@ -407,38 +412,50 @@ export default function PlanningPage() {
                       </Card>
                     ) : (
                       <Card>
-                        <CardBody className="p-6">
-                          <h3 className="text-lg font-semibold mb-4">Openstaande Taken</h3>
-                          <div className="space-y-3">
-                            {availableTasks.map(task => (
-                              <div key={task.id} className="border border-divider rounded-lg p-3">
-                                <div className="flex items-center justify-between mb-2">
-                                  <h4 className="font-medium text-sm">{task.title}</h4>
-                                  <Chip
-                                    size="sm"
-                                    color={getPriorityColor(task.priority)}
-                                    variant="dot"
-                                  >
-                                    {task.priority}
-                                  </Chip>
-                                </div>
-                                <p className="text-xs text-foreground-600 mb-1">{task.customer}</p>
-                                <p className="text-xs text-foreground-500 mb-2">{task.address}</p>
-                                <div className="flex items-center gap-2 mb-2">
-                                  <ClockIcon className="h-3 w-3 text-foreground-400" />
-                                  <span className="text-xs text-foreground-500">
-                                    {Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m
-                                  </span>
-                                </div>
-                                <div className="flex flex-wrap gap-1">
-                                  {task.requirements.map(req => (
-                                    <Chip key={req} size="sm" variant="flat" color="primary">
-                                      {req}
+                        <CardBody className="p-4">
+                          <h3 className="text-base font-semibold mb-3">Geplande Bezoeken</h3>
+                          <div className="space-y-2">
+                            {/* Today's scheduled visits */}
+                            {routeItems.map(route => {
+                              const task = availableTasks.find(t => t.id === route.taskId);
+                              const team = teams.find(t => t.id === route.teamId);
+                              if (!task || !team) return null;
+                              
+                              return (
+                                <div key={route.id} className="border border-divider rounded-lg p-2">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="text-xs font-medium">{route.scheduledTime}</span>
+                                    <Chip
+                                      size="sm"
+                                      color={getPriorityColor(task.priority)}
+                                      variant="dot"
+                                    >
+                                      {task.priority}
                                     </Chip>
-                                  ))}
+                                  </div>
+                                  <h4 className="font-medium text-xs mb-1">{task.title}</h4>
+                                  <p className="text-xs text-foreground-600 mb-1">{task.customer}</p>
+                                  <p className="text-xs text-foreground-500 mb-1 truncate">{task.address}</p>
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-1">
+                                      <ClockIcon className="h-3 w-3 text-foreground-400" />
+                                      <span className="text-xs text-foreground-500">
+                                        {Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m
+                                      </span>
+                                    </div>
+                                    <Chip size="sm" variant="flat" color="primary" className="text-xs">
+                                      {team.name}
+                                    </Chip>
+                                  </div>
                                 </div>
+                              );
+                            })}
+                            
+                            {routeItems.length === 0 && (
+                              <div className="text-center py-4">
+                                <p className="text-sm text-foreground-500">Geen bezoeken gepland</p>
                               </div>
-                            ))}
+                            )}
                           </div>
                         </CardBody>
                       </Card>
