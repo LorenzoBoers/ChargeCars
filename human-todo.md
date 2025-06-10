@@ -287,6 +287,17 @@ interface Conversation {
 
 ## ✅ Completed
 
+### 2025-01-09 - Enhanced Token Storage with Cookies
+- **Component**: `frontend/lib/auth.ts`
+- **Status**: ✅ Completed - Hybrid Storage Implementation
+- **Details**: 
+  - **Dual Storage**: Tokens now stored in both localStorage AND cookies
+  - **Security Improved**: Cookies with Secure, SameSite=Strict flags
+  - **Fallback Support**: localStorage first, cookies as backup
+  - **Auto Expiry**: Cookies automatically expire (7 days auth, 30 days refresh)
+  - **Full Cleanup**: Both storage methods cleared on logout
+  - **HTTPS Support**: Secure flag automatically added on HTTPS
+
 ### 2025-01-09 - Login Redirect & User State Fixes
 - **Components**: `frontend/contexts/AuthContext.tsx`, `frontend/components/auth/LoginPage.tsx`, `frontend/lib/api.ts`
 - **Status**: ✅ Completed - Enhanced Redirect Logic

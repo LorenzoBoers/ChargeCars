@@ -82,39 +82,70 @@ export const authAPI = {
   }
 };
 
-// Token management
+// Token management with cookie support
 export const tokenManager = {
+  // Cookie helper functions
+  setCookie(name: string, value: string, days: number = 7): void {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Strict${secure}`;
+  },
+
+  getCookie(name: string): string | null {
+    const nameEQ = name + "=";
+    const ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  },
+
+  deleteCookie(name: string): void {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+  },
+
+  // Token management methods
   setAuthToken(token: string): void {
+    // Store in both localStorage (for immediate access) and cookies (for security)
     localStorage.setItem('authToken', token);
+    this.setCookie('authToken', token, 7); // 7 days
   },
 
   getAuthToken(): string | null {
-    return localStorage.getItem('authToken');
+    // Try localStorage first, then cookies as fallback
+    return localStorage.getItem('authToken') || this.getCookie('authToken');
   },
 
   setTokenExpiry(expiry: number): void {
     localStorage.setItem('tokenExpiry', expiry.toString());
+    this.setCookie('tokenExpiry', expiry.toString(), 7);
   },
 
   getTokenExpiry(): number | null {
-    const expiry = localStorage.getItem('tokenExpiry');
+    const expiry = localStorage.getItem('tokenExpiry') || this.getCookie('tokenExpiry');
     return expiry ? parseInt(expiry) : null;
   },
 
   setRefreshToken(token: string): void {
     localStorage.setItem('refreshToken', token);
+    this.setCookie('refreshToken', token, 30); // 30 days for refresh token
   },
 
   getRefreshToken(): string | null {
-    return localStorage.getItem('refreshToken');
+    return localStorage.getItem('refreshToken') || this.getCookie('refreshToken');
   },
 
   setUserData(user: User): void {
-    localStorage.setItem('userData', JSON.stringify(user));
+    const userData = JSON.stringify(user);
+    localStorage.setItem('userData', userData);
+    this.setCookie('userData', userData, 7);
   },
 
   getUserData(): User | null {
-    const userData = localStorage.getItem('userData');
+    const userData = localStorage.getItem('userData') || this.getCookie('userData');
     return userData ? JSON.parse(userData) : null;
   },
 
@@ -130,10 +161,16 @@ export const tokenManager = {
   },
 
   clearAuth(): void {
+    // Clear from both localStorage and cookies
     localStorage.removeItem('authToken');
     localStorage.removeItem('tokenExpiry');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userData');
+    
+    this.deleteCookie('authToken');
+    this.deleteCookie('tokenExpiry');
+    this.deleteCookie('refreshToken');
+    this.deleteCookie('userData');
   }
 };
 
