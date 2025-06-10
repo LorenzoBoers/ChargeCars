@@ -59,6 +59,8 @@ export default function PlanningPage() {
   const [activeTab, setActiveTab] = useState('route-planner');
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'teams' | 'visits'>('teams');
+  const [hoveredTask, setHoveredTask] = useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = useState<string | null>(null);
 
   // Mock data
   const teams: Team[] = [
@@ -279,12 +281,12 @@ export default function PlanningPage() {
                     <Card>
                       <CardBody className="p-6">
                         <h3 className="text-lg font-semibold mb-4">Team Routes</h3>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                           {teams.map(team => (
-                            <div key={team.id} className="border border-divider rounded-lg p-3">
-                              <div className="flex items-center gap-4">
+                            <div key={team.id} className="border border-divider rounded-lg p-4">
+                              <div className="flex items-start gap-4">
                                 {/* Team Info - Left Side */}
-                                <div className="flex items-center gap-3 min-w-0 w-64">
+                                <div className="flex items-center gap-3 min-w-0 w-64 flex-shrink-0">
                                   <div className="flex -space-x-2">
                                     {team.members.map((member, index) => (
                                       <Avatar
@@ -310,28 +312,69 @@ export default function PlanningPage() {
                                 </div>
                                 
                                 {/* Route Items - Right Side */}
-                                <div className="flex-1 flex gap-2 overflow-x-auto">
+                                <div className="flex-1 flex gap-3 overflow-x-auto pb-2">
                                   {routeItems
                                     .filter(route => route.teamId === team.id)
                                     .map(route => {
                                       const task = availableTasks.find(t => t.id === route.taskId);
                                       if (!task) return null;
                                       
+                                      const isHovered = hoveredTask === route.id;
+                                      const isSelected = selectedTask === route.id;
+                                      
                                       return (
-                                        <div key={route.id} className="bg-content1 border border-divider rounded-lg p-2 min-w-48 flex-shrink-0">
-                                          <div className="flex items-center justify-between mb-1">
-                                            <span className="text-xs font-medium">{route.scheduledTime}</span>
-                                            <Chip size="sm" color={getPriorityColor(task.priority)} variant="dot">
-                                              {task.priority}
-                                            </Chip>
-                                          </div>
-                                          <h5 className="font-medium text-xs mb-1 truncate">{task.title}</h5>
-                                          <p className="text-xs text-foreground-600 truncate">{task.customer}</p>
-                                          <div className="flex items-center gap-1 mt-1">
-                                            <ClockIcon className="h-3 w-3 text-foreground-400 flex-shrink-0" />
-                                            <span className="text-xs text-foreground-500">
-                                              {Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m
-                                            </span>
+                                        <div 
+                                          key={route.id} 
+                                          className={`bg-content1 border border-divider rounded-lg p-3 min-w-44 max-w-44 flex-shrink-0 cursor-pointer transition-all duration-200 ${
+                                            isHovered || isSelected ? 'border-primary shadow-lg scale-105' : 'hover:border-primary/50'
+                                          }`}
+                                          style={{ height: '120px' }}
+                                          onMouseEnter={() => setHoveredTask(route.id)}
+                                          onMouseLeave={() => setHoveredTask(null)}
+                                          onClick={() => setSelectedTask(selectedTask === route.id ? null : route.id)}
+                                        >
+                                          <div className="flex flex-col h-full">
+                                            <div className="flex items-center justify-between mb-2">
+                                              <span className="text-sm font-medium">{route.scheduledTime}</span>
+                                              <Chip size="sm" color={getPriorityColor(task.priority)} variant="dot">
+                                                {task.priority === 'urgent' ? '!' : 
+                                                 task.priority === 'high' ? 'H' :
+                                                 task.priority === 'medium' ? 'M' : 'L'}
+                                              </Chip>
+                                            </div>
+                                            
+                                            <div className="flex-1 space-y-1">
+                                              <h5 className="font-semibold text-sm leading-tight">{task.title}</h5>
+                                              <p className="text-xs text-foreground-600 leading-tight">{task.customer}</p>
+                                              
+                                              {(isHovered || isSelected) && (
+                                                <div className="space-y-1 animate-in slide-in-from-top-1 duration-200">
+                                                  <p className="text-xs text-foreground-500 leading-tight">{task.address}</p>
+                                                  <div className="flex items-center gap-1">
+                                                    <ClockIcon className="h-3 w-3 text-foreground-400 flex-shrink-0" />
+                                                    <span className="text-xs text-foreground-500">
+                                                      {Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m
+                                                    </span>
+                                                  </div>
+                                                  <div className="flex flex-wrap gap-1">
+                                                    {task.requirements.slice(0, 2).map((req, index) => (
+                                                      <Chip key={index} size="sm" variant="flat" color="secondary" className="text-xs">
+                                                        {req}
+                                                      </Chip>
+                                                    ))}
+                                                  </div>
+                                                </div>
+                                              )}
+                                              
+                                              {!isHovered && !isSelected && (
+                                                <div className="flex items-center gap-1 pt-1">
+                                                  <ClockIcon className="h-3 w-3 text-foreground-400 flex-shrink-0" />
+                                                  <span className="text-xs text-foreground-500">
+                                                    {Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m
+                                                  </span>
+                                                </div>
+                                              )}
+                                            </div>
                                           </div>
                                         </div>
                                       );
@@ -340,10 +383,14 @@ export default function PlanningPage() {
                                   {/* Add Task Button */}
                                   <Button
                                     variant="bordered"
-                                    className="min-w-32 h-16 flex-shrink-0"
+                                    className="min-w-36 max-w-36 flex-shrink-0"
+                                    style={{ height: '120px' }}
                                     size="sm"
                                   >
-                                    + Taak
+                                    <div className="flex flex-col items-center gap-2">
+                                      <span className="text-2xl">+</span>
+                                      <span className="text-xs">Taak</span>
+                                    </div>
                                   </Button>
                                 </div>
                               </div>
