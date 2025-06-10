@@ -10,7 +10,9 @@ import {
   Tabs,
   Tab,
   ScrollShadow,
-  Switch
+  Switch,
+  Checkbox,
+  AvatarGroup
 } from '@nextui-org/react';
 import {
   MagnifyingGlassIcon,
@@ -22,7 +24,8 @@ import {
   ChevronRightIcon,
   PaperClipIcon,
   CheckIcon,
-  XMarkIcon
+  XMarkIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
 import { AppLayout } from '../components/layouts/AppLayout';
 
@@ -56,6 +59,7 @@ interface Conversation {
   lastMessageTime: string;
   unreadCount: number;
   assignedTo?: string;
+  assignedToAvatar?: string;
   slaDeadline?: string;
   businessEntityId: string;
   orderId?: string;
@@ -95,6 +99,7 @@ export default function InboxPage() {
   const [selectedConversation, setSelectedConversation] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [showOnlyOpen, setShowOnlyOpen] = useState(true);
+  const [showOnlyOwnMessages, setShowOnlyOwnMessages] = useState(false);
 
   // Mock data
   const businessEntities: BusinessEntity[] = [
@@ -177,6 +182,7 @@ export default function InboxPage() {
       lastMessageTime: '10:34',
       unreadCount: 2,
       assignedTo: 'Jan Petersma',
+      assignedToAvatar: 'JP',
       slaDeadline: '14:00',
       businessEntityId: 'chargecars',
       orderId: 'CHC-2024-001'
@@ -191,6 +197,8 @@ export default function InboxPage() {
       lastMessage: 'Hoi, ik heb een vraag over de offerte...',
       lastMessageTime: '09:15',
       unreadCount: 1,
+      assignedTo: 'Erik van Dam',
+      assignedToAvatar: 'ED',
       businessEntityId: 'laderthuis',
       orderId: 'LT-2024-078'
     },
@@ -205,9 +213,39 @@ export default function InboxPage() {
       lastMessageTime: 'gisteren',
       unreadCount: 0,
       assignedTo: 'Technical Support',
+      assignedToAvatar: 'TS',
       slaDeadline: 'Vandaag 16:00',
       businessEntityId: 'chargecars',
       orderId: 'CHC-2023-445'
+    },
+    {
+      id: '4',
+      subject: 'Email - Nieuwe klant vraag',
+      customer: { name: 'Anna Bakker', email: 'anna@bakker.nl' },
+      channel: 'email',
+      status: 'new',
+      priority: 'medium',
+      lastMessage: 'Ik ben geïnteresseerd in een laadpaal installatie',
+      lastMessageTime: '08:45',
+      unreadCount: 1,
+      assignedTo: 'Jan Petersma',
+      assignedToAvatar: 'JP',
+      businessEntityId: 'chargecars',
+      orderId: 'CHC-2024-089'
+    },
+    {
+      id: '5',
+      subject: 'LiveChat - Snelle vraag',
+      customer: { name: 'Tom de Groot', email: 'tom@groot.nl' },
+      channel: 'livechat',
+      status: 'open',
+      priority: 'low',
+      lastMessage: 'Hoe lang duurt een standaard installatie?',
+      lastMessageTime: '11:20',
+      unreadCount: 3,
+      assignedTo: 'Sarah de Jong',
+      assignedToAvatar: 'SJ',
+      businessEntityId: 'laderthuis'
     }
   ];
 
@@ -315,7 +353,14 @@ export default function InboxPage() {
     // For now, we'll just show it was closed (in real app, update the status to 'resolved')
   };
 
-  // Filter conversations based on selected entity, channel, and search
+  // Current user info (in real app, this would come from auth context)
+  const currentUser = {
+    id: 'jan-petersma',
+    name: 'Jan Petersma',
+    email: 'jan@chargecars.nl'
+  };
+
+  // Filter conversations based on selected entity, channel, search, and ownership
   const filteredConversations = conversations.filter(conversation => {
     const entityMatch = selectedEntity === 'all' || conversation.businessEntityId === selectedEntity;
     const channelMatch = selectedChannel === 'all' || conversation.channel === selectedChannel;
@@ -328,7 +373,12 @@ export default function InboxPage() {
       ['new', 'open', 'pending'].includes(conversation.status) : 
       true;
     
-    return entityMatch && channelMatch && searchMatch && statusMatch;
+    // Add ownership filter: if showOnlyOwnMessages is true, only show assigned to current user
+    const ownershipMatch = showOnlyOwnMessages ? 
+      conversation.assignedTo === currentUser.name : 
+      true;
+    
+    return entityMatch && channelMatch && searchMatch && statusMatch && ownershipMatch;
   });
 
   return (
@@ -479,18 +529,35 @@ export default function InboxPage() {
               </Button>
             </div>
             
-            {/* Open/Closed Switch */}
-            <div className="flex items-center gap-3">
-              <Switch 
-                size="sm"
-                isSelected={showOnlyOpen}
-                onValueChange={setShowOnlyOpen}
-                color="primary"
-              >
-                <span className="text-sm text-foreground-600">
-                  {showOnlyOpen ? 'Alleen open gesprekken' : 'Alle gesprekken'}
-                </span>
-              </Switch>
+            {/* Filters */}
+            <div className="space-y-3">
+              {/* Open/Closed Switch */}
+              <div className="flex items-center gap-3">
+                <Switch 
+                  size="sm"
+                  isSelected={showOnlyOpen}
+                  onValueChange={setShowOnlyOpen}
+                  color="primary"
+                >
+                  <span className="text-sm text-foreground-600">
+                    {showOnlyOpen ? 'Alleen open gesprekken' : 'Alle gesprekken'}
+                  </span>
+                </Switch>
+              </div>
+              
+              {/* Own Messages Checkbox */}
+              <div className="flex items-center gap-3">
+                <Checkbox
+                  size="sm"
+                  isSelected={showOnlyOwnMessages}
+                  onValueChange={setShowOnlyOwnMessages}
+                  color="primary"
+                >
+                  <span className="text-sm text-foreground-600">
+                    Alleen eigen berichten
+                  </span>
+                </Checkbox>
+              </div>
             </div>
           </div>
 
@@ -538,12 +605,36 @@ export default function InboxPage() {
                     <p className="text-xs text-foreground-600 font-medium">{conversation.customer.name}</p>
                     <p className="text-xs text-foreground-500 truncate">{conversation.lastMessage}</p>
                     
-                    {conversation.assignedTo && (
-                      <div className="flex items-center gap-1 mt-2">
-                        <Avatar name={conversation.assignedTo} size="sm" className="w-4 h-4" />
-                        <span className="text-xs text-foreground-500">{conversation.assignedTo}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-between mt-2">
+                      {/* Assignee Information */}
+                      {conversation.assignedTo && (
+                        <div className="flex items-center gap-2">
+                          <Avatar 
+                            name={conversation.assignedToAvatar || conversation.assignedTo} 
+                            size="sm" 
+                            className="w-5 h-5 text-xs"
+                          />
+                          <div className="flex items-center gap-1">
+                            <UserIcon className="h-3 w-3 text-foreground-400" />
+                            <span className="text-xs text-foreground-600 font-medium">
+                              {conversation.assignedTo}
+                            </span>
+                            {conversation.assignedTo === currentUser.name && (
+                              <Chip size="sm" color="primary" variant="flat" className="text-xs">
+                                Jij
+                              </Chip>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Order ID if available */}
+                      {conversation.orderId && (
+                        <Chip size="sm" color="default" variant="flat" className="text-xs">
+                          {conversation.orderId}
+                        </Chip>
+                      )}
+                    </div>
                     
                     {conversation.slaDeadline && (
                       <div className="flex items-center gap-1 mt-1">
@@ -553,6 +644,19 @@ export default function InboxPage() {
                   </div>
                 </div>
               ))}
+              
+              {filteredConversations.length === 0 && (
+                <div className="p-8 text-center">
+                  <InboxIcon className="h-12 w-12 text-foreground-300 mx-auto mb-3" />
+                  <h3 className="text-sm font-medium text-foreground-500 mb-1">Geen gesprekken gevonden</h3>
+                  <p className="text-xs text-foreground-400">
+                    {showOnlyOwnMessages 
+                      ? "Je hebt geen gesprekken toegewezen met de huidige filters" 
+                      : "Geen gesprekken gevonden met de huidige filters"
+                    }
+                  </p>
+                </div>
+              )}
             </div>
           </ScrollShadow>
         </div>
