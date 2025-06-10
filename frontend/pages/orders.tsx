@@ -19,7 +19,7 @@ import {
   Chip,
   Pagination,
   Spinner,
-  Avatar,
+
   Tooltip,
   Select,
   SelectItem
@@ -52,13 +52,25 @@ const orderTypes = ['Alle', 'Installatie', 'Onderhoud', 'Offerte', 'Reparatie'];
 const statuses = ['Alle', 'Nieuw', 'In behandeling', 'Wachten op klant', 'Gepland', 'In uitvoering', 'Voltooid', 'Geannuleerd'];
 
 const statusColorMap: Record<string, "default" | "primary" | "secondary" | "success" | "warning" | "danger"> = {
+  // Dutch status labels
   'Nieuw': 'primary',
   'In behandeling': 'warning',
   'Wachten op klant': 'secondary',
   'Gepland': 'primary',
   'In uitvoering': 'warning',
   'Voltooid': 'success',
-  'Geannuleerd': 'danger'
+  'Geannuleerd': 'danger',
+  
+  // English/API status labels
+  'new': 'primary',
+  'pending': 'warning',
+  'waiting_customer': 'secondary',
+  'scheduled': 'primary',
+  'in_progress': 'warning',
+  'completed': 'success',
+  'cancelled': 'danger',
+  'active': 'warning',
+  'draft': 'default'
 };
 
 const priorityColorMap: Record<string, "default" | "primary" | "secondary" | "success" | "warning" | "danger"> = {
@@ -158,6 +170,26 @@ export default function OrdersPage() {
     // Xano timestamps are typically in seconds, convert to milliseconds if needed
     const date = timestamp > 1e10 ? new Date(timestamp) : new Date(timestamp * 1000);
     return date.toLocaleDateString('nl-NL');
+  };
+
+  // Format relative time for status since
+  const formatRelativeTime = (timestamp: number | string) => {
+    const date = typeof timestamp === 'string' 
+      ? new Date(timestamp) 
+      : timestamp > 1e10 
+        ? new Date(timestamp) 
+        : new Date(timestamp * 1000);
+    
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Vandaag';
+    if (diffDays === 1) return 'Gisteren';
+    if (diffDays < 7) return `${diffDays} dagen geleden`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weken geleden`;
+    
+    return formatDate(timestamp);
   };
 
   const handleViewOrder = (orderId: number | string) => {
@@ -463,8 +495,8 @@ export default function OrdersPage() {
                 >
                   <TableHeader>
                     <TableColumn>ORDER</TableColumn>
-                    <TableColumn>KLANT</TableColumn>
-                    <TableColumn>BUSINESS ENTITY</TableColumn>
+                    <TableColumn>KLANT & ACCOUNT</TableColumn>
+                    <TableColumn>PARTNER</TableColumn>
                     <TableColumn>TYPE</TableColumn>
                     <TableColumn>STATUS</TableColumn>
                     <TableColumn>PRIORITEIT</TableColumn>
@@ -487,21 +519,22 @@ export default function OrdersPage() {
                         </TableCell>
                         
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Avatar name={order.customer_name || 'Unknown'} size="sm" className="w-6 h-6 text-xs" />
+                          <div className="flex flex-col">
                             <span className="font-medium text-xs">{order.customer_name || 'Unknown Customer'}</span>
+                            {order.business_entity && (
+                              <span className="text-xs text-foreground-400">
+                                {order.business_entity}
+                              </span>
+                            )}
                           </div>
                         </TableCell>
                         
                         <TableCell>
-                          <Chip 
-                            size="sm" 
-                            variant="flat" 
-                            color="primary"
-                            className="text-xs h-5"
-                          >
-                            {order.business_entity || 'N/A'}
-                          </Chip>
+                          {order.partner_name ? (
+                            <span className="text-xs font-medium">{order.partner_name}</span>
+                          ) : (
+                            <span className="text-xs text-foreground-400">-</span>
+                          )}
                         </TableCell>
                         
                         <TableCell>
@@ -509,14 +542,21 @@ export default function OrdersPage() {
                         </TableCell>
                         
                         <TableCell>
-                          <Chip 
-                            size="sm" 
-                            color={statusColorMap[order.status]} 
-                            variant="flat"
-                            className="text-xs h-5"
-                          >
-                            {order.status}
-                          </Chip>
+                          <div className="flex flex-col gap-1">
+                            <Chip 
+                              size="sm" 
+                              color={statusColorMap[order.status_label || order.status]} 
+                              variant="flat"
+                              className="text-xs h-5"
+                            >
+                              {order.status_label || order.status}
+                            </Chip>
+                            {order.status_since && (
+                              <span className="text-xs text-foreground-400">
+                                {formatRelativeTime(order.status_since)}
+                              </span>
+                            )}
+                          </div>
                         </TableCell>
                         
                         <TableCell>

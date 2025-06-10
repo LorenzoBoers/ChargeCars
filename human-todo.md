@@ -287,6 +287,18 @@ interface Conversation {
 
 ## ✅ Completed
 
+### 2025-01-09 - Orders Display Enhancement
+- **Components**: `frontend/pages/orders.tsx`, `frontend/lib/api.ts`
+- **Status**: ✅ Completed - Enhanced Status Display & Layout
+- **Details**: 
+  - **Status Fields**: Added support for status_name, status_label, and status_since from API response
+  - **Enhanced Status Display**: Status chip shows status_label with relative time (e.g., "2 dagen geleden")
+  - **Business Entity Layout**: Moved business entity as small text under customer name
+  - **Partner Column**: Added dedicated partner column replacing business entity column
+  - **Relative Time**: Smart relative time formatting (Vandaag, Gisteren, X dagen geleden)
+  - **Status Colors**: Extended color mapping for both Dutch and English status labels
+  - **Improved UX**: Better visual hierarchy with customer name + business entity grouped
+
 ### 2025-01-09 - Token Management System Documentation
 - **Components**: `frontend/lib/api.ts`, `frontend/contexts/AuthContext.tsx`, `frontend/hooks/useOrders.ts`, `documentation/frontend/token-management.md`
 - **Status**: ✅ Completed - Comprehensive Documentation Added

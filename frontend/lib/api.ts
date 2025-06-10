@@ -52,6 +52,11 @@ export interface OrderResponse {
   priority: string;
   amount?: number;
   
+  // Status information from API
+  status_name?: string;
+  status_label?: string;
+  status_since?: number; // timestamp
+  
   // Additional fields based on Xano API
   customer_name?: string;
   business_entity?: string;
