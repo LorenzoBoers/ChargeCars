@@ -10,7 +10,9 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-  Input
+  Input,
+  Avatar,
+  Badge
 } from "@nextui-org/react";
 import {
   ArrowLeftIcon,
@@ -28,7 +30,14 @@ import {
   TrashIcon,
   PlusIcon,
   XMarkIcon,
-  CheckIcon
+  CheckIcon,
+  PencilIcon,
+  BookmarkIcon,
+  UserIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  PaperAirplaneIcon,
+  EyeIcon
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../../components/layouts/AppLayout';
 
@@ -79,6 +88,16 @@ interface Article {
   supplier?: string;
 }
 
+interface IntakeInfo {
+  property_type: string;
+  vehicle_type: string;
+  charging_preference: string;
+  installation_urgency: string;
+  electrical_capacity: string;
+  special_requirements?: string;
+  completed_date: string;
+}
+
 interface QuoteDetail {
   id: string;
   quote_number: string;
@@ -97,6 +116,7 @@ interface QuoteDetail {
   line_items: QuoteLineItem[];
   statuses: QuoteStatus[];
   contacts: QuoteContact[];
+  intake: IntakeInfo;
   terms_conditions?: string;
   delivery_time?: string;
   warranty_period?: string;
@@ -133,6 +153,15 @@ const mockQuote: QuoteDetail = {
   delivery_time: '2-3 weken',
   warranty_period: '2 jaar',
   terms_conditions: 'Standaard algemene voorwaarden van toepassing.',
+  intake: {
+    property_type: 'Eengezinswoning',
+    vehicle_type: 'Tesla Model 3',
+    charging_preference: '22kW Driefase',
+    installation_urgency: 'Binnen 2 weken',
+    electrical_capacity: '3x25A',
+    special_requirements: 'Kabel onder de grond',
+    completed_date: '2024-01-14'
+  },
   statuses: [
     { id: '1', name: 'Concept', date: '2024-01-15', color: 'secondary', completed: true, current: false },
     { id: '2', name: 'Review', date: '2024-01-16', color: 'warning', completed: false, current: true },
@@ -213,6 +242,9 @@ const QuoteDetailPage: React.FC = () => {
   
   // State
   const [quote, setQuote] = useState<QuoteDetail>(mockQuote);
+  const [originalQuote, setOriginalQuote] = useState<QuoteDetail>(mockQuote);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editingItem, setEditingItem] = useState<string | null>(null);
   const [newItemVisitId, setNewItemVisitId] = useState<string | null>(null);
   const [newItemContactId, setNewItemContactId] = useState<string | null>(null);
@@ -250,6 +282,11 @@ const QuoteDetailPage: React.FC = () => {
     return groups;
   }, [quote.line_items]);
 
+  // Check if quote has changes
+  const hasChanges = React.useMemo(() => {
+    return JSON.stringify(quote) !== JSON.stringify(originalQuote);
+  }, [quote, originalQuote]);
+
   // Filter articles based on search
   useEffect(() => {
     if (searchQuery.length > 0) {
@@ -264,14 +301,39 @@ const QuoteDetailPage: React.FC = () => {
     }
   }, [searchQuery]);
 
+  // Enable editing mode
+  const startEditing = () => {
+    setOriginalQuote(JSON.parse(JSON.stringify(quote)));
+    setIsEditing(true);
+  };
+
+  // Save changes
+  const saveChanges = async () => {
+    setIsSaving(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setOriginalQuote(JSON.parse(JSON.stringify(quote)));
+    setIsEditing(false);
+    setIsSaving(false);
+  };
+
+  // Cancel changes
+  const cancelChanges = () => {
+    setQuote(JSON.parse(JSON.stringify(originalQuote)));
+    setIsEditing(false);
+    setEditingItem(null);
+    setIsAddingItem(false);
+  };
+
   // Update line item
   const updateLineItem = (itemId: string, updates: Partial<QuoteLineItem>) => {
+    if (!isEditing) return;
+    
     setQuote(prev => ({
       ...prev,
       line_items: prev.line_items.map(item => {
         if (item.id === itemId) {
           const updated = { ...item, ...updates };
-          // Recalculate total price
           updated.total_price = updated.quantity * updated.unit_price;
           return updated;
         }
@@ -282,6 +344,8 @@ const QuoteDetailPage: React.FC = () => {
 
   // Add new line item
   const addLineItem = (visitId: string, contactId: string) => {
+    if (!isEditing) return;
+    
     setNewItemVisitId(visitId);
     setNewItemContactId(contactId);
     setIsAddingItem(true);
@@ -294,7 +358,6 @@ const QuoteDetailPage: React.FC = () => {
     setSearchQuery('');
     setSelectedArticle(null);
     
-    // Focus on input after render
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
@@ -354,6 +417,8 @@ const QuoteDetailPage: React.FC = () => {
 
   // Remove line item
   const removeLineItem = (itemId: string) => {
+    if (!isEditing) return;
+    
     setQuote(prev => ({
       ...prev,
       line_items: prev.line_items.filter(item => item.id !== itemId)
@@ -468,67 +533,101 @@ const QuoteDetailPage: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            <Chip color={getStatusColor(quote.status)} variant="flat" size="sm">
-              {quote.status === 'draft' ? 'Concept' : 
-               quote.status === 'sent' ? 'Verzonden' :
-               quote.status === 'accepted' ? 'Geaccepteerd' :
-               quote.status === 'rejected' ? 'Afgewezen' : 'Verlopen'}
-            </Chip>
-            <Dropdown>
-              <DropdownTrigger>
-                <Button isIconOnly variant="flat" size="sm">
-                  <EllipsisVerticalIcon className="h-4 w-4" />
+            {isEditing ? (
+              <>
+                <Button
+                  size="sm"
+                  variant="flat"
+                  onPress={cancelChanges}
+                  startContent={<XMarkIcon className="h-4 w-4" />}
+                >
+                  Annuleren
                 </Button>
-              </DropdownTrigger>
-              <DropdownMenu>
-                <DropdownItem key="print" startContent={<PrinterIcon className="h-4 w-4" />}>
-                  Print Offerte
-                </DropdownItem>
-                <DropdownItem key="pdf" startContent={<DocumentArrowDownIcon className="h-4 w-4" />}>
-                  Download PDF
-                </DropdownItem>
-                <DropdownItem key="duplicate" startContent={<DocumentDuplicateIcon className="h-4 w-4" />}>
-                  Dupliceer
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+                <Button
+                  size="sm"
+                  color="primary"
+                  isLoading={isSaving}
+                  onPress={saveChanges}
+                  startContent={<BookmarkIcon className="h-4 w-4" />}
+                >
+                  {isSaving ? 'Opslaan...' : 'Opslaan'}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Chip color={getStatusColor(quote.status)} variant="flat" size="sm">
+                  {quote.status === 'draft' ? 'Concept' : 
+                   quote.status === 'sent' ? 'Verzonden' :
+                   quote.status === 'accepted' ? 'Geaccepteerd' :
+                   quote.status === 'rejected' ? 'Afgewezen' : 'Verlopen'}
+                </Chip>
+                <Button
+                  size="sm"
+                  color="primary"
+                  onPress={startEditing}
+                  startContent={<PencilIcon className="h-4 w-4" />}
+                >
+                  Bewerken
+                </Button>
+                <Dropdown>
+                  <DropdownTrigger>
+                    <Button isIconOnly variant="flat" size="sm">
+                      <EllipsisVerticalIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu>
+                    <DropdownItem key="print" startContent={<PrinterIcon className="h-4 w-4" />}>
+                      Print Offerte
+                    </DropdownItem>
+                    <DropdownItem key="pdf" startContent={<DocumentArrowDownIcon className="h-4 w-4" />}>
+                      Download PDF
+                    </DropdownItem>
+                    <DropdownItem key="duplicate" startContent={<DocumentDuplicateIcon className="h-4 w-4" />}>
+                      Dupliceer
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Status Timeline */}
-        <Card className="p-4">
-          <div className="flex items-center gap-4 overflow-x-auto">
-            {quote.statuses.map((status, index) => (
-              <React.Fragment key={status.id}>
-                <div className="flex flex-col items-center gap-1 min-w-fit">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ${
-                    status.completed ? 'bg-success text-white' :
-                    status.current ? 'bg-primary text-white' :
-                    'bg-default-200 text-default-500'
-                  }`}>
-                    {status.completed ? <CheckCircleIcon className="h-4 w-4" /> :
-                     status.current ? <ClockIcon className="h-4 w-4" /> :
-                     index + 1}
-                  </div>
-                  <div className="text-xs font-medium text-center">{status.name}</div>
-                  {status.date && (
-                    <div className="text-xs text-foreground-500 text-center">{status.date}</div>
-                  )}
-                </div>
-                {index < quote.statuses.length - 1 && (
-                  <div className={`h-0.5 w-12 ${
-                    status.completed ? 'bg-success' : 'bg-default-200'
-                  }`} />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </Card>
-
-        {/* Quote Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Status and Quote Details */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Status Timeline - 50% */}
           <Card className="p-4">
-            <h3 className="text-base font-semibold mb-2">Quote Details</h3>
+            <h3 className="text-base font-semibold mb-3">Status</h3>
+            <div className="flex items-center gap-3 overflow-x-auto">
+              {quote.statuses.map((status, index) => (
+                <React.Fragment key={status.id}>
+                  <div className="flex flex-col items-center gap-1 min-w-fit">
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                      status.completed ? 'bg-success text-white' :
+                      status.current ? 'bg-primary text-white' :
+                      'bg-default-200 text-default-500'
+                    }`}>
+                      {status.completed ? <CheckCircleIcon className="h-3 w-3" /> :
+                       status.current ? <ClockIcon className="h-3 w-3" /> :
+                       index + 1}
+                    </div>
+                    <div className="text-xs font-medium text-center">{status.name}</div>
+                    {status.date && (
+                      <div className="text-xs text-foreground-500 text-center">{status.date}</div>
+                    )}
+                  </div>
+                  {index < quote.statuses.length - 1 && (
+                    <div className={`h-0.5 w-8 ${
+                      status.completed ? 'bg-success' : 'bg-default-200'
+                    }`} />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </Card>
+
+          {/* Quote Details - 50% */}
+          <Card className="p-4">
+            <h3 className="text-base font-semibold mb-3">Quote Details</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-foreground-500">Geldig tot:</span>
@@ -542,338 +641,439 @@ const QuoteDetailPage: React.FC = () => {
                 <span className="text-foreground-500">Garantie:</span>
                 <span>{quote.warranty_period}</span>
               </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <h3 className="text-base font-semibold mb-2">Klant</h3>
-            <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-foreground-500">Naam:</span>
-                <span>{quote.customer_name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-foreground-500">Bedrag:</span>
-                <span className="font-medium">€{quote.customer_amount.toFixed(2)}</span>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4">
-            <h3 className="text-base font-semibold mb-2">Partner</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-foreground-500">Naam:</span>
-                <span>{quote.partner_name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-foreground-500">Bedrag:</span>
-                <span className="font-medium">€{quote.partner_amount.toFixed(2)}</span>
+                <span className="text-foreground-500">Totaal:</span>
+                <span className="font-semibold">€{(quote.customer_amount + quote.partner_amount).toFixed(2)}</span>
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Line Items Table */}
+        {/* Intake Information */}
         <Card className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold">Regelitems</h3>
-            <Button
-              size="sm"
-              color="primary"
-              startContent={<PlusIcon className="h-4 w-4" />}
-              onPress={() => addLineItem('V-001', 'CONT-001')}
-            >
-              Regel Toevoegen
-            </Button>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-divider">
-                  <th className="text-left text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[100px]">Bezoek</th>
-                  <th className="text-left text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[60px]">#</th>
-                  <th className="text-left text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[300px]">Omschrijving</th>
-                  <th className="text-right text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[80px]">Aantal</th>
-                  <th className="text-right text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[100px]">Prijs</th>
-                  <th className="text-right text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[100px]">Totaal</th>
-                  <th className="text-center text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[60px]">Acties</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(groupedItems).map(([visitId, visit], visitIndex) => {
-                  let itemNumber = 1;
-                  const visitRows: JSX.Element[] = [];
-                  let isFirstVisitRow = true;
-                  
-                  Object.entries(visit.contacts).forEach(([contactId, contact]) => {
-                    // Contact header
-                    visitRows.push(
-                      <tr key={`contact-${contactId}`} className="bg-content2/30">
-                        {isFirstVisitRow && (
-                          <td rowSpan={Object.values(visit.contacts).reduce((sum, c) => sum + c.items.length + 1, Object.keys(visit.contacts).length)} 
-                              className="border-r border-divider bg-gradient-to-b from-primary/10 to-primary/5">
-                            <div className="p-2 text-center">
-                              <div className="transform -rotate-90 whitespace-nowrap text-xs font-semibold text-primary">
-                                {visit.visit_name}
-                              </div>
-                            </div>
-                          </td>
-                        )}
-                        <td colSpan={5} className="py-2 px-2">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Chip size="sm" color={getContactColor(contact.contact_role)} variant="flat">
-                                {getContactLabel(contact.contact_role)}
-                              </Chip>
-                              <span className="text-sm font-medium">{contact.contact_name}</span>
-                            </div>
-                            <Button
-                              size="sm"
-                              variant="flat"
-                              startContent={<PlusIcon className="h-3 w-3" />}
-                              onPress={() => addLineItem(visitId, contactId)}
-                            >
-                              Toevoegen
-                            </Button>
-                          </div>
-                        </td>
-                        <td></td>
-                      </tr>
-                    );
-                    isFirstVisitRow = false;
-                    
-                    // Contact items
-                    contact.items.forEach((item, itemIndex) => {
-                      visitRows.push(
-                        <tr key={item.id} className="border-b border-divider hover:bg-content2/20">
-                          <td className="py-2 px-2 text-center text-xs text-foreground-500">
-                            {itemNumber}
-                          </td>
-                          <td className="py-2 px-2">
-                            <div className="flex items-start gap-2">
-                              <div className="flex-shrink-0">{getCategoryIcon(item.category)}</div>
-                              <div className="min-w-0">
-                                {editingItem === item.id ? (
-                                  <Input
-                                    size="sm"
-                                    value={item.description}
-                                    onChange={(e) => updateLineItem(item.id, { description: e.target.value })}
-                                    onBlur={() => setEditingItem(null)}
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') setEditingItem(null);
-                                      if (e.key === 'Escape') setEditingItem(null);
-                                    }}
-                                    autoFocus
-                                  />
-                                ) : (
-                                  <div 
-                                    className="text-sm cursor-pointer hover:bg-content2 rounded p-1 -m-1"
-                                    onClick={() => setEditingItem(item.id)}
-                                  >
-                                    {item.description}
-                                    {item.article_code && (
-                                      <div className="text-xs text-foreground-500">{item.article_code}</div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-2 px-2 text-right">
-                            <Input
-                              size="sm"
-                              type="number"
-                              value={item.quantity.toString()}
-                              onChange={(e) => updateLineItem(item.id, { quantity: parseInt(e.target.value) || 1 })}
-                              className="w-16 text-right"
-                              min="1"
-                            />
-                          </td>
-                          <td className="py-2 px-2 text-right">
-                            <div className="flex items-center justify-end">
-                              <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
-                              <Input
-                                size="sm"
-                                type="number"
-                                value={item.unit_price.toFixed(2)}
-                                onChange={(e) => updateLineItem(item.id, { unit_price: parseFloat(e.target.value) || 0 })}
-                                className="w-20 text-right"
-                                step="0.01"
-                              />
-                            </div>
-                          </td>
-                          <td className="py-2 px-2 text-right">
-                            <div className="flex items-center justify-end text-sm font-medium">
-                              <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
-                              {item.total_price.toFixed(2)}
-                            </div>
-                          </td>
-                          <td className="py-2 px-2 text-center">
-                            <Button
-                              isIconOnly
-                              size="sm"
-                              variant="flat"
-                              color="danger"
-                              onPress={() => removeLineItem(item.id)}
-                            >
-                              <TrashIcon className="h-3 w-3" />
-                            </Button>
-                          </td>
-                        </tr>
-                      );
-                      itemNumber++;
-                    });
-                    
-                    // Add new item row if this is the target contact
-                    if (isAddingItem && newItemVisitId === visitId && newItemContactId === contactId) {
-                      visitRows.push(
-                        <tr key="new-item" className="border-b border-divider bg-warning/10">
-                          <td className="py-2 px-2 text-center text-xs text-foreground-500">
-                            {itemNumber}
-                          </td>
-                          <td className="py-2 px-2 relative">
-                            <div className="space-y-2">
-                              <Input
-                                ref={inputRef}
-                                size="sm"
-                                placeholder="Begin met typen voor suggesties..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                autoFocus
-                              />
-                              {filteredArticles.length > 0 && (
-                                <div className="absolute z-10 w-full bg-content1 border border-divider rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                                  {filteredArticles.map((article) => (
-                                    <div
-                                      key={article.id}
-                                      className="p-2 hover:bg-content2 cursor-pointer border-b border-divider last:border-0"
-                                      onClick={() => selectArticle(article)}
-                                    >
-                                      <div className="text-sm font-medium">{article.name}</div>
-                                      <div className="text-xs text-foreground-500">{article.code} - €{article.unit_price.toFixed(2)}</div>
-                                      <div className="text-xs text-foreground-400">{article.description}</div>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                          <td className="py-2 px-2 text-right">
-                            <Input
-                              size="sm"
-                              type="number"
-                              value={newItem.quantity?.toString() || '1'}
-                              onChange={(e) => setNewItem({...newItem, quantity: parseInt(e.target.value) || 1})}
-                              className="w-16 text-right"
-                              min="1"
-                            />
-                          </td>
-                          <td className="py-2 px-2 text-right">
-                            <div className="flex items-center justify-end">
-                              <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
-                              <Input
-                                size="sm"
-                                type="number"
-                                value={newItem.unit_price?.toFixed(2) || '0.00'}
-                                onChange={(e) => setNewItem({...newItem, unit_price: parseFloat(e.target.value) || 0})}
-                                className="w-20 text-right"
-                                step="0.01"
-                              />
-                            </div>
-                          </td>
-                          <td className="py-2 px-2 text-right">
-                            <div className="flex items-center justify-end text-sm font-medium">
-                              <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
-                              {((newItem.quantity || 1) * (newItem.unit_price || 0)).toFixed(2)}
-                            </div>
-                          </td>
-                          <td className="py-2 px-2 text-center">
-                            <div className="flex gap-1">
-                              <Button
-                                isIconOnly
-                                size="sm"
-                                color="success"
-                                variant="flat"
-                                onPress={saveNewLineItem}
-                              >
-                                <CheckIcon className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                isIconOnly
-                                size="sm"
-                                variant="flat"
-                                onPress={cancelNewLineItem}
-                              >
-                                <XMarkIcon className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    }
-                    
-                    // Contact subtotal
-                    const contactTotal = getContactTotal(contactId);
-                    visitRows.push(
-                      <tr key={`subtotal-${contactId}`} className="bg-content2/50">
-                        <td colSpan={4} className="py-1 px-2 text-right text-xs font-medium text-foreground-600">
-                          Subtotaal {contact.contact_name}:
-                        </td>
-                        <td className="py-1 px-2 text-right text-sm font-semibold">
-                          <div className="flex items-center justify-end">
-                            <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
-                            {contactTotal.toFixed(2)}
-                          </div>
-                        </td>
-                        <td></td>
-                      </tr>
-                    );
-                  });
-                  
-                  return visitRows;
-                })}
-              </tbody>
-            </table>
+          <h3 className="text-base font-semibold mb-3">Intake Informatie</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <span className="text-foreground-500">Woningtype:</span>
+              <p className="font-medium">{quote.intake.property_type}</p>
+            </div>
+            <div>
+              <span className="text-foreground-500">Voertuig:</span>
+              <p className="font-medium">{quote.intake.vehicle_type}</p>
+            </div>
+            <div>
+              <span className="text-foreground-500">Laadcapaciteit:</span>
+              <p className="font-medium">{quote.intake.charging_preference}</p>
+            </div>
+            <div>
+              <span className="text-foreground-500">Urgentie:</span>
+              <p className="font-medium">{quote.intake.installation_urgency}</p>
+            </div>
+            {quote.intake.special_requirements && (
+              <div className="col-span-2 md:col-span-4">
+                <span className="text-foreground-500">Bijzonderheden:</span>
+                <p className="font-medium">{quote.intake.special_requirements}</p>
+              </div>
+            )}
           </div>
         </Card>
 
-        {/* Totals */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="p-4">
-            <h3 className="text-base font-semibold mb-3">Totaaloverzicht</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Subtotaal:</span>
-                <span>€{(quote.customer_amount + quote.partner_amount - (quote.customer_amount + quote.partner_amount) * 0.21).toFixed(2)}</span>
+        {/* Main Content Layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+          {/* Line Items Table - Left Side (3/4) */}
+          <div className="xl:col-span-3">
+            <Card className="p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-semibold">Regelitems</h3>
+                {hasChanges && !isEditing && (
+                  <Chip size="sm" color="warning" variant="flat">
+                    Niet opgeslagen wijzigingen
+                  </Chip>
+                )}
               </div>
-              <div className="flex justify-between">
-                <span>BTW (21%):</span>
-                <span>€{((quote.customer_amount + quote.partner_amount) * 0.21).toFixed(2)}</span>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-divider">
+                      <th className="text-left text-xs font-semibold text-foreground-500 py-2 px-2 w-20">Bezoek</th>
+                      <th className="text-left text-xs font-semibold text-foreground-500 py-2 px-2 w-12">#</th>
+                      <th className="text-left text-xs font-semibold text-foreground-500 py-2 px-2 min-w-[250px]">Omschrijving</th>
+                      <th className="text-right text-xs font-semibold text-foreground-500 py-2 px-2 w-20">Aantal</th>
+                      <th className="text-right text-xs font-semibold text-foreground-500 py-2 px-2 w-24">Prijs</th>
+                      <th className="text-right text-xs font-semibold text-foreground-500 py-2 px-2 w-24">Totaal</th>
+                      {isEditing && (
+                        <th className="text-center text-xs font-semibold text-foreground-500 py-2 px-2 w-16">Acties</th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(groupedItems).map(([visitId, visit], visitIndex) => {
+                      let itemNumber = 1;
+                      const visitRows: JSX.Element[] = [];
+                      let isFirstVisitRow = true;
+                      const totalContactRows = Object.values(visit.contacts).reduce((sum, c) => sum + c.items.length + 1, Object.keys(visit.contacts).length);
+                      
+                      Object.entries(visit.contacts).forEach(([contactId, contact]) => {
+                        // Contact header
+                        visitRows.push(
+                          <tr key={`contact-${contactId}`} className="bg-content2/30">
+                            {isFirstVisitRow && (
+                              <td rowSpan={totalContactRows} 
+                                  className="border-r border-divider bg-gradient-to-b from-primary/10 to-primary/5 align-top">
+                                <div className="p-2 text-center">
+                                  <div className="transform -rotate-90 whitespace-nowrap text-xs font-semibold text-primary">
+                                    {visit.visit_name}
+                                  </div>
+                                </div>
+                              </td>
+                            )}
+                            <td colSpan={isEditing ? 5 : 4} className="py-2 px-2">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Chip size="sm" color={getContactColor(contact.contact_role)} variant="flat">
+                                    {getContactLabel(contact.contact_role)}
+                                  </Chip>
+                                  <span className="text-sm font-medium">{contact.contact_name}</span>
+                                </div>
+                                {isEditing && (
+                                  <Button
+                                    size="sm"
+                                    variant="flat"
+                                    className="h-6 px-2 text-xs"
+                                    startContent={<PlusIcon className="h-3 w-3" />}
+                                    onPress={() => addLineItem(visitId, contactId)}
+                                  >
+                                    +
+                                  </Button>
+                                )}
+                              </div>
+                            </td>
+                            {isEditing && <td></td>}
+                          </tr>
+                        );
+                        isFirstVisitRow = false;
+                        
+                        // Contact items
+                        contact.items.forEach((item, itemIndex) => {
+                          visitRows.push(
+                            <tr key={item.id} className="border-b border-divider hover:bg-content2/20">
+                              <td className="py-2 px-2 text-center text-xs text-foreground-500">
+                                {itemNumber}
+                              </td>
+                              <td className="py-2 px-2">
+                                <div className="flex items-start gap-2">
+                                  <div className="flex-shrink-0">{getCategoryIcon(item.category)}</div>
+                                  <div className="min-w-0">
+                                    {isEditing && editingItem === item.id ? (
+                                      <Input
+                                        size="sm"
+                                        value={item.description}
+                                        onChange={(e) => updateLineItem(item.id, { description: e.target.value })}
+                                        onBlur={() => setEditingItem(null)}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') setEditingItem(null);
+                                          if (e.key === 'Escape') setEditingItem(null);
+                                        }}
+                                        autoFocus
+                                      />
+                                    ) : (
+                                      <div 
+                                        className={`text-sm ${isEditing ? 'cursor-pointer hover:bg-content2 rounded p-1 -m-1' : ''}`}
+                                        onClick={() => isEditing && setEditingItem(item.id)}
+                                      >
+                                        {item.description}
+                                        {item.article_code && (
+                                          <div className="text-xs text-foreground-500">{item.article_code}</div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="py-2 px-2 text-right">
+                                {isEditing ? (
+                                  <Input
+                                    size="sm"
+                                    type="number"
+                                    value={item.quantity.toString()}
+                                    onChange={(e) => updateLineItem(item.id, { quantity: parseInt(e.target.value) || 1 })}
+                                    className="w-16 text-right"
+                                    min="1"
+                                  />
+                                ) : (
+                                  <span className="text-sm">{item.quantity}</span>
+                                )}
+                              </td>
+                              <td className="py-2 px-2 text-right">
+                                {isEditing ? (
+                                  <div className="flex items-center justify-end">
+                                    <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                                    <Input
+                                      size="sm"
+                                      type="number"
+                                      value={item.unit_price.toFixed(2)}
+                                      onChange={(e) => updateLineItem(item.id, { unit_price: parseFloat(e.target.value) || 0 })}
+                                      className="w-20 text-right"
+                                      step="0.01"
+                                    />
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center justify-end text-sm">
+                                    <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                                    {item.unit_price.toFixed(2)}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="py-2 px-2 text-right">
+                                <div className="flex items-center justify-end text-sm font-medium">
+                                  <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                                  {item.total_price.toFixed(2)}
+                                </div>
+                              </td>
+                              {isEditing && (
+                                <td className="py-2 px-2 text-center">
+                                  <Button
+                                    isIconOnly
+                                    size="sm"
+                                    variant="flat"
+                                    color="danger"
+                                    onPress={() => removeLineItem(item.id)}
+                                  >
+                                    <TrashIcon className="h-3 w-3" />
+                                  </Button>
+                                </td>
+                              )}
+                            </tr>
+                          );
+                          itemNumber++;
+                        });
+                        
+                        // Add new item row if this is the target contact
+                        if (isAddingItem && newItemVisitId === visitId && newItemContactId === contactId) {
+                          visitRows.push(
+                            <tr key="new-item" className="border-b border-divider bg-warning/10">
+                              <td className="py-2 px-2 text-center text-xs text-foreground-500">
+                                {itemNumber}
+                              </td>
+                              <td className="py-2 px-2 relative">
+                                <div className="space-y-2">
+                                  <Input
+                                    ref={inputRef}
+                                    size="sm"
+                                    placeholder="Begin met typen..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    autoFocus
+                                  />
+                                  {filteredArticles.length > 0 && (
+                                    <div className="absolute z-10 w-full bg-content1 border border-divider rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                                      {filteredArticles.map((article) => (
+                                        <div
+                                          key={article.id}
+                                          className="p-2 hover:bg-content2 cursor-pointer border-b border-divider last:border-0"
+                                          onClick={() => selectArticle(article)}
+                                        >
+                                          <div className="text-sm font-medium">{article.name}</div>
+                                          <div className="text-xs text-foreground-500">{article.code} - €{article.unit_price.toFixed(2)}</div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-2 px-2 text-right">
+                                <Input
+                                  size="sm"
+                                  type="number"
+                                  value={newItem.quantity?.toString() || '1'}
+                                  onChange={(e) => setNewItem({...newItem, quantity: parseInt(e.target.value) || 1})}
+                                  className="w-16 text-right"
+                                  min="1"
+                                />
+                              </td>
+                              <td className="py-2 px-2 text-right">
+                                <div className="flex items-center justify-end">
+                                  <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                                  <Input
+                                    size="sm"
+                                    type="number"
+                                    value={newItem.unit_price?.toFixed(2) || '0.00'}
+                                    onChange={(e) => setNewItem({...newItem, unit_price: parseFloat(e.target.value) || 0})}
+                                    className="w-20 text-right"
+                                    step="0.01"
+                                  />
+                                </div>
+                              </td>
+                              <td className="py-2 px-2 text-right">
+                                <div className="flex items-center justify-end text-sm font-medium">
+                                  <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                                  {((newItem.quantity || 1) * (newItem.unit_price || 0)).toFixed(2)}
+                                </div>
+                              </td>
+                              <td className="py-2 px-2 text-center">
+                                <div className="flex gap-1">
+                                  <Button
+                                    isIconOnly
+                                    size="sm"
+                                    color="success"
+                                    variant="flat"
+                                    onPress={saveNewLineItem}
+                                  >
+                                    <CheckIcon className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    isIconOnly
+                                    size="sm"
+                                    variant="flat"
+                                    onPress={cancelNewLineItem}
+                                  >
+                                    <XMarkIcon className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        }
+                        
+                        // Contact subtotal
+                        const contactTotal = getContactTotal(contactId);
+                        visitRows.push(
+                          <tr key={`subtotal-${contactId}`} className="bg-content2/50">
+                            <td colSpan={isEditing ? 4 : 3} className="py-1 px-2 text-right text-xs font-medium text-foreground-600">
+                              Subtotaal {contact.contact_name}:
+                            </td>
+                            <td className="py-1 px-2 text-right text-sm font-semibold">
+                              <div className="flex items-center justify-end">
+                                <CurrencyEuroIcon className="h-3 w-3 text-foreground-500 mr-1" />
+                                {contactTotal.toFixed(2)}
+                              </div>
+                            </td>
+                            {isEditing && <td></td>}
+                          </tr>
+                        );
+                      });
+                      
+                      // Add spacing between visits
+                      if (visitIndex < Object.keys(groupedItems).length - 1) {
+                        visitRows.push(
+                          <tr key={`spacing-${visitId}`} className="h-4">
+                            <td colSpan={isEditing ? 7 : 6} className="border-b-4 border-content2"></td>
+                          </tr>
+                        );
+                      }
+                      
+                      return visitRows;
+                    })}
+                  </tbody>
+                </table>
               </div>
-              <Divider />
-              <div className="flex justify-between font-semibold">
-                <span>Totaal:</span>
-                <span>€{(quote.customer_amount + quote.partner_amount).toFixed(2)}</span>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
 
-          <Card className="p-4">
-            <h3 className="text-base font-semibold mb-3">Verdeling</h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Klant:</span>
-                <span className="font-medium">€{quote.customer_amount.toFixed(2)}</span>
+          {/* Contact Cards - Right Side (1/4) */}
+          <div className="space-y-4">
+            <h3 className="text-base font-semibold">Contact Acties</h3>
+            
+            {quote.contacts.map(contact => {
+              const contactTotal = getContactTotal(contact.id);
+              if (contactTotal === 0) return null;
+              
+              return (
+                <Card key={contact.id} className="p-3">
+                  <div className="space-y-3">
+                    {/* Contact Header */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-sm">{contact.name}</h4>
+                        <Chip size="sm" color={getContactColor(contact.role)} variant="flat">
+                          {getContactLabel(contact.role)}
+                        </Chip>
+                      </div>
+                      <div className="space-y-1 text-xs text-foreground-600">
+                        <div className="flex items-center gap-1">
+                          <EnvelopeIcon className="h-3 w-3" />
+                          {contact.email}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <PhoneIcon className="h-3 w-3" />
+                          {contact.phone}
+                        </div>
+                      </div>
+                      <Divider />
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium">Totaal:</span>
+                        <span className="font-bold text-sm">€{contactTotal.toFixed(2)}</span>
+                      </div>
+                    </div>
+
+                    <Divider />
+
+                    {/* Documents */}
+                    <div className="space-y-2">
+                      <h5 className="text-xs font-medium text-foreground-600 uppercase">Documenten</h5>
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between p-1.5 bg-content2/30 rounded text-xs">
+                          <span>Offerte PDF</span>
+                          <Button size="sm" isIconOnly variant="flat" className="h-5 w-5">
+                            <DocumentArrowDownIcon className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Online Quote Link */}
+                    <div className="space-y-2">
+                      <h5 className="text-xs font-medium text-foreground-600 uppercase">Online Offerte</h5>
+                      <div className="flex gap-1">
+                        <Button size="sm" color="primary" variant="flat" className="flex-1 text-xs h-6">
+                          <EyeIcon className="h-3 w-3 mr-1" />
+                          Bekijk
+                        </Button>
+                        <Button size="sm" variant="flat" isIconOnly className="h-6 w-6">
+                          <DocumentDuplicateIcon className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Signature Status */}
+                    <div className="space-y-2">
+                      <h5 className="text-xs font-medium text-foreground-600 uppercase">Ondertekening</h5>
+                      <div className="flex items-center gap-2 text-xs">
+                        <ClockIcon className="h-3 w-3 text-warning" />
+                        <span>Wacht op ondertekening</span>
+                      </div>
+                      <Button size="sm" color="success" variant="flat" className="w-full text-xs h-6">
+                        <PaperAirplaneIcon className="h-3 w-3 mr-1" />
+                        Verstuur voor Akkoord
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+
+            {/* Totals */}
+            <Card className="p-3">
+              <h3 className="text-sm font-semibold mb-2">Totaaloverzicht</h3>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span>Subtotaal:</span>
+                  <span>€{(quote.customer_amount + quote.partner_amount - (quote.customer_amount + quote.partner_amount) * 0.21).toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>BTW (21%):</span>
+                  <span>€{((quote.customer_amount + quote.partner_amount) * 0.21).toFixed(2)}</span>
+                </div>
+                <Divider />
+                <div className="flex justify-between font-semibold text-sm">
+                  <span>Totaal:</span>
+                  <span>€{(quote.customer_amount + quote.partner_amount).toFixed(2)}</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>Partner:</span>
-                <span className="font-medium">€{quote.partner_amount.toFixed(2)}</span>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
 
         {/* Terms & Conditions */}
