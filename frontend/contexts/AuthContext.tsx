@@ -91,6 +91,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
           setUser(userFromAPI);
           tokenManager.setUserData(userFromAPI);
+          
+          // Redirect to dashboard after successful authentication
+          if (router.pathname === '/auth/login' || router.pathname === '/') {
+            router.push('/dashboard');
+          }
         } else {
           throw new Error(response.error?.message || 'Failed to fetch user data');
         }
@@ -147,6 +152,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         setUser(mockUser);
         setIsLoading(false);
+        
+        // Redirect to dashboard after successful demo login
+        if (router.pathname === '/auth/login' || router.pathname === '/') {
+          router.push('/dashboard');
+        }
+        
         return { success: true };
       }
 
@@ -163,6 +174,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           
           setUser(response.data.user);
           setIsLoading(false);
+          
+          // Redirect to dashboard after successful API login
+          if (router.pathname === '/auth/login' || router.pathname === '/') {
+            router.push('/dashboard');
+          }
+          
           return { success: true };
         } else {
           setIsLoading(false);

@@ -18,15 +18,36 @@ import { useAuth } from '../contexts/AuthContext';
 
 export default function HomePage() {
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Redirect authenticated users to dashboard
+  React.useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      router.push('/today');
+      router.push('/dashboard');
     } else {
       router.push('/auth/login');
     }
   };
+
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center mx-auto mb-4">
+            <BoltIcon className="h-4 w-4 text-white animate-pulse" />
+          </div>
+          <p className="text-foreground-500 text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const features = [
     {

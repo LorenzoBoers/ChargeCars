@@ -287,6 +287,18 @@ interface Conversation {
 
 ## ✅ Completed
 
+### 2025-01-09 - Login Redirect & Routing Fixes
+- **Components**: `frontend/pages/index.tsx`, `frontend/contexts/AuthContext.tsx`, `frontend/components/auth/LoginPage.tsx`
+- **Configuration**: `frontend/next.config.js`, `frontend/public/.htaccess`, `frontend/package.json`
+- **Status**: ✅ Completed - Production Ready
+- **Details**: 
+  - **Login Redirect**: Fixed automatic redirect to dashboard after successful login
+  - **Index Page**: Added automatic redirect for authenticated users
+  - **Routing**: Fixed 404 issues by configuring proper SPA routing for Hostinger
+  - **Next.js Config**: Updated for conditional static export based on environment
+  - **Apache Config**: Added .htaccess for proper routing on shared hosting
+  - **Removed Duplicate Redirects**: Centralized redirect logic in AuthContext
+
 ### 2025-01-09 - Order Management Xano API Integration
 - **Component**: `frontend/pages/orders.tsx`, `frontend/hooks/useOrders.ts`, `frontend/lib/api.ts`
 - **Backend Work**: Full integration with Xano API `https://api.chargecars.nl/api:V2/order`

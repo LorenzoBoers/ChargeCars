@@ -1,15 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable static export for hosting on Hostinger
-  output: 'export',
+  // Static export for production deployment on Hostinger
+  output: process.env.NODE_ENV === 'production' ? 'export' : undefined,
   
-  // Disable server-side features that don't work with static export
+  // SPA routing for static hosting
   trailingSlash: true,
   skipTrailingSlashRedirect: true,
   
-  // Configure images for static export
+  // Configure images
   images: {
-    unoptimized: true
+    unoptimized: true,
+    domains: ['api.chargecars.nl', 'xrxc-xsc9-6egu.xano.io']
   },
   
   // Environment variables for Xano API

@@ -1,0 +1,28 @@
+# Next.js rewrites for Hostinger hosting
+RewriteEngine On
+
+# Handle Angular and Vue Router
+RewriteBase /
+
+# Handle Next.js static files
+RewriteRule ^(_next/|favicon\.ico|sitemap\.xml|robots\.txt) - [L]
+
+# Handle dynamic routes - redirect all to index.html for SPA behavior
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+# Force HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Set cache headers for static assets
+<IfModule mod_expires.c>
+  ExpiresActive on
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpg "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+</IfModule> 

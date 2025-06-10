@@ -76,10 +76,8 @@ const LoginPage: React.FC = () => {
       const result = await login(formData.email, formData.password);
       if (result.success) {
         setSuccess('Login successful! Redirecting...');
-        // Router push will be handled by useEffect when isAuthenticated changes
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 1000);
+        // Login function in AuthContext now handles the redirect automatically
+        // No need for manual redirect here
       } else {
         setError(result.error || 'Login failed. Please check your credentials.');
       }
