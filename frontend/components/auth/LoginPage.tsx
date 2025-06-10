@@ -51,10 +51,12 @@ const LoginPage: React.FC = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
+    console.log('🔍 LOGIN: Auth status changed:', { isAuthenticated, mounted, authLoading });
     if (isAuthenticated && mounted) {
+      console.log('🔍 LOGIN: User is authenticated, redirecting to dashboard...');
       router.push('/dashboard');
     }
-  }, [isAuthenticated, router, mounted]);
+  }, [isAuthenticated, router, mounted, authLoading]);
 
   const toggleVisibility = () => setIsVisible(!isVisible);
 
@@ -69,20 +71,26 @@ const LoginPage: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🔐 LOGIN: Form submitted with:', { email: formData.email, password: '***' });
     setError(null);
     setSuccess(null);
 
     try {
+      console.log('🔐 LOGIN: Calling login function...');
       const result = await login(formData.email, formData.password);
+      console.log('🔐 LOGIN: Login result:', result);
+      
       if (result.success) {
+        console.log('✅ LOGIN: Success! Setting success message...');
         setSuccess('Login successful! Redirecting...');
         // Login function in AuthContext now handles the redirect automatically
         // No need for manual redirect here
       } else {
+        console.log('❌ LOGIN: Failed with error:', result.error);
         setError(result.error || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('💥 LOGIN: Exception caught:', err);
       setError('An unexpected error occurred. Please try again.');
     }
   };

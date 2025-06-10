@@ -133,6 +133,13 @@ class ApiClient {
     const baseUrl = useAuthEndpoint ? this.authBaseUrl : this.baseUrl;
     const url = `${baseUrl}${endpoint}`;
     
+    console.log('📡 API REQUEST:', {
+      url,
+      method: options.method || 'GET',
+      useAuthEndpoint,
+      hasToken: !!this.token
+    });
+    
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -148,7 +155,14 @@ class ApiClient {
         headers,
       });
 
+      console.log('📡 API RESPONSE:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      });
+
       const data = await response.json();
+      console.log('📡 API DATA:', data);
 
       if (!response.ok) {
         return {
@@ -246,10 +260,16 @@ class ApiClient {
 
   // Authentication methods
   async login(email: string, password: string): Promise<ApiResponse<LoginResponse>> {
-    return this.request<LoginResponse>(API_ENDPOINTS.auth.login, {
+    console.log('🚀 API: Login request started for:', email);
+    console.log('🚀 API: Using auth endpoint:', `${this.authBaseUrl}${API_ENDPOINTS.auth.login}`);
+    
+    const response = await this.request<LoginResponse>(API_ENDPOINTS.auth.login, {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     }, true);
+    
+    console.log('🚀 API: Login response:', response);
+    return response;
   }
 
   async getMe(): Promise<ApiResponse<MeResponse>> {

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/router';
-import { User, authAPI, tokenManager, demoCredentials } from '../lib/auth';
+import { User, authAPI, tokenManager } from '../lib/auth';
 import { apiClient } from '../lib/api';
 
 interface AuthContextType {
@@ -30,18 +30,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Auto-login with demo credentials for testing (only if never logged in before)
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated && !sessionStorage.getItem('chargecars_login_attempted')) {
-      // Auto-login with demo admin user for development (one time only)
-      const timer = setTimeout(() => {
-        sessionStorage.setItem('chargecars_login_attempted', 'true');
-        login('admin@chargecars.nl', 'admin123');
-      }, 500);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading, isAuthenticated]);
+  // Auto-login disabled - using real credentials only
+  // useEffect(() => {
+  //   if (!isLoading && !isAuthenticated && !sessionStorage.getItem('chargecars_login_attempted')) {
+  //     // Auto-login with demo admin user for development (one time only)
+  //     const timer = setTimeout(() => {
+  //       sessionStorage.setItem('chargecars_login_attempted', 'true');
+  //       login('admin@chargecars.nl', 'admin123');
+  //     }, 500);
+  //     
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [isLoading, isAuthenticated]);
 
   const checkAuth = async (): Promise<void> => {
     setIsLoading(true);
@@ -115,55 +115,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    console.log('🔑 AUTH: Login started for:', email);
     setIsLoading(true);
 
     try {
-      // First try demo credentials for testing
-      const demoUser = demoCredentials.find(
-        cred => cred.email === email && cred.password === password
-      );
-
-      if (demoUser) {
-        // Create mock user data
-        const mockUser: User = {
-          id: `demo_${demoUser.role}_${Date.now()}`,
-          email: demoUser.email,
-          role_id: `role_${demoUser.role}`,
-          contact: {
-            id: `contact_${Date.now()}`,
-            first_name: demoUser.name.split(' ')[0],
-            last_name: demoUser.name.split(' ')[1] || '',
-          },
-          organization: {
-            id: 'demo_org',
-            name: 'Demo Organization',
-            type: 'demo'
-          }
-        };
-
-        // Store mock auth data
-        const mockToken = `demo_token_${demoUser.role}_${Date.now()}`;
-        const expiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
-        tokenManager.setAuthToken(mockToken);
-        tokenManager.setTokenExpiry(expiry);
-        tokenManager.setUserData(mockUser);
-        apiClient.setToken(mockToken); // Set token for API client
-        
-        setUser(mockUser);
-        setIsLoading(false);
-        
-        // Redirect to dashboard after successful demo login
-        if (router.pathname === '/auth/login' || router.pathname === '/') {
-          router.push('/dashboard');
-        }
-        
-        return { success: true };
-      }
-
-      // Try real API
+      // Use real API only - no demo credentials
+      console.log('🌐 AUTH: Attempting API login...');
       try {
         const response = await apiClient.login(email, password);
+        console.log('🌐 AUTH: API response:', response);
         
         if (response.success && response.data) {
           // Store auth data
@@ -174,14 +134,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           
           setUser(response.data.user);
           setIsLoading(false);
+          console.log('🌐 AUTH: API login successful, current path:', router.pathname);
           
           // Redirect to dashboard after successful API login
           if (router.pathname === '/auth/login' || router.pathname === '/') {
+            console.log('🌐 AUTH: Redirecting to dashboard...');
             router.push('/dashboard');
           }
           
+          console.log('🌐 AUTH: Returning success...');
           return { success: true };
         } else {
+          console.log('❌ AUTH: API login failed:', response.error);
           setIsLoading(false);
           return { 
             success: false, 
@@ -190,7 +154,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
         
       } catch (apiError) {
-        console.error('API login failed:', apiError);
+        console.error('💥 AUTH: API login failed:', apiError);
         setIsLoading(false);
         return { 
           success: false, 
@@ -199,7 +163,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
       
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('💥 AUTH: Login error:', error);
       setIsLoading(false);
       return { 
         success: false, 
