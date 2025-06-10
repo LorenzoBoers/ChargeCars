@@ -29,6 +29,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuth();
   }, []);
 
+  // Auto-login with demo credentials for testing (only if never logged in before)
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated && !sessionStorage.getItem('chargecars_login_attempted')) {
+      // Auto-login with demo admin user for development (one time only)
+      const timer = setTimeout(() => {
+        sessionStorage.setItem('chargecars_login_attempted', 'true');
+        login('admin@chargecars.nl', 'admin123');
+      }, 500);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, isAuthenticated]);
+
   const checkAuth = async (): Promise<void> => {
     setIsLoading(true);
     

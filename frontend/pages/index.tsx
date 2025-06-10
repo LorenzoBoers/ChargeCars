@@ -22,7 +22,7 @@ export default function HomePage() {
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      router.push('/dashboard');
+      router.push('/today');
     } else {
       router.push('/auth/login');
     }
@@ -95,7 +95,7 @@ export default function HomePage() {
                     className="font-semibold"
                     onPress={handleGetStarted}
                   >
-                    {isAuthenticated ? 'Naar Dashboard' : 'Inloggen'}
+                    {isAuthenticated ? 'Naar Portal' : 'Inloggen'}
                   </Button>
                   
                   <Button
@@ -171,7 +171,7 @@ export default function HomePage() {
                   className="font-semibold"
                   onPress={handleGetStarted}
                 >
-                  {isAuthenticated ? 'Naar Dashboard' : 'Begin Nu'}
+                  {isAuthenticated ? 'Naar Portal' : 'Begin Nu'}
                 </Button>
               </CardBody>
             </Card>

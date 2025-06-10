@@ -40,9 +40,9 @@ export default function Custom404() {
                 size="lg"
                 className="w-full"
                 startContent={<HomeIcon className="h-5 w-5" />}
-                onPress={() => router.push('/dashboard')}
+                onPress={() => router.push('/today')}
               >
-                Naar Dashboard
+                Naar Hoofdpagina
               </Button>
               
               <Button
