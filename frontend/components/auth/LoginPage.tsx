@@ -23,6 +23,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from 'next-themes';
 import ThemeToggle from '../ThemeToggle';
+import Logo from '../ui/Logo';
 
 interface LoginFormData {
   email: string;
@@ -134,11 +135,7 @@ const LoginPage: React.FC = () => {
           <CardHeader className="flex flex-col gap-4 px-8 pt-8 pb-0">
             {/* Logo */}
             <div className="flex justify-center">
-                <img 
-                src="/images/ChargeCars portal svg dark mode (1).svg" 
-                alt="ChargeCars Portal" 
-                className="h-16 w-auto"
-                />
+              <Logo />
             </div>
 
             <div className="text-center">

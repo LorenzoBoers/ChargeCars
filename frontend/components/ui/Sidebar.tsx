@@ -22,7 +22,8 @@ import {
   BoltIcon,
   UserIcon,
   InboxIcon,
-  MapIcon
+  MapIcon,
+  ClockIcon
 } from "@heroicons/react/24/outline";
 import Logo from './Logo';
 import { useAuth } from '../../contexts/AuthContext';
@@ -56,6 +57,12 @@ export function Sidebar({ className = "" }: SidebarProps) {
       href: '/dashboard',
       icon: HomeIcon,
       isActive: router.pathname === '/dashboard'
+    },
+    {
+      label: 'Today',
+      href: '/today',
+      icon: ClockIcon,
+      isActive: router.pathname === '/today'
     },
     {
       label: 'Inbox',

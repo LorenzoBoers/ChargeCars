@@ -229,31 +229,6 @@ export default function PlanningPage() {
         <div className="p-4 border-b border-divider bg-content1">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-xl font-bold">Planning Dashboard</h1>
-            
-            {/* Day Switcher - Compact */}
-            {activeTab === 'route-planner' && (
-              <div className="flex items-center gap-2">
-                <Button
-                  size="sm"
-                  variant="flat"
-                  isIconOnly
-                  onPress={() => changeDate('prev')}
-                >
-                  <ChevronLeftIcon className="h-3 w-3" />
-                </Button>
-                <div className="text-sm font-medium px-2">
-                  {formatDate(selectedDate)}
-                </div>
-                <Button
-                  size="sm"
-                  variant="flat"
-                  isIconOnly
-                  onPress={() => changeDate('next')}
-                >
-                  <ChevronRightIcon className="h-3 w-3" />
-                </Button>
-              </div>
-            )}
           </div>
 
           {/* Tabs */}
@@ -450,6 +425,35 @@ export default function PlanningPage() {
 
                 {/* Right Sidebar - Planned Visits and Teams */}
                 <div className="col-span-3 space-y-6">
+                  {/* Date Switcher */}
+                  {activeTab === 'route-planner' && (
+                    <Card>
+                      <CardBody className="p-3">
+                        <div className="flex items-center justify-between">
+                          <Button
+                            size="sm"
+                            variant="flat"
+                            isIconOnly
+                            onPress={() => changeDate('prev')}
+                          >
+                            <ChevronLeftIcon className="h-4 w-4" />
+                          </Button>
+                          <div className="text-sm font-medium">
+                            {formatDate(selectedDate)}
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="flat"
+                            isIconOnly
+                            onPress={() => changeDate('next')}
+                          >
+                            <ChevronRightIcon className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  )}
+
                   {/* View Toggle */}
                   <Card>
                     <CardBody className="p-3">

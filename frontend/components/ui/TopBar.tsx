@@ -39,33 +39,6 @@ export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
     setMounted(true);
   }, []);
 
-  // Mock field service notifications
-  const fieldServiceNotifications = [
-    { id: 1, message: "Team Alpha - Vertraging verwacht", type: 'warning', time: '5 min' },
-    { id: 2, message: "Urgent: Storing gemeld CHC-2024-001", type: 'danger', time: '12 min' },
-    { id: 3, message: "Route optimalisatie voltooid", type: 'info', time: '15 min' }
-  ];
-
-  const unreadFSNCount = fieldServiceNotifications.filter(n => n.type !== 'info').length;
-
-  const getFSNIcon = (type: string) => {
-    switch (type) {
-      case 'warning': return <ExclamationTriangleIcon className="h-4 w-4" />;
-      case 'danger': return <ExclamationTriangleIcon className="h-4 w-4" />;
-      case 'info': return <BellIcon className="h-4 w-4" />;
-      default: return <BellIcon className="h-4 w-4" />;
-    }
-  };
-
-  const getFSNColor = (type: string) => {
-    switch (type) {
-      case 'warning': return 'warning';
-      case 'danger': return 'danger';
-      case 'info': return 'primary';
-      default: return 'default';
-    }
-  };
-
   const getUserStatusColor = (status: string) => {
     switch (status) {
       case 'available':
@@ -103,32 +76,8 @@ export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
     return (
       <div className="w-full">
         {/* Main Top Bar */}
-        <div className={`h-12 bg-content1 border-b border-divider flex items-center justify-between px-6 w-full ${className}`}>
-          {/* Left: FSN Notifications */}
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-medium text-foreground-600">FSN:</span>
-            {fieldServiceNotifications.slice(0, 2).map(notification => (
-              <Chip
-                key={notification.id}
-                size="sm"
-                color={getFSNColor(notification.type)}
-                variant="solid"
-                startContent={getFSNIcon(notification.type)}
-                className="text-xs"
-              >
-                {notification.message}
-              </Chip>
-            ))}
-            {unreadFSNCount > 0 && (
-              <Badge content={unreadFSNCount} color="danger" size="sm">
-                <Button size="sm" variant="flat" isIconOnly>
-                  <BellIcon className="h-4 w-4" />
-                </Button>
-              </Badge>
-            )}
-          </div>
-
-          {/* Right: Status Indicators */}
+        <div className={`h-12 bg-content1 border-b border-divider flex items-center justify-end px-6 w-full ${className}`}>
+          {/* Status Indicators */}
           <div className="flex items-center gap-4">
             {/* FSN Toggle */}
             <div className="flex items-center gap-2">
@@ -170,31 +119,7 @@ export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
   return (
     <div className="w-full">
       {/* Main Top Bar */}
-      <div className={`h-12 bg-content1 border-b border-divider flex items-center justify-between px-6 w-full ${className}`}>
-        {/* Left: FSN Notifications */}
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-foreground-600">FSN:</span>
-          {fieldServiceNotifications.slice(0, 2).map(notification => (
-            <Chip
-              key={notification.id}
-              size="sm"
-              color={getFSNColor(notification.type)}
-              variant="solid"
-              startContent={getFSNIcon(notification.type)}
-              className="text-xs"
-            >
-              {notification.message}
-            </Chip>
-          ))}
-          {unreadFSNCount > 0 && (
-            <Badge content={unreadFSNCount} color="danger" size="sm">
-              <Button size="sm" variant="flat" isIconOnly>
-                <BellIcon className="h-4 w-4" />
-              </Button>
-            </Badge>
-          )}
-        </div>
-
+      <div className={`h-12 bg-content1 border-b border-divider flex items-center justify-end px-6 w-full ${className}`}>
         {/* Right: Status Indicators */}
         <div className="flex items-center gap-4">
           {/* FSN Toggle */}
@@ -285,29 +210,29 @@ export const TopBar: React.FC<TopBarProps> = ({ className = '' }) => {
                   </Badge>
                 </Button>
               </DropdownTrigger>
-                             <DropdownMenu>
-                 <DropdownItem key="notification-1" textValue="Nieuwe order ontvangen">
-                   <div className="flex flex-col gap-1">
-                     <span className="text-sm font-medium">Nieuwe order ontvangen</span>
-                     <span className="text-xs text-foreground-500">2 min geleden</span>
-                   </div>
-                 </DropdownItem>
-                 <DropdownItem key="notification-2" textValue="Installatie voltooid">
-                   <div className="flex flex-col gap-1">
-                     <span className="text-sm font-medium">Installatie voltooid</span>
-                     <span className="text-xs text-foreground-500">1 uur geleden</span>
-                   </div>
-                 </DropdownItem>
-                 <DropdownItem key="notification-3" textValue="Factuur gegenereerd">
-                   <div className="flex flex-col gap-1">
-                     <span className="text-sm font-medium">Factuur gegenereerd</span>
-                     <span className="text-xs text-foreground-500">3 uur geleden</span>
-                   </div>
-                 </DropdownItem>
-                 <DropdownItem key="view-all" textValue="Bekijk alle notificaties">
-                   <span className="text-primary">Bekijk alle notificaties</span>
-                 </DropdownItem>
-               </DropdownMenu>
+              <DropdownMenu>
+                <DropdownItem key="notification-1" textValue="Nieuwe order ontvangen">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-medium">Nieuwe order ontvangen</span>
+                    <span className="text-xs text-foreground-500">2 min geleden</span>
+                  </div>
+                </DropdownItem>
+                <DropdownItem key="notification-2" textValue="Installatie voltooid">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-medium">Installatie voltooid</span>
+                    <span className="text-xs text-foreground-500">1 uur geleden</span>
+                  </div>
+                </DropdownItem>
+                <DropdownItem key="notification-3" textValue="Factuur gegenereerd">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-sm font-medium">Factuur gegenereerd</span>
+                    <span className="text-xs text-foreground-500">3 uur geleden</span>
+                  </div>
+                </DropdownItem>
+                <DropdownItem key="view-all" textValue="Bekijk alle notificaties">
+                  <span className="text-primary">Bekijk alle notificaties</span>
+                </DropdownItem>
+              </DropdownMenu>
             </Dropdown>
           </Tooltip>
         </div>

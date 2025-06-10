@@ -709,30 +709,21 @@ const QuoteDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Intake Information - 1/3 */}
           <Card className="p-4">
-            <h3 className="text-base font-semibold mb-3">Intake Informatie</h3>
+            <h3 className="text-base font-semibold mb-3">Intake Status</h3>
             <div className="space-y-3 text-sm">
-              <div>
-                <span className="text-foreground-500">Woningtype:</span>
-                <p className="font-medium">{quote.intake.property_type}</p>
+              <div className="flex items-center justify-between">
+                <span className="text-foreground-500">Status:</span>
+                <Chip size="sm" color="success" variant="flat">Voltooid</Chip>
               </div>
               <div>
-                <span className="text-foreground-500">Laadcapaciteit:</span>
-                <p className="font-medium">{quote.intake.charging_preference}</p>
+                <span className="text-foreground-500">Samenvatting:</span>
+                <p className="font-medium text-xs mt-1">
+                  {quote.intake.property_type} • {quote.intake.charging_preference} • {quote.intake.installation_urgency}
+                </p>
               </div>
-              <div>
-                <span className="text-foreground-500">Urgentie:</span>
-                <p className="font-medium">{quote.intake.installation_urgency}</p>
+              <div className="text-xs text-foreground-400">
+                Voltooid op {new Date(quote.intake.completed_date).toLocaleDateString('nl-NL')}
               </div>
-              <div>
-                <span className="text-foreground-500">Elektrische capaciteit:</span>
-                <p className="font-medium">{quote.intake.electrical_capacity}</p>
-              </div>
-              {quote.intake.special_requirements && (
-                <div>
-                  <span className="text-foreground-500">Bijzonderheden:</span>
-                  <p className="font-medium">{quote.intake.special_requirements}</p>
-                </div>
-              )}
             </div>
           </Card>
 
@@ -886,11 +877,24 @@ const QuoteDetailPage: React.FC = () => {
                           <tr key={`contact-${contactId}`} className="bg-content2/30">
                             {isFirstVisitRow && (
                               <td rowSpan={totalRowsForVisit} 
-                                  className="border-r border-divider bg-gradient-to-b from-primary/10 to-primary/5 align-top">
-                                <div className="p-2 text-center">
+                                  className="border-r border-divider bg-gradient-to-b from-primary/10 to-primary/5 align-middle">
+                                <div className="p-2 text-center h-full flex flex-col justify-center">
                                   <div className="transform -rotate-90 whitespace-nowrap text-xs font-semibold text-primary">
                                     {visit.visit_name}
                                   </div>
+                                  {isEditing && (
+                                    <div className="mt-2">
+                                      <Button
+                                        size="sm"
+                                        variant="flat"
+                                        color="primary"
+                                        className="transform -rotate-90 h-6 w-6 min-w-0 px-0 text-xs"
+                                        onPress={() => addLineItem(visitId, 'CONT-001')} // Add to first paying contact
+                                      >
+                                        +€
+                                      </Button>
+                                    </div>
+                                  )}
                                 </div>
                               </td>
                             )}

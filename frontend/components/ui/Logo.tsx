@@ -10,7 +10,7 @@ interface LogoProps {
 }
 
 const sizeMap = {
-  xs: { width: 100, height: 36 },  // New smaller size for sidebar
+  xs: { width: 80, height: 29 },  // Even smaller size for sidebar
   sm: { width: 120, height: 43 },
   md: { width: 160, height: 58 },
   lg: { width: 200, height: 72 },
