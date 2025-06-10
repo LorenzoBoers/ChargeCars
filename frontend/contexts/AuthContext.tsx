@@ -126,21 +126,51 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         console.log('🌐 AUTH: API response:', response);
         
         if (response.success && response.data) {
+          console.log('🌐 AUTH: Processing successful API response:', response.data);
+          
           // Store auth data
           tokenManager.setAuthToken(response.data.auth_token);
-          tokenManager.setRefreshToken(response.data.refresh_token);
-          tokenManager.setUserData(response.data.user);
+          // Set token expiry (24 hours from now if not provided)
+          const expiry = response.data.auth_token_exp ? 
+            response.data.auth_token_exp * 1000 : 
+            Date.now() + 24 * 60 * 60 * 1000;
+          tokenManager.setTokenExpiry(expiry);
+          
+          if (response.data.refresh_token) {
+            tokenManager.setRefreshToken(response.data.refresh_token);
+          }
+          
+          // Create user object from API response
+          const userFromAPI: User = {
+            id: response.data.user?.id || 'api_user',
+            email: response.data.user?.email || email,
+            role_id: response.data.user?.role_id || 'user',
+            contact: {
+              id: response.data.user?.id || 'contact_id',
+              first_name: response.data.user?.first_name || 'User',
+              last_name: response.data.user?.last_name || '',
+            },
+            organization: {
+              id: response.data.user?.organization_id || 'org_id',
+              name: response.data.user?.organization_name || 'Organization',
+              type: 'business'
+            }
+          };
+          
+          console.log('🌐 AUTH: Created user object:', userFromAPI);
+          
+          tokenManager.setUserData(userFromAPI);
           apiClient.setToken(response.data.auth_token); // Set token for API client
           
-          setUser(response.data.user);
+          setUser(userFromAPI);
           setIsLoading(false);
           console.log('🌐 AUTH: API login successful, current path:', router.pathname);
           
-          // Redirect to dashboard after successful API login
-          if (router.pathname === '/auth/login' || router.pathname === '/') {
-            console.log('🌐 AUTH: Redirecting to dashboard...');
+          // Force redirect after state update
+          setTimeout(() => {
+            console.log('🌐 AUTH: Delayed redirect to dashboard...');
             router.push('/dashboard');
-          }
+          }, 100);
           
           console.log('🌐 AUTH: Returning success...');
           return { success: true };

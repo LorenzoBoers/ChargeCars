@@ -95,7 +95,9 @@ export interface DashboardStats {
 
 export interface LoginResponse {
   auth_token: string;
-  refresh_token: string;
+  refresh_token?: string;
+  auth_token_exp?: number;
+  refresh_token_exp?: number;
   user: any; // Will be defined based on actual API response
 }
 

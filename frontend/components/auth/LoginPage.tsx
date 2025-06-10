@@ -83,8 +83,12 @@ const LoginPage: React.FC = () => {
       if (result.success) {
         console.log('✅ LOGIN: Success! Setting success message...');
         setSuccess('Login successful! Redirecting...');
-        // Login function in AuthContext now handles the redirect automatically
-        // No need for manual redirect here
+        
+        // Additional redirect as backup after 1.5 seconds
+        setTimeout(() => {
+          console.log('✅ LOGIN: Backup redirect to dashboard...');
+          router.push('/dashboard');
+        }, 1500);
       } else {
         console.log('❌ LOGIN: Failed with error:', result.error);
         setError(result.error || 'Login failed. Please check your credentials.');
