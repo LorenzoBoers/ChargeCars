@@ -599,21 +599,20 @@ const OrderDetailPage: React.FC = () => {
                 </Card>
               </div>
 
-              {/* Addresses with Google Maps */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <h3 className="text-base font-semibold flex items-center gap-2">
-                    <MapPinIcon className="h-4 w-4" />
-                    Adressen
-                  </h3>
-                </CardHeader>
-                <CardBody className="pt-0">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {/* Address List */}
-                    <div className="space-y-3">
-                      {order.addresses.map((address, index) => (
-                        <div key={index} className="p-3 border border-divider rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
+              {/* Addresses with Mock Images per Card */}
+              <div className="space-y-4">
+                <h3 className="text-base font-semibold flex items-center gap-2">
+                  <MapPinIcon className="h-4 w-4" />
+                  Adressen
+                </h3>
+                
+                {order.addresses.map((address, index) => (
+                  <Card key={index}>
+                    <CardBody className="p-0">
+                      <div className="grid grid-cols-1 lg:grid-cols-2">
+                        {/* Address Info */}
+                        <div className="p-4">
+                          <div className="flex items-center justify-between mb-3">
                             <Chip 
                               size="sm" 
                               color={address.type === 'installation' ? 'primary' : 'secondary'} 
@@ -631,37 +630,37 @@ const OrderDetailPage: React.FC = () => {
                               <PencilIcon className="h-3 w-3" />
                             </Button>
                           </div>
-                          <div className="space-y-1">
+                          <div className="space-y-2">
                             <p className="font-medium text-sm">{address.street}</p>
                             <p className="text-sm text-foreground-600">{address.zipCode} {address.city}</p>
                             <p className="text-xs text-foreground-500">{address.country}</p>
                           </div>
+                          <div className="mt-4">
+                            <Button
+                              size="sm"
+                              variant="flat"
+                              color="primary"
+                              className="text-xs h-6"
+                              startContent={<MapPinIcon className="h-3 w-3" />}
+                            >
+                              Route
+                            </Button>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                    
-                    {/* Mock Map Image */}
-                    <div className="relative h-48 bg-content2 rounded-lg overflow-hidden">
-                      <img
-                        src="/images/Schermafbeelding 2025-06-10 022658.png"
-                        alt="Kaart weergave"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute top-2 right-2">
-                        <Button
-                          size="sm"
-                          variant="flat"
-                          color="primary"
-                          className="text-xs h-6"
-                          startContent={<MapPinIcon className="h-3 w-3" />}
-                        >
-                          Route
-                        </Button>
+                        
+                        {/* Mock Map Image */}
+                        <div className="relative h-32 lg:h-auto bg-content2 rounded-r-lg overflow-hidden">
+                          <img
+                            src="/images/Schermafbeelding 2025-06-10 022658.png"
+                            alt="Kaart weergave"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </CardBody>
-              </Card>
+                    </CardBody>
+                  </Card>
+                ))}
+              </div>
 
               {/* Grouped Related Items */}
               <Card>
