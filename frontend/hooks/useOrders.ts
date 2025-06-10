@@ -59,6 +59,9 @@ export const useOrders = (initialFilters?: OrderFilters): UseOrdersReturn => {
     setLoading(true);
     setError(null);
 
+    // Check if API client has a token
+    console.log('📋 ORDERS: Fetching orders with token:', !!apiClient.getToken());
+
     try {
       const filters: OrderFilters = {
         search: searchValue || undefined,

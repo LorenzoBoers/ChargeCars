@@ -28,6 +28,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Check authentication status on app load
   useEffect(() => {
     checkAuth();
+    
+    // Ensure API client has token on startup
+    const token = tokenManager.getAuthToken();
+    if (token && tokenManager.isTokenValid()) {
+      apiClient.setToken(token);
+      console.log('🔑 AUTH: API client token set on startup');
+    }
   }, []);
 
   // Auto-login disabled - using real credentials only
@@ -61,6 +68,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (userData) {
         // We have cached user data and valid token
         apiClient.setToken(token); // Set token for API client
+        console.log('🔑 AUTH: Restored user session with token');
         setUser(userData);
         setIsLoading(false);
         return;

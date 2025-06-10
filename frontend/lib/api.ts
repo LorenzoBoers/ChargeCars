@@ -121,10 +121,37 @@ class ApiClient {
   constructor() {
     this.baseUrl = `${API_BASE_URL}/api:${API_GROUP}`;
     this.authBaseUrl = `${API_BASE_URL}/api:auth`;
+    
+    // Initialize token from storage on app startup
+    this.initializeToken();
   }
 
-  setToken(token: string) {
+  private initializeToken(): void {
+    try {
+      // Check if we're in browser environment
+      if (typeof window !== 'undefined') {
+        const { tokenManager } = require('./auth');
+        const storedToken = tokenManager.getAuthToken();
+        if (storedToken && tokenManager.isTokenValid()) {
+          this.token = storedToken;
+          console.log('🔑 API: Token initialized from storage');
+        } else if (storedToken) {
+          console.log('⚠️ API: Stored token is expired, clearing...');
+          tokenManager.clearAuth();
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ API: Could not initialize token from storage:', error);
+    }
+  }
+
+  setToken(token: string | null) {
     this.token = token;
+    console.log('🔑 API: Token updated:', !!token);
+  }
+
+  getToken(): string | null {
+    return this.token;
   }
 
   private async request<T>(
@@ -139,7 +166,8 @@ class ApiClient {
       url,
       method: options.method || 'GET',
       useAuthEndpoint,
-      hasToken: !!this.token
+      hasToken: !!this.token,
+      tokenPreview: this.token ? `${this.token.substring(0, 10)}...` : 'none'
     });
     
     const headers: HeadersInit = {

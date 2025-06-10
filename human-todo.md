@@ -287,6 +287,17 @@ interface Conversation {
 
 ## ✅ Completed
 
+### 2025-01-09 - API Client Token Management Fix
+- **Components**: `frontend/lib/api.ts`, `frontend/contexts/AuthContext.tsx`, `frontend/hooks/useOrders.ts`
+- **Status**: ✅ Completed - Token Automatically Applied to API Requests
+- **Details**: 
+  - **Auto Token Init**: API client automatically loads token from storage on startup
+  - **Token Validation**: Expired tokens are automatically cleared
+  - **Startup Token Set**: AuthContext ensures API client has token on app load
+  - **Debug Logging**: Added extensive logging to track token usage in requests
+  - **Token Preview**: Console shows token preview for verification
+  - **Order Requests**: Orders page now properly includes auth token in all requests
+
 ### 2025-01-09 - Enhanced Token Storage with Cookies
 - **Component**: `frontend/lib/auth.ts`
 - **Status**: ✅ Completed - Hybrid Storage Implementation
