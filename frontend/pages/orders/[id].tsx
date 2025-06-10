@@ -499,38 +499,38 @@ const OrderDetailPage: React.FC = () => {
                 </CardBody>
               </Card>
 
-              {/* Customer & Partner Details Side by Side */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Customer & Partner Details - 3 Cards Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 {/* Customer Details */}
                 <Card>
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <UserIcon className="h-5 w-5" />
+                  <CardHeader className="pb-2">
+                    <h3 className="text-base font-semibold flex items-center gap-2">
+                      <UserIcon className="h-4 w-4" />
                       Eindklant
                     </h3>
                   </CardHeader>
-                  <CardBody>
+                  <CardBody className="pt-0">
                     <div 
-                      className="flex items-start gap-4 p-3 rounded-lg hover:bg-content2 transition-colors cursor-pointer"
+                      className="flex items-start gap-3 p-2 rounded-lg hover:bg-content2 transition-colors cursor-pointer"
                       onClick={() => router.push(`/contacts/${order.customer.id}`)}
                     >
-                      <Avatar name={order.customer.name} size="lg" />
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-lg text-primary hover:text-primary-600 transition-colors">{order.customer.name}</h4>
-                        <p className="text-foreground-600 mb-2">{order.customer.role}</p>
+                      <Avatar name={order.customer.name} size="md" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-sm text-primary hover:text-primary-600 transition-colors truncate">{order.customer.name}</h4>
+                        <p className="text-foreground-600 text-xs mb-2">{order.customer.role}</p>
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <EnvelopeIcon className="h-4 w-4 text-foreground-500" />
-                            <span className="text-sm">{order.customer.email}</span>
+                          <div className="flex items-center gap-1">
+                            <EnvelopeIcon className="h-3 w-3 text-foreground-500 flex-shrink-0" />
+                            <span className="text-xs truncate">{order.customer.email}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <PhoneIcon className="h-4 w-4 text-foreground-500" />
-                            <span className="text-sm">{order.customer.phone}</span>
+                          <div className="flex items-center gap-1">
+                            <PhoneIcon className="h-3 w-3 text-foreground-500 flex-shrink-0" />
+                            <span className="text-xs">{order.customer.phone}</span>
                           </div>
                         </div>
                       </div>
-                      <div className="self-center">
-                        <ChevronRightIcon className="h-5 w-5 text-foreground-400" />
+                      <div className="self-center flex-shrink-0">
+                        <ChevronRightIcon className="h-4 w-4 text-foreground-400" />
                       </div>
                     </div>
                   </CardBody>
@@ -538,85 +538,133 @@ const OrderDetailPage: React.FC = () => {
 
                 {/* Partner Details */}
                 <Card>
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <BuildingOfficeIcon className="h-5 w-5" />
+                  <CardHeader className="pb-2">
+                    <h3 className="text-base font-semibold flex items-center gap-2">
+                      <BuildingOfficeIcon className="h-4 w-4" />
                       Opdrachtgever
                     </h3>
                   </CardHeader>
-                  <CardBody>
-                    <div className="flex items-start gap-4">
-                      <Avatar name={order.partner.name} size="lg" color="secondary" />
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-lg">{order.partnerName}</h4>
-                        <p className="text-foreground-600 mb-2">{order.partner.name} • {order.partner.role}</p>
+                  <CardBody className="pt-0">
+                    <div className="flex items-start gap-3 p-2">
+                      <Avatar name={order.partner.name} size="md" color="secondary" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-sm truncate">{order.partnerName}</h4>
+                        <p className="text-foreground-600 text-xs mb-2 truncate">{order.partner.name} • {order.partner.role}</p>
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <EnvelopeIcon className="h-4 w-4 text-foreground-500" />
-                            <span className="text-sm">{order.partner.email}</span>
+                          <div className="flex items-center gap-1">
+                            <EnvelopeIcon className="h-3 w-3 text-foreground-500 flex-shrink-0" />
+                            <span className="text-xs truncate">{order.partner.email}</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <PhoneIcon className="h-4 w-4 text-foreground-500" />
-                            <span className="text-sm">{order.partner.phone}</span>
+                          <div className="flex items-center gap-1">
+                            <PhoneIcon className="h-3 w-3 text-foreground-500 flex-shrink-0" />
+                            <span className="text-xs">{order.partner.phone}</span>
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </CardBody>
+                </Card>
+
+                {/* Additional Contacts */}
+                <Card>
+                  <CardHeader className="pb-2">
+                    <h3 className="text-base font-semibold">Overige Contacten</h3>
+                  </CardHeader>
+                  <CardBody className="pt-0">
+                    <div className="space-y-2">
+                      {order.additionalContacts.length > 0 ? (
+                        order.additionalContacts.map((contact) => (
+                          <div key={contact.id} className="flex items-center gap-2 p-2 bg-content2/50 rounded-lg">
+                            <Avatar name={contact.name} size="sm" className="w-6 h-6 text-xs" />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-xs truncate">{contact.name}</p>
+                              <p className="text-xs text-foreground-600 truncate">{contact.role}</p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-foreground-500 italic">Geen extra contacten</p>
+                      )}
+                      <Button 
+                        size="sm" 
+                        variant="light" 
+                        color="primary" 
+                        className="w-full text-xs h-6"
+                        startContent={<UserIcon className="h-3 w-3" />}
+                      >
+                        Contact Toevoegen
+                      </Button>
                     </div>
                   </CardBody>
                 </Card>
               </div>
 
-              {/* Additional Contacts */}
-              {order.additionalContacts.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold">Extra Contacten</h3>
-                  </CardHeader>
-                  <CardBody>
-                    <div className="space-y-4">
-                      {order.additionalContacts.map((contact) => (
-                        <div key={contact.id} className="flex items-center gap-3 p-3 bg-content2 rounded-lg">
-                          <Avatar name={contact.name} size="sm" />
-                          <div className="flex-1">
-                            <p className="font-medium">{contact.name}</p>
-                            <p className="text-sm text-foreground-600">{contact.role}</p>
+              {/* Addresses with Google Maps */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <h3 className="text-base font-semibold flex items-center gap-2">
+                    <MapPinIcon className="h-4 w-4" />
+                    Adressen
+                  </h3>
+                </CardHeader>
+                <CardBody className="pt-0">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* Address List */}
+                    <div className="space-y-3">
+                      {order.addresses.map((address, index) => (
+                        <div key={index} className="p-3 border border-divider rounded-lg">
+                          <div className="flex items-center justify-between mb-2">
+                            <Chip 
+                              size="sm" 
+                              color={address.type === 'installation' ? 'primary' : 'secondary'} 
+                              variant="flat"
+                              className="text-xs"
+                            >
+                              {address.type === 'installation' ? 'Installatie' : 'Factuur'}
+                            </Chip>
+                            <Button
+                              size="sm"
+                              variant="light"
+                              isIconOnly
+                              className="h-6 w-6"
+                            >
+                              <PencilIcon className="h-3 w-3" />
+                            </Button>
                           </div>
-                          <div className="text-right text-sm">
-                            <p>{contact.email}</p>
-                            <p className="text-foreground-500">{contact.phone}</p>
+                          <div className="space-y-1">
+                            <p className="font-medium text-sm">{address.street}</p>
+                            <p className="text-sm text-foreground-600">{address.zipCode} {address.city}</p>
+                            <p className="text-xs text-foreground-500">{address.country}</p>
                           </div>
                         </div>
                       ))}
                     </div>
-                  </CardBody>
-                </Card>
-              )}
-
-              {/* Addresses */}
-              <Card>
-                <CardHeader>
-                  <h3 className="text-lg font-semibold flex items-center gap-2">
-                    <MapPinIcon className="h-5 w-5" />
-                    Adressen
-                  </h3>
-                </CardHeader>
-                <CardBody>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {order.addresses.map((address, index) => (
-                      <div key={index} className="p-4 border border-divider rounded-lg">
-                        <div className="flex items-center gap-2 mb-2">
-                          <MapPinIcon className="h-4 w-4 text-foreground-500" />
-                          <Chip size="sm" variant="flat" color={address.type === 'installation' ? 'primary' : 'secondary'}>
-                            {address.type === 'installation' ? 'Installatie' : 'Factuur'}
-                          </Chip>
-                        </div>
-                        <div className="text-sm space-y-1">
-                          <p>{address.street}</p>
-                          <p>{address.zipCode} {address.city}</p>
-                          <p className="text-foreground-500">{address.country}</p>
-                        </div>
+                    
+                    {/* Google Maps Embed */}
+                    <div className="relative">
+                      <div className="w-full h-48 bg-content2 rounded-lg overflow-hidden">
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          loading="lazy"
+                          allowFullScreen
+                          referrerPolicy="no-referrer-when-downgrade"
+                          src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBDaeWicvigtP9xPv919E-RNoxfvC-Hqik&q=${encodeURIComponent(order.addresses[0]?.street + ', ' + order.addresses[0]?.city + ', ' + order.addresses[0]?.country)}`}
+                        />
                       </div>
-                    ))}
+                      <div className="absolute top-2 right-2">
+                        <Button
+                          size="sm"
+                          variant="flat"
+                          color="primary"
+                          className="text-xs h-6"
+                          startContent={<MapPinIcon className="h-3 w-3" />}
+                        >
+                          Route
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </CardBody>
               </Card>

@@ -60,7 +60,8 @@ import {
   BookmarkIcon,
   XMarkIcon,
   WrenchScrewdriverIcon,
-  ArchiveBoxIcon
+  ArchiveBoxIcon,
+  PaperAirplaneIcon
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../../../components/layouts/AppLayout';
 
@@ -414,12 +415,23 @@ const QuoteBuildPage: React.FC = () => {
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'product': return <ArchiveBoxIcon className="h-4 w-4 text-primary" />;
-      case 'service': return <WrenchScrewdriverIcon className="h-4 w-4 text-success" />;
-      case 'installation': return <BoltIcon className="h-4 w-4 text-warning" />;
-      case 'other': return <DocumentTextIcon className="h-4 w-4 text-default-500" />;
-      default: return <DocumentTextIcon className="h-4 w-4 text-default-500" />;
+      case 'product': return <ArchiveBoxIcon className="h-4 w-4 text-blue-500" />;
+      case 'service': return <WrenchScrewdriverIcon className="h-4 w-4 text-green-500" />;
+      case 'installation': return <BoltIcon className="h-4 w-4 text-orange-500" />;
+      default: return <DocumentTextIcon className="h-4 w-4 text-foreground-600" />;
     }
+  };
+
+  const getContactTotal = (contactId: string) => {
+    return quote.line_items
+      .filter(item => item.contact_id === contactId)
+      .reduce((sum, item) => sum + item.total_price, 0);
+  };
+
+  const addQuickLineItem = (visitId: string, contactId: string) => {
+    setSelectedVisitForNewItem(visitId);
+    setSelectedContactForNewItem(contactId);
+    onAddItemOpen();
   };
 
   const getTotalByResponsibility = () => {
@@ -587,204 +599,244 @@ const QuoteBuildPage: React.FC = () => {
                   </thead>
                   <tbody>
                     <DragDropContext onDragEnd={onDragEnd}>
-                      {groupedItems.map(({ visit, contactGroups }) => (
-                        <React.Fragment key={visit.id}>
-                          {/* Visit header row */}
-                          <tr className="bg-primary/10 border-b border-divider">
-                            <td className="py-2 px-3 font-semibold text-sm text-primary" colSpan={6}>
-                              <div className="flex items-center gap-2">
-                                <CalendarDaysIcon className="h-4 w-4" />
-                                {visit.visit_type}
-                                <span className="text-xs text-foreground-600">({visit.planned_date})</span>
-                                <div className="flex items-center gap-2 ml-auto">
-                                  <Button
-                                    size="sm"
-                                    variant="flat"
-                                    color="primary"
-                                    className="text-xs h-6"
-                                    onPress={() => {
-                                      setSelectedVisitForNewItem(visit.id);
-                                      onAddItemOpen();
-                                    }}
-                                  >
-                                    <PlusIcon className="h-3 w-3 mr-1" />
-                                    Item
-                                  </Button>
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                          
-                          {contactGroups.map(({ contact, items }) => {
-                            const contactTotal = items.reduce((sum, item) => sum + item.total_price, 0);
-                            
-                            return (
-                              <React.Fragment key={contact.id}>
-                                {/* Contact header row */}
-                                <tr className="bg-content2/40 border-b border-divider border-l-4 border-l-primary/30">
-                                  <td className="py-1.5 px-3" colSpan={6}>
-                                    <div className="flex items-center justify-between">
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-medium text-sm">{contact.name}</span>
-                                        <Chip 
-                                          size="sm" 
-                                          color={getContactColor(contact.role)} 
-                                          variant="flat" 
-                                          className="text-xs"
-                                        >
-                                          {getContactLabel(contact.role)}
-                                        </Chip>
-                                      </div>
-                                      <span className="text-xs text-foreground-600 font-medium">€{contactTotal.toLocaleString('nl-NL')}</span>
-                                    </div>
-                                  </td>
-                                </tr>
-                                
-                                {/* Line items for this contact */}
-                                <Droppable droppableId={`visit-${visit.id}-contact-${contact.id}`}>
-                                  {(provided, snapshot) => (
-                                    <tbody
-                                      ref={provided.innerRef}
-                                      {...provided.droppableProps}
-                                      className={snapshot.isDraggingOver ? 'bg-primary/5' : ''}
+                      <Droppable droppableId="visits" type="VISIT">
+                        {(provided) => (
+                          <React.Fragment>
+                            {groupedItems.map(({ visit, contactGroups }, visitIndex) => (
+                              <Draggable key={visit.id} draggableId={`visit-${visit.id}`} index={visitIndex}>
+                                {(visitProvided, visitSnapshot) => (
+                                  <React.Fragment key={visit.id}>
+                                    {/* Visit header row */}
+                                    <tr 
+                                      ref={visitProvided.innerRef}
+                                      {...visitProvided.draggableProps}
+                                      className={`bg-primary/10 border-b border-divider ${visitSnapshot.isDragging ? 'shadow-lg' : ''}`}
                                     >
-                                      {items.map((item, index) => (
-                                        <Draggable key={item.id} draggableId={item.id} index={index}>
-                                          {(provided, snapshot) => (
-                                            <tr
-                                              ref={provided.innerRef}
-                                              {...provided.draggableProps}
-                                              className={`border-b border-divider/30 hover:bg-content2/10 transition-colors ${
-                                                snapshot.isDragging ? 'shadow-lg bg-primary/5' : ''
-                                              }`}
+                                      <td className="py-2 px-3 font-semibold text-sm text-primary" colSpan={6}>
+                                        <div className="flex items-center gap-2">
+                                          <div
+                                            {...visitProvided.dragHandleProps}
+                                            className="cursor-grab hover:cursor-grabbing"
+                                          >
+                                            <Bars3Icon className="h-4 w-4" />
+                                          </div>
+                                          <CalendarDaysIcon className="h-4 w-4" />
+                                          {visit.visit_type}
+                                          <span className="text-xs text-foreground-600">({visit.planned_date})</span>
+                                          <div className="flex items-center gap-2 ml-auto">
+                                            <Button
+                                              size="sm"
+                                              variant="flat"
+                                              color="primary"
+                                              className="text-xs h-6"
+                                              onPress={() => {
+                                                setSelectedVisitForNewItem(visit.id);
+                                                onAddItemOpen();
+                                              }}
                                             >
-                                              {/* Drag handle */}
-                                              <td className="py-1.5 px-3 text-center">
-                                                <div
-                                                  {...provided.dragHandleProps}
-                                                  className="cursor-grab hover:cursor-grabbing text-foreground-400"
-                                                >
-                                                  <Bars3Icon className="h-4 w-4" />
+                                              <PlusIcon className="h-3 w-3 mr-1" />
+                                              Item
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                    
+                                    {contactGroups.map(({ contact, items }) => {
+                                      const contactTotal = items.reduce((sum, item) => sum + item.total_price, 0);
+                                      
+                                      return (
+                                        <React.Fragment key={contact.id}>
+                                          {/* Contact header row */}
+                                          <tr className="bg-content2/40 border-b border-divider border-l-4 border-l-primary/30">
+                                            <td className="py-1.5 px-3" colSpan={6}>
+                                              <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-2">
+                                                  <span className="font-medium text-sm">{contact.name}</span>
+                                                  <Chip 
+                                                    size="sm" 
+                                                    color={getContactColor(contact.role)} 
+                                                    variant="flat" 
+                                                    className="text-xs"
+                                                  >
+                                                    {getContactLabel(contact.role)}
+                                                  </Chip>
                                                 </div>
-                                              </td>
-                                              
-                                              {/* Description */}
-                                              <td className="py-1.5 px-3">
-                                                <div className="pl-4">
-                                                  {editingItem === item.id ? (
-                                                    <Input
-                                                      size="sm"
-                                                      value={item.description}
-                                                      onValueChange={(value) => updateLineItem(item.id, { description: value })}
-                                                      className="text-xs"
-                                                    />
-                                                  ) : (
-                                                    <p className="text-sm font-medium text-foreground">{item.description}</p>
-                                                  )}
-                                                </div>
-                                              </td>
-                                              
-                                              {/* Quantity */}
-                                              <td className="py-1.5 px-3 text-left">
-                                                {editingItem === item.id ? (
-                                                  <Input
-                                                    size="sm"
-                                                    type="number"
-                                                    value={item.quantity.toString()}
-                                                    onValueChange={(value) => updateLineItem(item.id, { quantity: Number(value) })}
-                                                    className="text-xs w-20"
-                                                  />
-                                                ) : (
-                                                  <span className="text-sm font-medium">{item.quantity}x</span>
-                                                )}
-                                              </td>
-                                              
-                                              {/* Unit price */}
-                                              <td className="py-1.5 px-3 text-right">
-                                                {editingItem === item.id ? (
-                                                  <Input
-                                                    size="sm"
-                                                    type="number"
-                                                    step="0.01"
-                                                    value={item.unit_price.toString()}
-                                                    onValueChange={(value) => updateLineItem(item.id, { unit_price: Number(value) })}
-                                                    startContent="€"
-                                                    className="text-xs w-24"
-                                                  />
-                                                ) : (
-                                                  <span className="text-sm font-medium">€{item.unit_price.toLocaleString('nl-NL')}</span>
-                                                )}
-                                              </td>
-                                              
-                                              {/* Total price */}
-                                              <td className="py-1.5 px-3 text-right">
-                                                <span className="text-sm font-semibold">€{item.total_price.toLocaleString('nl-NL')}</span>
-                                              </td>
-                                              
-                                              {/* Actions */}
-                                              <td className="py-1.5 px-3 text-center">
-                                                <div className="flex items-center justify-center gap-1">
-                                                  {editingItem === item.id ? (
-                                                    <>
+                                                <span className="text-xs text-foreground-600 font-medium">€{contactTotal.toLocaleString('nl-NL')}</span>
+                                              </div>
+                                            </td>
+                                          </tr>
+                                          
+                                          {/* Line items for this contact */}
+                                          <Droppable droppableId={`visit-${visit.id}-contact-${contact.id}`}>
+                                            {(provided, snapshot) => (
+                                              <React.Fragment>
+                                                {items.map((item, index) => (
+                                                  <Draggable key={item.id} draggableId={item.id} index={index}>
+                                                    {(provided, snapshot) => (
+                                                      <tr
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        className={`border-b border-divider/30 hover:bg-content2/10 transition-colors ${
+                                                          snapshot.isDragging ? 'shadow-lg bg-primary/5' : ''
+                                                        }`}
+                                                      >
+                                                        {/* Drag handle */}
+                                                        <td className="py-1.5 px-3 text-center">
+                                                          <div
+                                                            {...provided.dragHandleProps}
+                                                            className="cursor-grab hover:cursor-grabbing text-foreground-400"
+                                                          >
+                                                            <Bars3Icon className="h-4 w-4" />
+                                                          </div>
+                                                        </td>
+                                                        
+                                                        {/* Description */}
+                                                        <td className="py-1.5 px-3">
+                                                          <div className="pl-4">
+                                                            {editingItem === item.id ? (
+                                                              <Input
+                                                                size="sm"
+                                                                value={item.description}
+                                                                onValueChange={(value) => updateLineItem(item.id, { description: value })}
+                                                                className="text-xs"
+                                                              />
+                                                            ) : (
+                                                              <p className="text-sm font-medium text-foreground">{item.description}</p>
+                                                            )}
+                                                          </div>
+                                                        </td>
+                                                        
+                                                        {/* Quantity */}
+                                                        <td className="py-1.5 px-3 text-left">
+                                                          {editingItem === item.id ? (
+                                                            <Input
+                                                              size="sm"
+                                                              type="number"
+                                                              value={item.quantity.toString()}
+                                                              onValueChange={(value) => updateLineItem(item.id, { quantity: Number(value) })}
+                                                              className="text-xs w-20"
+                                                            />
+                                                          ) : (
+                                                            <span className="text-sm font-medium">{item.quantity}x</span>
+                                                          )}
+                                                        </td>
+                                                        
+                                                        {/* Unit price */}
+                                                        <td className="py-1.5 px-3 text-right">
+                                                          {editingItem === item.id ? (
+                                                            <Input
+                                                              size="sm"
+                                                              type="number"
+                                                              step="0.01"
+                                                              value={item.unit_price.toString()}
+                                                              onValueChange={(value) => updateLineItem(item.id, { unit_price: Number(value) })}
+                                                              startContent="€"
+                                                              className="text-xs w-24"
+                                                            />
+                                                          ) : (
+                                                            <span className="text-sm font-medium">€{item.unit_price.toLocaleString('nl-NL')}</span>
+                                                          )}
+                                                        </td>
+                                                        
+                                                        {/* Total price */}
+                                                        <td className="py-1.5 px-3 text-right">
+                                                          <span className="text-sm font-semibold">€{item.total_price.toLocaleString('nl-NL')}</span>
+                                                        </td>
+                                                        
+                                                        {/* Actions */}
+                                                        <td className="py-1.5 px-3 text-center">
+                                                          <div className="flex items-center justify-center gap-1">
+                                                            {editingItem === item.id ? (
+                                                              <>
+                                                                <Button
+                                                                  size="sm"
+                                                                  isIconOnly
+                                                                  color="success"
+                                                                  variant="light"
+                                                                  onPress={() => setEditingItem(null)}
+                                                                  className="h-6 w-6 min-w-6"
+                                                                >
+                                                                  <CheckCircleIcon className="h-3 w-3" />
+                                                                </Button>
+                                                                <Button
+                                                                  size="sm"
+                                                                  isIconOnly
+                                                                  color="danger"
+                                                                  variant="light"
+                                                                  onPress={() => setEditingItem(null)}
+                                                                  className="h-6 w-6 min-w-6"
+                                                                >
+                                                                  <XMarkIcon className="h-3 w-3" />
+                                                                </Button>
+                                                              </>
+                                                            ) : (
+                                                              <>
+                                                                <Button
+                                                                  size="sm"
+                                                                  isIconOnly
+                                                                  variant="light"
+                                                                  onPress={() => setEditingItem(item.id)}
+                                                                  className="h-6 w-6 min-w-6"
+                                                                >
+                                                                  <PencilIcon className="h-3 w-3" />
+                                                                </Button>
+                                                                <Button
+                                                                  size="sm"
+                                                                  isIconOnly
+                                                                  color="danger"
+                                                                  variant="light"
+                                                                  onPress={() => removeLineItem(item.id)}
+                                                                  className="h-6 w-6 min-w-6"
+                                                                >
+                                                                  <TrashIcon className="h-3 w-3" />
+                                                                </Button>
+                                                              </>
+                                                            )}
+                                                          </div>
+                                                        </td>
+                                                      </tr>
+                                                    )}
+                                                  </Draggable>
+                                                ))}
+                                                
+                                                {/* Add item row for this contact */}
+                                                <tr className="border-b border-divider/20">
+                                                  <td className="py-1 px-3" colSpan={6}>
+                                                    <div className="flex items-center justify-center">
                                                       <Button
                                                         size="sm"
-                                                        isIconOnly
-                                                        color="success"
                                                         variant="light"
-                                                        onPress={() => setEditingItem(null)}
-                                                        className="h-6 w-6 min-w-6"
-                                                      >
-                                                        <CheckCircleIcon className="h-3 w-3" />
-                                                      </Button>
-                                                      <Button
-                                                        size="sm"
+                                                        color="primary"
                                                         isIconOnly
-                                                        color="danger"
-                                                        variant="light"
-                                                        onPress={() => setEditingItem(null)}
-                                                        className="h-6 w-6 min-w-6"
+                                                        className="h-6 w-6 min-w-6 opacity-60 hover:opacity-100"
+                                                        onPress={() => addQuickLineItem(visit.id, contact.id)}
                                                       >
-                                                        <XMarkIcon className="h-3 w-3" />
+                                                        <PlusIcon className="h-3 w-3" />
                                                       </Button>
-                                                    </>
-                                                  ) : (
-                                                    <>
-                                                      <Button
-                                                        size="sm"
-                                                        isIconOnly
-                                                        variant="light"
-                                                        onPress={() => setEditingItem(item.id)}
-                                                        className="h-6 w-6 min-w-6"
-                                                      >
-                                                        <PencilIcon className="h-3 w-3" />
-                                                      </Button>
-                                                      <Button
-                                                        size="sm"
-                                                        isIconOnly
-                                                        color="danger"
-                                                        variant="light"
-                                                        onPress={() => removeLineItem(item.id)}
-                                                        className="h-6 w-6 min-w-6"
-                                                      >
-                                                        <TrashIcon className="h-3 w-3" />
-                                                      </Button>
-                                                    </>
-                                                  )}
-                                                </div>
-                                              </td>
-                                            </tr>
-                                          )}
-                                        </Draggable>
-                                      ))}
-                                      {provided.placeholder}
-                                    </tbody>
-                                  )}
-                                </Droppable>
-                              </React.Fragment>
-                            );
-                          })}
-                        </React.Fragment>
-                      ))}
+                                                    </div>
+                                                  </td>
+                                                </tr>
+                                                
+                                                <tr ref={provided.innerRef} {...provided.droppableProps} style={{ display: 'none' }}>
+                                                  <td>{provided.placeholder}</td>
+                                                </tr>
+                                              </React.Fragment>
+                                            )}
+                                          </Droppable>
+                                        </React.Fragment>
+                                      );
+                                    })}
+                                  </React.Fragment>
+                                )}
+                              </Draggable>
+                            ))}
+                            <tr ref={provided.innerRef} {...provided.droppableProps} style={{ display: 'none' }}>
+                              <td>{provided.placeholder}</td>
+                            </tr>
+                          </React.Fragment>
+                        )}
+                      </Droppable>
                     </DragDropContext>
                   </tbody>
                 </table>
@@ -792,28 +844,130 @@ const QuoteBuildPage: React.FC = () => {
             </CardBody>
           </Card>
 
-          {/* Totals Card */}
-          <Card>
-            <CardHeader className="pb-2">
-              <h3 className="text-base font-semibold">Totaal Overzicht</h3>
-            </CardHeader>
-            <CardBody className="pt-0">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-3 bg-success/10 rounded-lg">
-                  <p className="text-lg font-bold text-success">€{customerTotal.toLocaleString('nl-NL')}</p>
-                  <p className="text-xs text-foreground-600">Klant Verantwoordelijk</p>
-                </div>
-                <div className="text-center p-3 bg-primary/10 rounded-lg">
-                  <p className="text-lg font-bold text-primary">€{partnerTotal.toLocaleString('nl-NL')}</p>
-                  <p className="text-xs text-foreground-600">Partner Verantwoordelijk</p>
-                </div>
-                <div className="text-center p-3 bg-foreground/10 rounded-lg">
-                  <p className="text-lg font-bold text-foreground">€{total.toLocaleString('nl-NL')}</p>
-                  <p className="text-xs text-foreground-600">Totaal Offerte</p>
-                </div>
-              </div>
-            </CardBody>
-          </Card>
+          {/* Totals Breakdown */}
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
+            {/* Totals Overview - Left Side */}
+            <div className="xl:col-span-3">
+              <Card>
+                <CardHeader className="pb-2">
+                  <h3 className="text-base font-semibold">Totaaloverzicht</h3>
+                </CardHeader>
+                <CardBody className="pt-0">
+                  <div className="space-y-3">
+                    {/* Per Contact Totals */}
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-medium text-foreground-600">Per Contact:</h4>
+                      {quote.contacts.map(contact => {
+                        const contactTotal = getContactTotal(contact.id);
+                        if (contactTotal === 0) return null;
+                        
+                        return (
+                          <div key={contact.id} className="flex justify-between items-center py-1 px-2 bg-content2/20 rounded">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">{contact.name}</span>
+                              <Chip size="sm" color={getContactColor(contact.role)} variant="flat" className="text-xs">
+                                {getContactLabel(contact.role)}
+                              </Chip>
+                            </div>
+                            <span className="text-sm font-medium">€{contactTotal.toLocaleString('nl-NL')}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    <Divider />
+                    
+                    {/* VAT Breakdown */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>Subtotaal (excl. BTW):</span>
+                        <span className="font-medium">€{(total / 1.21).toLocaleString('nl-NL', { maximumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span>BTW (21%):</span>
+                        <span className="font-medium">€{(total - (total / 1.21)).toLocaleString('nl-NL', { maximumFractionDigits: 2 })}</span>
+                      </div>
+                      <Divider />
+                      <div className="flex justify-between font-bold text-base">
+                        <span>Totaal (incl. BTW):</span>
+                        <span className="text-primary">€{total.toLocaleString('nl-NL')}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardBody>
+              </Card>
+            </div>
+
+            {/* Contact Signature Cards - Right Side */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold">Ondertekening Status</h3>
+              
+              {quote.contacts.map((contact, index) => {
+                const contactTotal = getContactTotal(contact.id);
+                if (contactTotal === 0) return null;
+                
+                const hasSigned = index === 0; // First contact has already signed
+                
+                return (
+                  <Card key={contact.id} className="p-3">
+                    <div className="space-y-2">
+                      {/* Contact Header */}
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-semibold text-sm">{contact.name}</h4>
+                          <Chip size="sm" color={getContactColor(contact.role)} variant="flat" className="text-xs">
+                            {getContactLabel(contact.role)}
+                          </Chip>
+                        </div>
+                        <p className="text-xs text-foreground-600">{contact.email}</p>
+                        <Divider />
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs">QUO-2024-002-1</span>
+                          <span className="font-bold text-xs">€{contactTotal.toLocaleString('nl-NL')}</span>
+                        </div>
+                      </div>
+
+                      <Divider />
+
+                      {/* Signature Status */}
+                      <div className="space-y-2">
+                        <h5 className="text-xs font-medium text-foreground-600 uppercase">Ondertekening</h5>
+                        
+                        {hasSigned ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs">
+                              <CheckCircleIcon className="h-3 w-3 text-success" />
+                              <span className="text-success">Ondertekend</span>
+                            </div>
+                            <div className="p-2 bg-success/10 rounded border border-success/20">
+                              <div className="text-xs text-foreground-600 mb-1">Handtekening:</div>
+                              <div className="h-8 bg-content2/50 rounded flex items-center justify-center">
+                                <span className="text-xs italic text-foreground-500">~ {contact.name} ~</span>
+                              </div>
+                              <div className="text-xs text-foreground-500 mt-1">
+                                Ondertekend op: 2024-01-22 14:35
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-xs">
+                              <ClockIcon className="h-3 w-3 text-warning" />
+                              <span>Wacht op ondertekening</span>
+                            </div>
+                            <Button size="sm" color="success" variant="flat" className="w-full text-xs h-6">
+                              <PaperAirplaneIcon className="h-3 w-3 mr-1" />
+                              Verstuur voor Ondertekening
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Add Line Item Modal */}
