@@ -9,7 +9,8 @@ import {
   Divider,
   Tabs,
   Tab,
-  ScrollShadow
+  ScrollShadow,
+  Switch
 } from '@nextui-org/react';
 import {
   MagnifyingGlassIcon,
@@ -78,9 +79,13 @@ interface ContactInfo {
   company?: string;
   avatar?: string;
   tags: string[];
-  orderId?: string;
-  orderStatus?: string;
-  orderValue?: number;
+  orders: Array<{
+    id: string;
+    status: string;
+    value: number;
+    lastActivity: string;
+    type: string;
+  }>;
   lastActivity: string;
 }
 
@@ -89,6 +94,7 @@ export default function InboxPage() {
   const [selectedChannel, setSelectedChannel] = useState<string>('all');
   const [selectedConversation, setSelectedConversation] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showOnlyOpen, setShowOnlyOpen] = useState(true);
 
   // Mock data
   const businessEntities: BusinessEntity[] = [
@@ -239,9 +245,29 @@ export default function InboxPage() {
     phone: '+31 6 12345678',
     company: 'Berg Installaties B.V.',
     tags: ['VIP Klant', 'Zakelijk'],
-    orderId: 'CHC-2024-001',
-    orderStatus: 'Gepland',
-    orderValue: 2450.00,
+    orders: [
+      {
+        id: 'CHC-2024-001',
+        status: 'Gepland',
+        value: 2450.00,
+        lastActivity: '2 dagen geleden',
+        type: 'installation'
+      },
+      {
+        id: 'CHC-2024-067',
+        status: 'Offerte',
+        value: 1850.00,
+        lastActivity: '1 week geleden',
+        type: 'quote'
+      },
+      {
+        id: 'LT-2024-012',
+        status: 'Voltooid',
+        value: 3200.00,
+        lastActivity: '3 weken geleden',
+        type: 'service'
+      }
+    ],
     lastActivity: '2 dagen geleden'
   };
 
@@ -283,14 +309,26 @@ export default function InboxPage() {
     return Object.values(entity.channelCounts).reduce((sum, count) => sum + count, 0);
   };
 
-  const filteredConversations = conversations.filter(conv => {
-    const entityMatch = selectedEntity === 'all' || conv.businessEntityId === selectedEntity;
-    const channelMatch = selectedChannel === 'all' || conv.channel === selectedChannel;
+  const closeConversation = (conversationId: string) => {
+    // In real app, this would call an API to close the conversation
+    console.log('Closing conversation:', conversationId);
+    // For now, we'll just show it was closed (in real app, update the status to 'resolved')
+  };
+
+  // Filter conversations based on selected entity, channel, and search
+  const filteredConversations = conversations.filter(conversation => {
+    const entityMatch = selectedEntity === 'all' || conversation.businessEntityId === selectedEntity;
+    const channelMatch = selectedChannel === 'all' || conversation.channel === selectedChannel;
     const searchMatch = searchQuery === '' || 
-      conv.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conv.customer.name.toLowerCase().includes(searchQuery.toLowerCase());
+      conversation.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      conversation.customer.name.toLowerCase().includes(searchQuery.toLowerCase());
     
-    return entityMatch && channelMatch && searchMatch;
+    // Add status filter: if showOnlyOpen is true, only show 'new', 'open', 'pending'
+    const statusMatch = showOnlyOpen ? 
+      ['new', 'open', 'pending'].includes(conversation.status) : 
+      true;
+    
+    return entityMatch && channelMatch && searchMatch && statusMatch;
   });
 
   return (
@@ -432,13 +470,27 @@ export default function InboxPage() {
         <div className="w-96 border-r border-divider bg-content1 flex flex-col">
           {/* Header */}
           <div className="p-4 border-b border-divider">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-3">
               <h2 className="font-semibold">
                 Gesprekken ({filteredConversations.length})
               </h2>
               <Button size="sm" variant="flat">
                 Filters
               </Button>
+            </div>
+            
+            {/* Open/Closed Switch */}
+            <div className="flex items-center gap-3">
+              <Switch 
+                size="sm"
+                isSelected={showOnlyOpen}
+                onValueChange={setShowOnlyOpen}
+                color="primary"
+              >
+                <span className="text-sm text-foreground-600">
+                  {showOnlyOpen ? 'Alleen open gesprekken' : 'Alle gesprekken'}
+                </span>
+              </Switch>
             </div>
           </div>
 
@@ -525,6 +577,15 @@ export default function InboxPage() {
                     </Chip>
                     <Button size="sm" variant="flat">
                       Acties
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="flat"
+                      color="success"
+                      startContent={<CheckIcon className="h-4 w-4" />}
+                      onPress={() => closeConversation(selectedConversation)}
+                    >
+                      Sluiten
                     </Button>
                   </div>
                 </div>
@@ -634,33 +695,56 @@ export default function InboxPage() {
                 </div>
               </div>
 
-              {/* Order Information */}
-              {contactInfo.orderId && (
+              {/* Primary Order Information */}
+              {contactInfo.orders.length > 0 && (
                 <div className="p-4 border-b border-divider">
-                  <h3 className="font-semibold mb-3">Order Informatie</h3>
+                  <h3 className="font-semibold mb-3">Hoofdorder</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-xs text-foreground-500">Order ID:</span>
-                      <span className="text-xs font-medium">{contactInfo.orderId}</span>
+                      <span className="text-xs font-medium">{contactInfo.orders[0].id}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-xs text-foreground-500">Status:</span>
                       <Chip size="sm" color="primary" variant="flat">
-                        {contactInfo.orderStatus}
+                        {contactInfo.orders[0].status}
                       </Chip>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-xs text-foreground-500">Waarde:</span>
-                      <span className="text-xs font-medium">€{contactInfo.orderValue?.toFixed(2)}</span>
+                      <span className="text-xs font-medium">€{contactInfo.orders[0].value?.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-xs text-foreground-500">Laatste activiteit:</span>
-                      <span className="text-xs text-foreground-500">{contactInfo.lastActivity}</span>
+                      <span className="text-xs text-foreground-500">{contactInfo.orders[0].lastActivity}</span>
                     </div>
                   </div>
                   <Button size="sm" color="primary" variant="flat" className="w-full mt-3">
                     Bekijk Order Details
                   </Button>
+                </div>
+              )}
+
+              {/* Additional Orders Section */}
+              {contactInfo.orders.length > 1 && (
+                <div className="p-4 border-b border-divider">
+                  <h3 className="font-semibold mb-3">Overige Orders ({contactInfo.orders.length - 1})</h3>
+                  <div className="space-y-2">
+                    {contactInfo.orders.slice(1).map(order => (
+                      <div key={order.id} className="bg-content2 p-2 rounded-lg">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs font-medium">{order.id}</span>
+                          <Chip size="sm" color="secondary" variant="flat">
+                            {order.status}
+                          </Chip>
+                        </div>
+                        <div className="flex justify-between mt-1">
+                          <span className="text-xs text-foreground-500">€{order.value.toFixed(2)}</span>
+                          <span className="text-xs text-foreground-400">{order.lastActivity}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 

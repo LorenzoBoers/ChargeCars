@@ -21,7 +21,8 @@ import {
   ArrowRightOnRectangleIcon,
   BoltIcon,
   UserIcon,
-  InboxIcon
+  InboxIcon,
+  MapIcon
 } from "@heroicons/react/24/outline";
 import Logo from './Logo';
 import { useAuth } from '../../contexts/AuthContext';
@@ -62,6 +63,12 @@ export function Sidebar({ className = "" }: SidebarProps) {
       icon: InboxIcon,
       isActive: router.pathname === '/inbox',
       badge: '17'
+    },
+    {
+      label: 'Planning',
+      href: '/planning',
+      icon: MapIcon,
+      isActive: router.pathname === '/planning'
     },
     {
       label: 'Order Beheer',
