@@ -10,7 +10,9 @@ import {
   Divider,
   Switch,
   Select,
-  SelectItem
+  SelectItem,
+  Tooltip,
+  Badge
 } from '@nextui-org/react';
 import {
   CalendarIcon,
@@ -20,7 +22,9 @@ import {
   TruckIcon,
   WrenchScrewdriverIcon,
   ChevronLeftIcon,
-  ChevronRightIcon
+  ChevronRightIcon,
+  PlusIcon,
+  UserPlusIcon
 } from '@heroicons/react/24/outline';
 import { AppLayout } from '../components/layouts/AppLayout';
 
@@ -28,10 +32,17 @@ import { AppLayout } from '../components/layouts/AppLayout';
 interface Team {
   id: string;
   name: string;
-  members: string[];
+  members: TeamMember[];
   status: 'available' | 'busy' | 'break';
   currentLocation?: string;
   skills: string[];
+}
+
+interface TeamMember {
+  id: string;
+  name: string;
+  isAvailable: boolean;
+  currentTask?: string;
 }
 
 interface Task {
@@ -39,10 +50,12 @@ interface Task {
   title: string;
   customer: string;
   address: string;
-  estimatedDuration: number; // in minutes
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  type: 'installation' | 'maintenance' | 'repair' | 'consultation';
+  city: string;
+  estimatedDuration: number;
+  priority: 'urgent' | 'high' | 'medium' | 'low';
+  type: 'installation' | 'maintenance' | 'repair' | 'inspection';
   requirements: string[];
+  orderNumber?: number;
 }
 
 interface RouteItem {
@@ -52,6 +65,7 @@ interface RouteItem {
   scheduledTime: string;
   estimatedArrival: string;
   status: 'scheduled' | 'in_progress' | 'completed' | 'delayed';
+  orderNumber: number;
 }
 
 export default function PlanningPage() {
@@ -59,7 +73,6 @@ export default function PlanningPage() {
   const [activeTab, setActiveTab] = useState('route-planner');
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'teams' | 'visits'>('teams');
-  const [hoveredTask, setHoveredTask] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
 
   // Mock data
@@ -67,7 +80,10 @@ export default function PlanningPage() {
     {
       id: 'team-1',
       name: 'Team Alpha',
-      members: ['Jan Petersma', 'Piet de Vries'],
+      members: [
+        { id: 'jan', name: 'Jan Petersma', isAvailable: true },
+        { id: 'piet', name: 'Piet de Vries', isAvailable: true, currentTask: 'task-1' }
+      ],
       status: 'available',
       currentLocation: 'Amsterdam Noord',
       skills: ['Laadpaal installatie', 'Meterkast', 'Elektriek']
@@ -75,7 +91,10 @@ export default function PlanningPage() {
     {
       id: 'team-2',
       name: 'Team Beta',
-      members: ['Marie Jansen', 'Erik van Dam'],
+      members: [
+        { id: 'marie', name: 'Marie Jansen', isAvailable: true, currentTask: 'task-2' },
+        { id: 'erik', name: 'Erik van Dam', isAvailable: false }
+      ],
       status: 'busy',
       currentLocation: 'Haarlem',
       skills: ['Laadpaal onderhoud', 'Diagnose', 'Reparatie']
@@ -83,7 +102,9 @@ export default function PlanningPage() {
     {
       id: 'team-3',
       name: 'Team Gamma',
-      members: ['Lisa Wong'],
+      members: [
+        { id: 'lisa', name: 'Lisa Wong', isAvailable: false }
+      ],
       status: 'break',
       currentLocation: 'Utrecht',
       skills: ['Advies', 'Inspectie', 'Metingen']
@@ -95,31 +116,37 @@ export default function PlanningPage() {
       id: 'task-1',
       title: 'Laadpaal installatie',
       customer: 'Henk van der Berg',
-      address: 'Hoofdstraat 123, Amsterdam',
+      address: 'Hoofdstraat 123',
+      city: 'Amsterdam',
       estimatedDuration: 180,
       priority: 'high',
       type: 'installation',
-      requirements: ['Laadpaal installatie', 'Meterkast']
+      requirements: ['Laadpaal installatie', 'Meterkast'],
+      orderNumber: 2024001
     },
     {
       id: 'task-2',
       title: 'Onderhoud laadpunt',
       customer: 'Marie Jansen',
-      address: 'Kerkstraat 45, Haarlem',
+      address: 'Kerkstraat 45',
+      city: 'Haarlem',
       estimatedDuration: 90,
       priority: 'medium',
       type: 'maintenance',
-      requirements: ['Laadpaal onderhoud']
+      requirements: ['Laadpaal onderhoud'],
+      orderNumber: 2024002
     },
     {
       id: 'task-3',
       title: 'Storing oplossen',
       customer: 'Peter de Vries',
-      address: 'Nieuwstraat 67, Utrecht',
+      address: 'Nieuwstraat 67',
+      city: 'Utrecht',
       estimatedDuration: 120,
       priority: 'urgent',
       type: 'repair',
-      requirements: ['Diagnose', 'Reparatie']
+      requirements: ['Diagnose', 'Reparatie'],
+      orderNumber: 2024003
     }
   ];
 
@@ -130,7 +157,8 @@ export default function PlanningPage() {
       taskId: 'task-1',
       scheduledTime: '09:00',
       estimatedArrival: '09:15',
-      status: 'scheduled'
+      status: 'scheduled',
+      orderNumber: 1
     },
     {
       id: 'route-2',
@@ -138,7 +166,8 @@ export default function PlanningPage() {
       taskId: 'task-2',
       scheduledTime: '10:30',
       estimatedArrival: '10:45',
-      status: 'in_progress'
+      status: 'in_progress',
+      orderNumber: 2
     }
   ];
 
@@ -170,10 +199,34 @@ export default function PlanningPage() {
     }
   };
 
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'installation': return '🔧';
+      case 'maintenance': return '⚙️';
+      case 'repair': return '🛠️';
+      case 'inspection': return '🔍';
+      default: return '📋';
+    }
+  };
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case 'installation': return 'Installatie';
+      case 'maintenance': return 'Onderhoud';
+      case 'repair': return 'Reparatie';
+      case 'inspection': return 'Inspectie';
+      default: return 'Taak';
+    }
+  };
+
   const changeDate = (direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate);
     newDate.setDate(selectedDate.getDate() + (direction === 'next' ? 1 : -1));
     setSelectedDate(newDate);
+  };
+
+  const getAvailableMembers = (team: Team) => {
+    return team.members.filter(member => member.isAvailable);
   };
 
   return (
@@ -267,7 +320,7 @@ export default function PlanningPage() {
                     {/* Map Placeholder */}
                     <Card>
                       <CardBody className="p-0">
-                        <div className="h-80 bg-content2 rounded-lg flex items-center justify-center">
+                        <div className="h-[500px] bg-content2 rounded-lg flex items-center justify-center">
                           <div className="text-center">
                             <MapIcon className="h-16 w-16 text-foreground-300 mx-auto mb-4" />
                             <h3 className="text-lg font-semibold text-foreground-500">Kaart Weergave</h3>
@@ -282,126 +335,177 @@ export default function PlanningPage() {
                       <CardBody className="p-6">
                         <h3 className="text-lg font-semibold mb-4">Team Routes</h3>
                         <div className="space-y-4">
-                          {teams.map(team => (
-                            <div key={team.id} className="border border-divider rounded-lg p-4">
-                              <div className="flex items-start gap-4">
-                                {/* Team Info - Left Side */}
-                                <div className="flex items-center gap-3 min-w-0 w-64 flex-shrink-0">
-                                  <div className="flex -space-x-2">
-                                    {team.members.map((member, index) => (
-                                      <Avatar
-                                        key={index}
-                                        name={member}
-                                        size="sm"
-                                        className="border-2 border-background"
-                                      />
-                                    ))}
-                                  </div>
-                                  <div className="min-w-0 flex-1">
-                                    <h4 className="font-semibold text-sm">{team.name}</h4>
-                                    <p className="text-xs text-foreground-500 truncate">{team.currentLocation}</p>
-                                  </div>
-                                  <Chip
-                                    size="sm"
-                                    color={getStatusColor(team.status)}
-                                    variant="flat"
-                                  >
-                                    {team.status === 'available' ? 'Beschikbaar' :
-                                     team.status === 'busy' ? 'Bezet' : 'Pauze'}
-                                  </Chip>
-                                </div>
-                                
-                                {/* Route Items - Right Side */}
-                                <div className="flex-1 flex gap-3 overflow-x-auto pb-2">
-                                  {routeItems
-                                    .filter(route => route.teamId === team.id)
-                                    .map(route => {
-                                      const task = availableTasks.find(t => t.id === route.taskId);
-                                      if (!task) return null;
-                                      
-                                      const isHovered = hoveredTask === route.id;
-                                      const isSelected = selectedTask === route.id;
-                                      
-                                      return (
-                                        <div 
-                                          key={route.id} 
-                                          className={`bg-content1 border border-divider rounded-lg p-3 min-w-44 max-w-44 flex-shrink-0 cursor-pointer transition-all duration-200 ${
-                                            isHovered || isSelected ? 'border-primary shadow-lg scale-105' : 'hover:border-primary/50'
+                          {teams.map(team => {
+                            const availableMembers = getAvailableMembers(team);
+                            
+                            return (
+                              <div key={team.id} className="border border-divider rounded-lg p-4">
+                                <div className="flex items-start gap-4">
+                                  {/* Team Info - Left Side */}
+                                  <div className="flex items-start gap-3 min-w-0 w-72 flex-shrink-0">
+                                    <div className="flex -space-x-2">
+                                      {team.members.map((member, index) => (
+                                        <Avatar
+                                          key={index}
+                                          name={member.name}
+                                          size="sm"
+                                          className={`border-2 border-background ${
+                                            member.isAvailable ? '' : 'opacity-50 grayscale'
                                           }`}
-                                          style={{ height: '120px' }}
-                                          onMouseEnter={() => setHoveredTask(route.id)}
-                                          onMouseLeave={() => setHoveredTask(null)}
-                                          onClick={() => setSelectedTask(selectedTask === route.id ? null : route.id)}
+                                        />
+                                      ))}
+                                      <Button
+                                        isIconOnly
+                                        size="sm"
+                                        variant="bordered"
+                                        className="rounded-full w-8 h-8 min-w-0"
+                                      >
+                                        <UserPlusIcon className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex items-center gap-2 mb-1">
+                                        <h4 className="font-semibold text-sm">{team.name}</h4>
+                                        <Chip
+                                          size="sm"
+                                          color={getStatusColor(team.status)}
+                                          variant="flat"
                                         >
-                                          <div className="flex flex-col h-full">
-                                            <div className="flex items-center justify-between mb-2">
-                                              <span className="text-sm font-medium">{route.scheduledTime}</span>
-                                              <Chip size="sm" color={getPriorityColor(task.priority)} variant="dot">
-                                                {task.priority === 'urgent' ? '!' : 
-                                                 task.priority === 'high' ? 'H' :
-                                                 task.priority === 'medium' ? 'M' : 'L'}
-                                              </Chip>
-                                            </div>
-                                            
-                                            <div className="flex-1 space-y-1">
-                                              <h5 className="font-semibold text-sm leading-tight">{task.title}</h5>
-                                              <p className="text-xs text-foreground-600 leading-tight">{task.customer}</p>
+                                          {team.status === 'available' ? 'Beschikbaar' :
+                                           team.status === 'busy' ? 'Bezet' : 'Pauze'}
+                                        </Chip>
+                                      </div>
+                                      <p className="text-xs text-foreground-500 mb-2">{team.currentLocation}</p>
+                                      
+                                      {/* Available Members Today */}
+                                      <div className="space-y-1">
+                                        <p className="text-xs font-medium text-foreground-700">Beschikbaar vandaag:</p>
+                                        {availableMembers.length > 0 ? (
+                                          <div className="space-y-1">
+                                            {availableMembers.map(member => (
+                                              <div key={member.id} className="flex items-center gap-2">
+                                                <div className="w-2 h-2 bg-success rounded-full flex-shrink-0"></div>
+                                                <span className="text-xs text-foreground-600">{member.name}</span>
+                                                {member.currentTask && (
+                                                  <Chip size="sm" variant="flat" color="primary" className="text-xs">
+                                                    Actief
+                                                  </Chip>
+                                                )}
+                                              </div>
+                                            ))}
+                                          </div>
+                                        ) : (
+                                          <p className="text-xs text-foreground-400">Niemand beschikbaar</p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Route Items - Right Side */}
+                                  <div className="flex-1 flex gap-3 overflow-x-auto pb-2">
+                                    {routeItems
+                                      .filter(route => route.teamId === team.id)
+                                      .map(route => {
+                                        const task = availableTasks.find(t => t.id === route.taskId);
+                                        if (!task) return null;
+                                        
+                                        const tooltipContent = (
+                                          <div className="p-2 max-w-xs">
+                                            <div className="space-y-2">
+                                              <div>
+                                                <p className="font-semibold text-sm">{task.title}</p>
+                                                <p className="text-xs text-foreground-600">Order: #{task.orderNumber}</p>
+                                              </div>
                                               
-                                              {(isHovered || isSelected) && (
-                                                <div className="space-y-1 animate-in slide-in-from-top-1 duration-200">
-                                                  <p className="text-xs text-foreground-500 leading-tight">{task.address}</p>
-                                                  <div className="flex items-center gap-1">
-                                                    <ClockIcon className="h-3 w-3 text-foreground-400 flex-shrink-0" />
-                                                    <span className="text-xs text-foreground-500">
-                                                      {Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m
-                                                    </span>
-                                                  </div>
-                                                  <div className="flex flex-wrap gap-1">
-                                                    {task.requirements.slice(0, 2).map((req, index) => (
-                                                      <Chip key={index} size="sm" variant="flat" color="secondary" className="text-xs">
-                                                        {req}
-                                                      </Chip>
-                                                    ))}
-                                                  </div>
-                                                </div>
-                                              )}
+                                              <Divider />
                                               
-                                              {!isHovered && !isSelected && (
-                                                <div className="flex items-center gap-1 pt-1">
-                                                  <ClockIcon className="h-3 w-3 text-foreground-400 flex-shrink-0" />
-                                                  <span className="text-xs text-foreground-500">
-                                                    {Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m
-                                                  </span>
+                                              <div className="space-y-1">
+                                                <p className="text-xs"><span className="font-medium">Klant:</span> {task.customer}</p>
+                                                <p className="text-xs"><span className="font-medium">Adres:</span> {task.address}, {task.city}</p>
+                                                <p className="text-xs"><span className="font-medium">Tijd:</span> {route.scheduledTime} ({Math.floor(task.estimatedDuration / 60)}h {task.estimatedDuration % 60}m)</p>
+                                                <p className="text-xs"><span className="font-medium">Prioriteit:</span> {task.priority}</p>
+                                              </div>
+                                              
+                                              <Divider />
+                                              
+                                              <div>
+                                                <p className="text-xs font-medium mb-1">Vereisten:</p>
+                                                <div className="flex flex-wrap gap-1">
+                                                  {task.requirements.map((req, index) => (
+                                                    <Chip key={index} size="sm" variant="flat" color="secondary" className="text-xs">
+                                                      {req}
+                                                    </Chip>
+                                                  ))}
                                                 </div>
-                                              )}
+                                              </div>
                                             </div>
                                           </div>
-                                        </div>
-                                      );
-                                    })}
-                                  
-                                  {/* Add Task Button */}
-                                  <Button
-                                    variant="bordered"
-                                    className="min-w-36 max-w-36 flex-shrink-0"
-                                    style={{ height: '120px' }}
-                                    size="sm"
-                                  >
-                                    <div className="flex flex-col items-center gap-2">
-                                      <span className="text-2xl">+</span>
-                                      <span className="text-xs">Taak</span>
-                                    </div>
-                                  </Button>
+                                        );
+                                        
+                                        return (
+                                          <Tooltip
+                                            key={route.id}
+                                            content={tooltipContent}
+                                            placement="top"
+                                            className="bg-content1 border border-divider shadow-lg"
+                                          >
+                                            <div className="bg-content1 border border-divider rounded-lg p-3 min-w-36 max-w-36 flex-shrink-0 cursor-pointer transition-all duration-200 hover:border-primary/50 hover:shadow-md relative">
+                                              {/* Order Number Badge */}
+                                              <Badge 
+                                                content={route.orderNumber} 
+                                                color="primary" 
+                                                className="absolute -top-2 -right-2"
+                                                size="sm"
+                                              >
+                                                <div></div>
+                                              </Badge>
+                                              
+                                              <div className="space-y-2">
+                                                {/* Time */}
+                                                <div className="text-center">
+                                                  <span className="text-lg font-bold text-primary">{route.scheduledTime}</span>
+                                                </div>
+                                                
+                                                {/* Type with Icon */}
+                                                <div className="text-center">
+                                                  <div className="flex items-center justify-center gap-1 mb-1">
+                                                    <span className="text-lg">{getTypeIcon(task.type)}</span>
+                                                  </div>
+                                                  <p className="text-xs font-medium text-foreground-700">{getTypeLabel(task.type)}</p>
+                                                </div>
+                                                
+                                                {/* City */}
+                                                <div className="text-center">
+                                                  <p className="text-sm font-semibold text-foreground-900">{task.city}</p>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </Tooltip>
+                                        );
+                                      })}
+                                    
+                                    {/* Add Task Button */}
+                                    <Button
+                                      variant="bordered"
+                                      className="min-w-36 max-w-36 h-20 flex-shrink-0"
+                                      size="sm"
+                                    >
+                                      <div className="flex flex-col items-center gap-1">
+                                        <PlusIcon className="h-5 w-5" />
+                                        <span className="text-xs">Taak</span>
+                                      </div>
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </CardBody>
                     </Card>
                   </div>
 
-                  {/* Right Sidebar - Teams and Planned Visits */}
+                  {/* Right Sidebar - Planned Visits and Teams */}
                   <div className="col-span-3 space-y-6">
                     {/* View Toggle */}
                     <Card>
@@ -410,8 +514,8 @@ export default function PlanningPage() {
                           <span className="text-sm font-medium">Weergave:</span>
                           <Switch
                             size="sm"
-                            isSelected={viewMode === 'visits'}
-                            onValueChange={(checked) => setViewMode(checked ? 'visits' : 'teams')}
+                            isSelected={viewMode === 'teams'}
+                            onValueChange={(checked) => setViewMode(checked ? 'teams' : 'visits')}
                           >
                             {viewMode === 'teams' ? 'Teams' : 'Bezoeken'}
                           </Switch>
@@ -419,45 +523,7 @@ export default function PlanningPage() {
                       </CardBody>
                     </Card>
 
-                    {viewMode === 'teams' ? (
-                      <Card>
-                        <CardBody className="p-4">
-                          <h3 className="text-base font-semibold mb-3">Teams</h3>
-                          <div className="space-y-2">
-                            {teams.map(team => (
-                              <div key={team.id} className="border border-divider rounded-lg p-2">
-                                <div className="flex items-center justify-between mb-1">
-                                  <h4 className="font-medium text-sm">{team.name}</h4>
-                                  <Chip
-                                    size="sm"
-                                    color={getStatusColor(team.status)}
-                                    variant="flat"
-                                  >
-                                    {team.status === 'available' ? 'Beschikbaar' :
-                                     team.status === 'busy' ? 'Bezet' : 'Pauze'}
-                                  </Chip>
-                                </div>
-                                <div className="text-xs text-foreground-600 mb-1">
-                                  {team.members.join(', ')}
-                                </div>
-                                <div className="flex flex-wrap gap-1">
-                                  {team.skills.slice(0, 2).map(skill => (
-                                    <Chip key={skill} size="sm" variant="flat" color="secondary" className="text-xs">
-                                      {skill}
-                                    </Chip>
-                                  ))}
-                                  {team.skills.length > 2 && (
-                                    <Chip size="sm" variant="flat" color="default" className="text-xs">
-                                      +{team.skills.length - 2}
-                                    </Chip>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </CardBody>
-                      </Card>
-                    ) : (
+                    {viewMode === 'visits' ? (
                       <Card>
                         <CardBody className="p-4">
                           <h3 className="text-base font-semibold mb-3">Geplande Bezoeken</h3>
@@ -482,7 +548,7 @@ export default function PlanningPage() {
                                   </div>
                                   <h4 className="font-medium text-xs mb-1">{task.title}</h4>
                                   <p className="text-xs text-foreground-600 mb-1">{task.customer}</p>
-                                  <p className="text-xs text-foreground-500 mb-1 truncate">{task.address}</p>
+                                  <p className="text-xs text-foreground-500 mb-1 truncate">{task.address}, {task.city}</p>
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-1">
                                       <ClockIcon className="h-3 w-3 text-foreground-400" />
@@ -503,6 +569,76 @@ export default function PlanningPage() {
                                 <p className="text-sm text-foreground-500">Geen bezoeken gepland</p>
                               </div>
                             )}
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ) : (
+                      <Card>
+                        <CardBody className="p-4">
+                          <h3 className="text-base font-semibold mb-3">Teams</h3>
+                          <div className="space-y-3">
+                            {teams.map(team => {
+                              const availableMembers = getAvailableMembers(team);
+                              
+                              return (
+                                <div key={team.id} className="border border-divider rounded-lg p-3">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <h4 className="font-medium text-sm">{team.name}</h4>
+                                    <Chip
+                                      size="sm"
+                                      color={getStatusColor(team.status)}
+                                      variant="flat"
+                                    >
+                                      {team.status === 'available' ? 'Beschikbaar' :
+                                       team.status === 'busy' ? 'Bezet' : 'Pauze'}
+                                    </Chip>
+                                  </div>
+                                  
+                                  <div className="space-y-2">
+                                    <div className="text-xs text-foreground-600">
+                                      <span className="font-medium">Locatie:</span> {team.currentLocation}
+                                    </div>
+                                    
+                                    <div>
+                                      <p className="text-xs font-medium text-foreground-700 mb-1">Team leden:</p>
+                                      <div className="space-y-1">
+                                        {team.members.map(member => (
+                                          <div key={member.id} className="flex items-center gap-2">
+                                            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                                              member.isAvailable ? 'bg-success' : 'bg-default-300'
+                                            }`}></div>
+                                            <span className={`text-xs ${
+                                              member.isAvailable ? 'text-foreground-600' : 'text-foreground-400'
+                                            }`}>{member.name}</span>
+                                            {member.currentTask && (
+                                              <Chip size="sm" variant="flat" color="primary" className="text-xs">
+                                                Actief
+                                              </Chip>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                    
+                                    <div>
+                                      <p className="text-xs font-medium text-foreground-700 mb-1">Vaardigheden:</p>
+                                      <div className="flex flex-wrap gap-1">
+                                        {team.skills.slice(0, 2).map((skill, index) => (
+                                          <Chip key={index} size="sm" variant="flat" color="secondary" className="text-xs">
+                                            {skill}
+                                          </Chip>
+                                        ))}
+                                        {team.skills.length > 2 && (
+                                          <Chip size="sm" variant="flat" color="default" className="text-xs">
+                                            +{team.skills.length - 2}
+                                          </Chip>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         </CardBody>
                       </Card>
