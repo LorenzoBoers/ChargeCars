@@ -151,18 +151,34 @@ export default function OrdersPage() {
 
   // Get status color from API or fallback to mapping
   const getStatusColor = (order: OrderResponse): "default" | "primary" | "secondary" | "success" | "warning" | "danger" => {
-    // If API provides status_color, try to map it to NextUI colors
-    if (order.status_color) {
-      const color = order.status_color.toLowerCase();
-      if (color.includes('green') || color.includes('success')) return 'success';
-      if (color.includes('red') || color.includes('danger') || color.includes('error')) return 'danger';
-      if (color.includes('yellow') || color.includes('warning') || color.includes('orange')) return 'warning';
-      if (color.includes('blue') || color.includes('primary')) return 'primary';
-      if (color.includes('gray') || color.includes('grey') || color.includes('secondary')) return 'secondary';
-    }
+    const result = (() => {
+      // If API provides status_color (hex code), map to NextUI colors
+      if (order.status_color) {
+        const color = order.status_color.toLowerCase();
+        
+        // Map common hex colors to NextUI colors
+        if (color === '#22c55e' || color === '#10b981' || color === '#16a34a' || color.includes('green')) return 'success';
+        if (color === '#ef4444' || color === '#dc2626' || color === '#f87171' || color.includes('red')) return 'danger';
+        if (color === '#f59e0b' || color === '#eab308' || color === '#fbbf24' || color.includes('yellow') || color.includes('orange')) return 'warning';
+        if (color === '#3b82f6' || color === '#2563eb' || color === '#097bff' || color.includes('blue')) return 'primary';
+        if (color === '#6b7280' || color === '#9ca3af' || color.includes('gray') || color.includes('grey')) return 'secondary';
+        
+        // For any other hex color, use primary as default
+        if (color.startsWith('#')) return 'primary';
+      }
+      
+      // Fallback to our mapping based on status text
+      return statusColorMap[order.status_label || order.status] || 'default';
+    })();
     
-    // Fallback to our mapping
-    return statusColorMap[order.status_label || order.status] || 'default';
+    console.log(`🎨 STATUS COLOR for ${order.order_number}:`, {
+      status_color: order.status_color,
+      status_label: order.status_label,
+      status_name: order.status_name,
+      computed_color: result
+    });
+    
+    return result;
   };
 
   // Debug status values
