@@ -136,12 +136,24 @@ export interface LoginResponse {
 export interface MeResponse {
   id: string;
   email: string;
-  role_id?: string;
   first_name?: string;
   last_name?: string;
+  full_name?: string;
+  display_name?: string;
+  role_id?: string;
   organization_id?: string;
   organization_name?: string;
-  // Add other user fields based on actual API response
+  profile_picture?: string;
+  avatar?: string;
+  phone?: string;
+  job_title?: string;
+  department?: string;
+  is_active?: boolean;
+  last_login?: number;
+  created_at?: number;
+  updated_at?: number;
+  signup_type?: 'customer' | 'internal' | 'external' | 'technician';
+  permissions?: string[];
 }
 
 // Customer interfaces from customers.tsx

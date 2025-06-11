@@ -435,15 +435,9 @@ const QuoteDetailPage: React.FC = () => {
   const addNewVisit = () => {
     if (!newVisitName.trim()) return;
     
-    // Create new visit with empty contacts
-    const newVisit = {
-      id: `visit-${Date.now()}`,
-      name: newVisitName,
-      contacts: {}
-    };
-    
-    // Add to grouped items (this would normally sync with backend)
-    // setHasChanges(true); // This would be handled by proper state management
+    // Note: In real implementation, this would create actual visits
+    // For now, we just close the modal since visits are created
+    // when line items are added with new visit IDs
     setIsAddingVisit(false);
     setNewVisitName('');
   };
@@ -452,16 +446,20 @@ const QuoteDetailPage: React.FC = () => {
   const addNewContact = () => {
     if (!newContactName.trim()) return;
     
-    const newContact = {
-      id: `contact-${Date.now()}`,
+    const newContact: QuoteContact = {
+      id: `CONT-${Date.now()}`,
       name: newContactName,
       email: `${newContactName.toLowerCase().replace(/\s+/g, '.')}@example.com`,
       phone: '+31 6 12345678',
       role: newContactRole
     };
     
-    // Add to quote contacts (this would normally sync with backend)
-    // setHasChanges(true); // This would be handled by proper state management
+    // Add to quote contacts
+    setQuote(prev => ({
+      ...prev,
+      contacts: [...prev.contacts, newContact]
+    }));
+    
     setIsAddingContact(false);
     setNewContactName('');
   };
@@ -837,6 +835,25 @@ const QuoteDetailPage: React.FC = () => {
                 </div>
               </div>
               
+              {/* Add New Visit Section */}
+              {isEditing && (
+                <div className="mb-4 p-3 bg-content2/30 rounded-lg border border-dashed border-divider">
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-sm text-foreground-600">Nieuwe installatie toevoegen</span>
+                    <Button
+                      size="sm"
+                      variant="flat"
+                      color="primary"
+                      className="h-7 px-3 text-xs"
+                      startContent={<PlusIcon className="h-3 w-3" />}
+                      onPress={() => setIsAddingVisit(true)}
+                    >
+                      Installatie
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -887,11 +904,11 @@ const QuoteDetailPage: React.FC = () => {
                                       <Button
                                         size="sm"
                                         variant="flat"
-                                        color="primary"
+                                        color="secondary"
                                         className="transform -rotate-90 h-6 w-6 min-w-0 px-0 text-xs"
-                                        onPress={() => addLineItem(visitId, 'CONT-001')} // Add to first paying contact
+                                        onPress={() => setIsAddingContact(true)}
                                       >
-                                        +€
+                                        +👤
                                       </Button>
                                     </div>
                                   )}
@@ -1100,15 +1117,16 @@ const QuoteDetailPage: React.FC = () => {
                           visitRows.push(
                             <tr key={`add-${contactId}`} className="border-b border-divider">
                               <td colSpan={isEditing ? 7 : 6} className="py-2 px-2">
-                                <div className="flex items-center justify-center">
+                                <div className="flex items-center justify-center gap-2">
+                                  <span className="text-xs text-foreground-600">Regel toevoegen voor {contact.contact_name}</span>
                                   <Button
                                     size="sm"
                                     variant="flat"
-                                    className="h-7 px-4 text-xs"
+                                    className="h-7 px-3 text-xs"
                                     startContent={<PlusIcon className="h-3 w-3" />}
                                     onPress={() => addLineItem(visitId, contactId)}
                                   >
-                                    Regel toevoegen voor {contact.contact_name}
+                                    Toevoegen
                                   </Button>
                                 </div>
                               </td>
@@ -1133,6 +1151,29 @@ const QuoteDetailPage: React.FC = () => {
                           </tr>
                         );
                       });
+                      
+                      // Add new contact button row for this visit
+                      if (isEditing) {
+                        visitRows.push(
+                          <tr key={`add-contact-${visitId}`} className="border-b border-divider">
+                            <td colSpan={isEditing ? 7 : 6} className="py-2 px-2">
+                              <div className="flex items-center justify-center gap-2">
+                                <span className="text-xs text-foreground-600">Contact toevoegen voor {visit.visit_name}</span>
+                                <Button
+                                  size="sm"
+                                  variant="flat"
+                                  color="secondary"
+                                  className="h-7 px-3 text-xs"
+                                  startContent={<UserPlusIcon className="h-3 w-3" />}
+                                  onPress={() => setIsAddingContact(true)}
+                                >
+                                  Contact
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      }
                       
                       // Add spacing between visits
                       if (visitIndex < Object.keys(groupedItems).length - 1) {
