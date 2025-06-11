@@ -25,6 +25,13 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  Avatar,
+  Badge,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
 } from '@nextui-org/react';
 import {
   MagnifyingGlassIcon,
@@ -430,333 +437,255 @@ export default function CustomersPage() {
             </Button>
           </div>
 
-          {/* Metrics Dashboard */}
-          {metrics && (
+          {/* Metrics Cards */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, index) => (
+                <Card key={index}>
+                  <CardBody className="p-4">
+                    <div className="animate-pulse">
+                      <div className="h-4 bg-default-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-6 bg-default-300 rounded w-1/2"></div>
+                    </div>
+                  </CardBody>
+                </Card>
+              ))}
+            </div>
+          ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardBody className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-foreground-600">Totaal Klanten</p>
-                      <p className="text-xl font-bold">{metrics.total_customers}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-success">+{metrics.customers_change}%</p>
-                      <p className="text-xs text-foreground-500">vs vorige maand</p>
-                    </div>
-                  </div>
+                  <p className="text-sm text-foreground-600">Totaal Klanten</p>
+                  <p className="text-2xl font-bold text-foreground">{metrics?.total_customers || 0}</p>
+                  <p className="text-xs text-success-600 flex items-center gap-1">
+                    +{metrics?.customers_change || 0}% deze maand
+                  </p>
                 </CardBody>
               </Card>
-
+              
               <Card>
                 <CardBody className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-foreground-600">Organisaties</p>
-                      <p className="text-xl font-bold">{metrics.total_organizations}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-foreground-500">Actief</p>
-                      <p className="text-xs text-foreground-500">{metrics.active_customers}</p>
-                    </div>
-                  </div>
+                  <p className="text-sm text-foreground-600">Organisaties</p>
+                  <p className="text-2xl font-bold text-foreground">{metrics?.total_organizations || 0}</p>
                 </CardBody>
               </Card>
-
+              
               <Card>
                 <CardBody className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-foreground-600">Partners</p>
-                      <p className="text-xl font-bold">{metrics.total_partners}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-foreground-500">Nieuw</p>
-                      <p className="text-xs text-foreground-500">{metrics.new_this_month}</p>
-                    </div>
-                  </div>
+                  <p className="text-sm text-foreground-600">Partners</p>
+                  <p className="text-2xl font-bold text-foreground">{metrics?.total_partners || 0}</p>
                 </CardBody>
               </Card>
-
+              
               <Card>
                 <CardBody className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs text-foreground-600">Omzet Deze Maand</p>
-                      <p className="text-xl font-bold">{formatCurrency(metrics.revenue_this_month)}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-success">+{metrics.revenue_change}%</p>
-                      <p className="text-xs text-foreground-500">vs vorige maand</p>
-                    </div>
-                  </div>
+                  <p className="text-sm text-foreground-600">Omzet Deze Maand</p>
+                  <p className="text-2xl font-bold text-foreground">{formatCurrency(metrics?.revenue_this_month)}</p>
+                  <p className="text-xs text-success-600 flex items-center gap-1">
+                    +{metrics?.revenue_change || 0}% vs vorige maand
+                  </p>
                 </CardBody>
               </Card>
             </div>
           )}
 
-          {/* Quick Filter Presets */}
+          {/* Search and Filters */}
           <Card>
-            <CardBody className="p-3">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-medium text-foreground-600">Quick Filters:</span>
-                {presetFilters.map((filter, index) => (
-                  <Button
-                    key={index}
-                    size="sm"
-                    variant="flat"
-                    className="h-6 text-xs"
-                    onPress={filter.action}
-                  >
-                    {filter.label}
-                  </Button>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
-
-          {/* Filters */}
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <FunnelIcon className="h-4 w-4 text-foreground-600" />
-                <h3 className="text-base font-semibold">Filters</h3>
-              </div>
-            </CardHeader>
-            <CardBody className="pt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
-                <Input
-                  placeholder="Zoek klanten..."
-                  value={searchValue}
-                  onValueChange={setSearchValue}
-                  startContent={<MagnifyingGlassIcon className="h-4 w-4 text-foreground-500" />}
-                  size="sm"
-                  className="lg:col-span-2"
-                />
+            <CardBody className="p-4">
+              <div className="flex flex-col lg:flex-row gap-4">
+                <div className="flex-1">
+                  <Input
+                    placeholder="Zoek klanten..."
+                    value={searchValue}
+                    onValueChange={setSearchValue}
+                    startContent={<MagnifyingGlassIcon className="h-4 w-4 text-foreground-400" />}
+                    className="w-full"
+                  />
+                </div>
                 
-                <Select
-                  placeholder="Status"
-                  selectedKeys={[selectedStatus]}
-                  onSelectionChange={(keys) => setSelectedStatus(Array.from(keys)[0] as string)}
-                  size="sm"
-                >
-                  {statuses.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {status}
-                    </SelectItem>
-                  ))}
-                </Select>
-
-                <Select
-                  placeholder="Communicatie"
-                  selectedKeys={[selectedCommunication]}
-                  onSelectionChange={(keys) => setSelectedCommunication(Array.from(keys)[0] as string)}
-                  size="sm"
-                >
-                  {communicationPreferences.map((pref) => (
-                    <SelectItem key={pref} value={pref}>
-                      {pref}
-                    </SelectItem>
-                  ))}
-                </Select>
-
-                <Select
-                  placeholder="Organisatie"
-                  selectedKeys={[selectedParentOrg]}
-                  onSelectionChange={(keys) => setSelectedParentOrg(Array.from(keys)[0] as string)}
-                  size="sm"
-                >
-                  {parentOrganizations.map((org) => (
-                    <SelectItem key={org} value={org}>
-                      {org}
-                    </SelectItem>
-                  ))}
-                </Select>
+                <div className="flex gap-2">
+                  <Select
+                    placeholder="Status"
+                    selectedKeys={selectedStatus ? [selectedStatus] : []}
+                    onSelectionChange={(keys) => setSelectedStatus(Array.from(keys)[0] as string || '')}
+                    className="w-32"
+                  >
+                    {statuses.map((status) => (
+                      <SelectItem key={status} value={status}>
+                        {status}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                  
+                  <Select
+                    placeholder="Communicatie"
+                    selectedKeys={selectedCommunication ? [selectedCommunication] : []}
+                    onSelectionChange={(keys) => setSelectedCommunication(Array.from(keys)[0] as string || '')}
+                    className="w-40"
+                  >
+                    {communicationPreferences.map((pref) => (
+                      <SelectItem key={pref} value={pref}>
+                        {pref}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                  
+                  <Select
+                    placeholder="Organisatie"
+                    selectedKeys={selectedParentOrg ? [selectedParentOrg] : []}
+                    onSelectionChange={(keys) => setSelectedParentOrg(Array.from(keys)[0] as string || '')}
+                    className="w-40"
+                  >
+                    {parentOrganizations.map((org) => (
+                      <SelectItem key={org} value={org}>
+                        {org}
+                      </SelectItem>
+                    ))}
+                  </Select>
+                </div>
               </div>
             </CardBody>
           </Card>
 
-          {/* Tabs and Table */}
+          {/* Tabs */}
+          <Tabs 
+            selectedKey={selectedTab} 
+            onSelectionChange={(key) => setSelectedTab(key as string)}
+            aria-label="Customer tabs"
+          >
+            <Tab key="all" title={`Alle (${customers.length})`} />
+            <Tab key="organizations" title={`Organisaties (${customers.filter(c => c.contact_type === 'organization').length})`} />
+            <Tab key="endcustomers" title={`Eindklanten (${customers.filter(c => c.contact_type === 'person' && c.contact_subtype === 'customer').length})`} />
+            <Tab key="partners" title={`Partners (${customers.filter(c => c.contact_subtype === 'partner').length})`} />
+          </Tabs>
+
+          {/* Table */}
           <Card>
             <CardBody className="p-0">
-              <Tabs
-                selectedKey={selectedTab}
-                onSelectionChange={(key) => setSelectedTab(key as string)}
-                className="px-4 pt-4"
-                variant="underlined"
-              >
-                <Tab key="all" title="Alle Klanten" />
-                <Tab key="organizations" title="Organisaties" />
-                <Tab key="endcustomers" title="Eindklanten" />
-                <Tab key="partners" title="Partners" />
-              </Tabs>
-
-              <Table 
-                aria-label="Customers table"
-                classNames={{
-                  wrapper: "shadow-none rounded-none",
-                  th: "bg-content2/50 text-xs font-semibold",
-                  td: "text-xs"
-                }}
-              >
-                <TableHeader>
-                  <TableColumn>KLANT</TableColumn>
-                  <TableColumn>TYPE</TableColumn>
-                  <TableColumn>CONTACT</TableColumn>
-                  <TableColumn>ORGANISATIE</TableColumn>
-                  <TableColumn>STATUS</TableColumn>
-                  <TableColumn>ORDERS</TableColumn>
-                  <TableColumn>OMZET</TableColumn>
-                  <TableColumn>LAATSTE ORDER</TableColumn>
-                  <TableColumn>ACTIES</TableColumn>
-                </TableHeader>
-                <TableBody>
-                  {paginatedCustomers.map((customer) => (
-                    <TableRow key={customer.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {getContactTypeIcon(customer)}
-                          <div>
-                            <p className="font-medium text-xs">
-                              {customer.display_name || `${customer.first_name} ${customer.last_name}`}
-                            </p>
-                            <p className="text-xs text-foreground-500">{customer.email}</p>
+              {loading ? (
+                <div className="p-8 text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                  <p className="text-foreground-600 mt-2">Klanten laden...</p>
+                </div>
+              ) : (
+                <Table
+                  aria-label="Customers table"
+                  classNames={{
+                    wrapper: "min-h-[400px]",
+                  }}
+                >
+                  <TableHeader>
+                    <TableColumn>KLANT</TableColumn>
+                    <TableColumn>TYPE</TableColumn>
+                    <TableColumn>STATUS</TableColumn>
+                    <TableColumn>ORDERS</TableColumn>
+                    <TableColumn>OMZET</TableColumn>
+                    <TableColumn>LAATSTE ORDER</TableColumn>
+                    <TableColumn>ACTIES</TableColumn>
+                  </TableHeader>
+                  <TableBody emptyContent="Geen klanten gevonden">
+                    {paginatedCustomers.map((customer) => (
+                      <TableRow key={customer.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            {getContactTypeIcon(customer)}
+                            <div>
+                              <p className="font-medium text-foreground">
+                                {customer.display_name || `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'Onbekend'}
+                              </p>
+                              <p className="text-sm text-foreground-600">{customer.email}</p>
+                              {customer.parent_organization_name && (
+                                <p className="text-xs text-foreground-500">{customer.parent_organization_name}</p>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-medium">
-                            {customer.contact_type === 'organization' ? 'Organisatie' : 'Persoon'}
-                          </span>
-                          <span className="text-xs text-foreground-400">
-                            {customer.contact_subtype === 'customer' ? 'Klant' : 'Partner'}
-                          </span>
-                        </div>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="text-xs">{customer.phone}</span>
-                          {customer.preferred_communication && (
-                            <span className="text-xs text-foreground-400">
-                              Voorkeur: {customer.preferred_communication}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">
+                              {customer.contact_type === 'organization' ? 'Organisatie' : 'Persoon'}
                             </span>
-                          )}
-                        </div>
-                      </TableCell>
-                      
-                      <TableCell>
-                        {customer.parent_organization_name ? (
-                          <span className="text-xs">{customer.parent_organization_name}</span>
-                        ) : (
-                          <span className="text-xs text-foreground-400">-</span>
-                        )}
-                      </TableCell>
-                      
-                      <TableCell>
-                        <Chip 
-                          size="sm" 
-                          color={getStatusColor(customer.status)} 
-                          variant="flat"
-                          className="text-xs h-5"
-                        >
-                          {customer.status || 'Onbekend'}
-                        </Chip>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <span className="text-xs font-medium">{customer.total_orders || 0}</span>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <span className="text-xs font-medium">{formatCurrency(customer.total_revenue)}</span>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <span className="text-xs">{formatDate(customer.last_order_date)}</span>
-                      </TableCell>
-                      
-                      <TableCell>
-                        <div className="flex items-center gap-1">
-                          <Tooltip content="Bekijken">
-                            <Button
-                              isIconOnly
-                              size="sm"
-                              variant="light"
-                              onPress={() => handleViewCustomer(customer.id)}
-                              className="h-6 w-6 min-w-6"
-                            >
-                              <EyeIcon className="h-3 w-3" />
-                            </Button>
-                          </Tooltip>
-                          
-                          <Tooltip content="Bewerken">
-                            <Button
-                              isIconOnly
-                              size="sm"
-                              variant="light"
-                              onPress={() => handleEditCustomer(customer.id)}
-                              className="h-6 w-6 min-w-6"
-                            >
-                              <PencilIcon className="h-3 w-3" />
-                            </Button>
-                          </Tooltip>
-                          
+                            <span className="text-xs text-foreground-600">
+                              {customer.contact_subtype === 'customer' ? 'Klant' : 'Partner'}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            color={getStatusColor(customer.status)}
+                            size="sm"
+                            variant="flat"
+                          >
+                            {customer.status || 'Onbekend'}
+                          </Chip>
+                        </TableCell>
+                        <TableCell>
+                          <span className="font-medium">{customer.total_orders || 0}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="font-medium">{formatCurrency(customer.total_revenue)}</span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm">{formatDate(customer.last_order_date)}</span>
+                        </TableCell>
+                        <TableCell>
                           <Dropdown>
                             <DropdownTrigger>
                               <Button
                                 isIconOnly
                                 size="sm"
                                 variant="light"
-                                className="h-6 w-6 min-w-6"
                               >
-                                <EllipsisVerticalIcon className="h-3 w-3" />
+                                <EllipsisVerticalIcon className="h-4 w-4" />
                               </Button>
                             </DropdownTrigger>
                             <DropdownMenu>
                               <DropdownItem
-                                key="orders"
-                                onPress={() => router.push(`/orders?customer=${customer.id}`)}
-                                className="text-xs"
+                                key="view"
+                                startContent={<EyeIcon className="h-4 w-4" />}
+                                onPress={() => handleViewCustomer(customer.id)}
                               >
-                                Bekijk Orders
+                                Bekijken
+                              </DropdownItem>
+                              <DropdownItem
+                                key="edit"
+                                startContent={<PencilIcon className="h-4 w-4" />}
+                                onPress={() => handleEditCustomer(customer.id)}
+                              >
+                                Bewerken
                               </DropdownItem>
                               <DropdownItem
                                 key="delete"
                                 color="danger"
+                                startContent={<TrashIcon className="h-4 w-4" />}
                                 onPress={() => handleDeleteCustomer(customer.id)}
-                                startContent={<TrashIcon className="h-3 w-3" />}
-                                className="text-xs"
                               >
                                 Verwijderen
                               </DropdownItem>
                             </DropdownMenu>
                           </Dropdown>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardBody>
           </Card>
 
           {/* Pagination */}
-          <div className="flex justify-between items-center">
-            <p className="text-xs text-foreground-500">
-              {pagination.totalItems} resultaten gevonden
-            </p>
-            <Pagination
-              total={pagination.totalPages}
-              page={pagination.currentPage}
-              onChange={setCurrentPage}
-              size="sm"
-              showControls
-              className="gap-2"
-            />
-          </div>
+          {pagination.totalPages > 1 && (
+            <div className="flex justify-center">
+              <Pagination
+                total={pagination.totalPages}
+                page={pagination.currentPage}
+                onChange={setCurrentPage}
+                showControls
+                showShadow
+                color="primary"
+              />
+            </div>
+          )}
         </div>
       </AppLayout>
     </>

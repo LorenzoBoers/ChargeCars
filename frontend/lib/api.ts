@@ -304,9 +304,9 @@ class ApiClient {
       tokenPreview: this.token ? `${this.token.substring(0, 10)}...` : 'none'
     });
     
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string> || {}),
     };
 
     if (this.token) {

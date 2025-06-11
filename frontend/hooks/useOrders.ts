@@ -249,12 +249,12 @@ export const useOrders = (initialFilters?: OrderFilters): UseOrdersReturn => {
 
     if (searchValue && !filtered.some(order => 
       order.order_number.toLowerCase().includes(searchValue.toLowerCase()) ||
-      order.customer_name.toLowerCase().includes(searchValue.toLowerCase())
+      order.customer_name?.toLowerCase().includes(searchValue.toLowerCase())
     )) {
       // If API doesn't return filtered results, do client-side filtering
       filtered = orders.filter(order =>
         order.order_number.toLowerCase().includes(searchValue.toLowerCase()) ||
-        order.customer_name.toLowerCase().includes(searchValue.toLowerCase()) ||
+        order.customer_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
         order.partner_name?.toLowerCase().includes(searchValue.toLowerCase())
       );
     }

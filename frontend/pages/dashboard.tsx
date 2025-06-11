@@ -17,7 +17,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/react";
+} from "@nextui-org/react";
 import {
   BoltIcon,
   UserIcon,

@@ -149,17 +149,17 @@ export function useCustomers(initialFilters: Partial<CustomerFilters> = {}): Use
    * Derive filter options from current customer data
    */
   const statuses = useMemo(() => {
-    const uniqueStatuses = Array.from(new Set(customers.map(customer => customer.status).filter(Boolean)));
+    const uniqueStatuses = Array.from(new Set(customers.map(customer => customer.status).filter(Boolean))) as string[];
     return ['Alle', ...uniqueStatuses];
   }, [customers]);
   
   const communicationPreferences = useMemo(() => {
-    const uniquePrefs = Array.from(new Set(customers.map(customer => customer.preferred_communication).filter(Boolean)));
+    const uniquePrefs = Array.from(new Set(customers.map(customer => customer.preferred_communication).filter(Boolean))) as string[];
     return ['Alle', ...uniquePrefs];
   }, [customers]);
   
   const parentOrganizations = useMemo(() => {
-    const uniqueOrgs = Array.from(new Set(customers.map(customer => customer.parent_organization_name).filter(Boolean)));
+    const uniqueOrgs = Array.from(new Set(customers.map(customer => customer.parent_organization_name).filter(Boolean))) as string[];
     return ['Alle', ...uniqueOrgs];
   }, [customers]);
 
