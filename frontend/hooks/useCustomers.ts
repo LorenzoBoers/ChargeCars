@@ -18,7 +18,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useApiClient, CustomerResponse, CustomerFilters, CustomerMetrics, ApiResponse } from '@/lib/api';
+import { useApiClient, CustomerResponse, CustomerFilters, CustomerMetrics, ApiResponse } from '../lib/api';
 
 /**
  * Interface defining the return type of the useCustomers hook
@@ -149,17 +149,17 @@ export function useCustomers(initialFilters: Partial<CustomerFilters> = {}): Use
    * Derive filter options from current customer data
    */
   const statuses = useMemo(() => {
-    const uniqueStatuses = [...new Set(customers.map(customer => customer.status).filter(Boolean))];
+    const uniqueStatuses = Array.from(new Set(customers.map(customer => customer.status).filter(Boolean)));
     return ['Alle', ...uniqueStatuses];
   }, [customers]);
   
   const communicationPreferences = useMemo(() => {
-    const uniquePrefs = [...new Set(customers.map(customer => customer.preferred_communication).filter(Boolean))];
+    const uniquePrefs = Array.from(new Set(customers.map(customer => customer.preferred_communication).filter(Boolean)));
     return ['Alle', ...uniquePrefs];
   }, [customers]);
   
   const parentOrganizations = useMemo(() => {
-    const uniqueOrgs = [...new Set(customers.map(customer => customer.parent_organization_name).filter(Boolean))];
+    const uniqueOrgs = Array.from(new Set(customers.map(customer => customer.parent_organization_name).filter(Boolean)));
     return ['Alle', ...uniqueOrgs];
   }, [customers]);
 
