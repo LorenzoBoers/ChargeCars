@@ -600,14 +600,29 @@ export default function OrdersPage() {
                         
                         <TableCell>
                           <div className="flex flex-col gap-1">
-                            <Chip 
-                              size="sm" 
-                              color={getStatusColor(order)} 
-                              variant="flat"
-                              className="text-xs h-5"
-                            >
-                              {order.status_label || order.status}
-                            </Chip>
+                            {(() => {
+                              const statusColor = getStatusColor(order);
+                              const testColors = ['success', 'danger', 'warning', 'primary', 'secondary', 'default'];
+                              
+                              return (
+                                <Chip 
+                                  size="sm" 
+                                  color={statusColor}
+                                  variant="flat"
+                                  className="text-xs h-5"
+                                  data-testid={`status-chip-${statusColor}`}
+                                  style={
+                                    statusColor === 'success' ? { backgroundColor: '#22c55e20', color: '#22c55e', borderColor: '#22c55e40' } :
+                                    statusColor === 'danger' ? { backgroundColor: '#ef444420', color: '#ef4444', borderColor: '#ef444440' } :
+                                    statusColor === 'warning' ? { backgroundColor: '#f59e0b20', color: '#f59e0b', borderColor: '#f59e0b40' } :
+                                    statusColor === 'secondary' ? { backgroundColor: '#6b728020', color: '#6b7280', borderColor: '#6b728040' } :
+                                    undefined
+                                  }
+                                >
+                                  {order.status_label || order.status}
+                                </Chip>
+                              );
+                            })()}
                             {order.status_since && formatRelativeTime(order.status_since) && (
                               <span className="text-xs text-foreground-400">
                                 {formatRelativeTime(order.status_since)}
