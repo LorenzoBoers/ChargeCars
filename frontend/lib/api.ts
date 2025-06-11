@@ -56,10 +56,16 @@ export interface OrderResponse {
   status_name?: string;
   status_label?: string;
   status_since?: number; // timestamp
+  status_color?: string;
   
-  // Additional fields based on Xano API
+  // Customer information from API
   customer_name?: string;
+  customer_first_name?: string;
+  customer_last_name?: string;
+  
+  // Account/Business Entity information
   business_entity?: string;
+  account?: string;
   installation_date?: string;
   partner_name?: string;
   reference?: string;

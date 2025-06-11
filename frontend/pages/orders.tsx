@@ -73,11 +73,7 @@ const statusColorMap: Record<string, "default" | "primary" | "secondary" | "succ
   'draft': 'default'
 };
 
-const priorityColorMap: Record<string, "default" | "primary" | "secondary" | "success" | "warning" | "danger"> = {
-  'low': 'default',
-  'medium': 'warning',
-  'high': 'danger'
-};
+
 
 export default function OrdersPage() {
   const { user } = useAuth();
@@ -153,6 +149,36 @@ export default function OrdersPage() {
   // Orders are now filtered and paginated by the useOrders hook
   const paginatedOrders = filteredOrders;
 
+  // Get status color from API or fallback to mapping
+  const getStatusColor = (order: OrderResponse): "default" | "primary" | "secondary" | "success" | "warning" | "danger" => {
+    // If API provides status_color, try to map it to NextUI colors
+    if (order.status_color) {
+      const color = order.status_color.toLowerCase();
+      if (color.includes('green') || color.includes('success')) return 'success';
+      if (color.includes('red') || color.includes('danger') || color.includes('error')) return 'danger';
+      if (color.includes('yellow') || color.includes('warning') || color.includes('orange')) return 'warning';
+      if (color.includes('blue') || color.includes('primary')) return 'primary';
+      if (color.includes('gray') || color.includes('grey') || color.includes('secondary')) return 'secondary';
+    }
+    
+    // Fallback to our mapping
+    return statusColorMap[order.status_label || order.status] || 'default';
+  };
+
+  // Debug status values
+  React.useEffect(() => {
+    if (orders.length > 0) {
+      console.log('🎨 STATUS DEBUG:', orders.slice(0, 3).map(order => ({
+        id: order.id,
+        status: order.status,
+        status_label: order.status_label,
+        status_name: order.status_name,
+        status_color: order.status_color,
+        resolved_color: getStatusColor(order)
+      })));
+    }
+  }, [orders]);
+
   const formatCurrency = (amount?: number) => {
     if (!amount) return '€0,00';
     return new Intl.NumberFormat('nl-NL', {
@@ -163,22 +189,33 @@ export default function OrdersPage() {
 
   // Format timestamp (Xano returns timestamps in seconds or milliseconds)
   const formatDate = (timestamp: number | string) => {
+    // Handle invalid/null timestamps
+    if (!timestamp || timestamp === 0) return '-';
+    
     // Handle both timestamp numbers and string dates
     if (typeof timestamp === 'string') {
-      return new Date(timestamp).toLocaleDateString('nl-NL');
+      const date = new Date(timestamp);
+      return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('nl-NL');
     }
+    
     // Xano timestamps are typically in seconds, convert to milliseconds if needed
     const date = timestamp > 1e10 ? new Date(timestamp) : new Date(timestamp * 1000);
-    return date.toLocaleDateString('nl-NL');
+    return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('nl-NL');
   };
 
   // Format relative time for status since
   const formatRelativeTime = (timestamp: number | string) => {
+    // Handle invalid/null timestamps
+    if (!timestamp || timestamp === 0) return '';
+    
     const date = typeof timestamp === 'string' 
       ? new Date(timestamp) 
       : timestamp > 1e10 
         ? new Date(timestamp) 
         : new Date(timestamp * 1000);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) return '';
     
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
@@ -499,7 +536,6 @@ export default function OrdersPage() {
                     <TableColumn>PARTNER</TableColumn>
                     <TableColumn>TYPE</TableColumn>
                     <TableColumn>STATUS</TableColumn>
-                    <TableColumn>PRIORITEIT</TableColumn>
                     <TableColumn>BEDRAG</TableColumn>
                     <TableColumn>DATUM</TableColumn>
                     <TableColumn>ACTIES</TableColumn>
@@ -520,10 +556,15 @@ export default function OrdersPage() {
                         
                         <TableCell>
                           <div className="flex flex-col">
-                            <span className="font-medium text-xs">{order.customer_name || 'Unknown Customer'}</span>
-                            {order.business_entity && (
+                            <span className="font-medium text-xs">
+                              {order.customer_name || 
+                               (order.customer_first_name && order.customer_last_name 
+                                 ? `${order.customer_first_name} ${order.customer_last_name}` 
+                                 : 'Unknown Customer')}
+                            </span>
+                            {(order.account || order.business_entity) && (
                               <span className="text-xs text-foreground-400">
-                                {order.business_entity}
+                                {order.account || order.business_entity}
                               </span>
                             )}
                           </div>
@@ -545,29 +586,18 @@ export default function OrdersPage() {
                           <div className="flex flex-col gap-1">
                             <Chip 
                               size="sm" 
-                              color={statusColorMap[order.status_label || order.status]} 
+                              color={getStatusColor(order)} 
                               variant="flat"
                               className="text-xs h-5"
                             >
                               {order.status_label || order.status}
                             </Chip>
-                            {order.status_since && (
+                            {order.status_since && formatRelativeTime(order.status_since) && (
                               <span className="text-xs text-foreground-400">
                                 {formatRelativeTime(order.status_since)}
                               </span>
                             )}
                           </div>
-                        </TableCell>
-                        
-                        <TableCell>
-                          <Chip 
-                            size="sm" 
-                            color={priorityColorMap[order.priority]} 
-                            variant="dot"
-                            className="text-xs h-5"
-                          >
-                            {order.priority === 'high' ? 'Hoog' : order.priority === 'medium' ? 'Normaal' : 'Laag'}
-                          </Chip>
                         </TableCell>
                         
                         <TableCell>
