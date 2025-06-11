@@ -51,26 +51,93 @@ const businessEntities = ['Alle', 'ChargeCars', 'LaderThuis', 'MeterKastThuis', 
 const orderTypes = ['Alle', 'Installatie', 'Onderhoud', 'Offerte', 'Reparatie'];
 const statuses = ['Alle', 'Nieuw', 'In behandeling', 'Wachten op klant', 'Gepland', 'In uitvoering', 'Voltooid', 'Geannuleerd'];
 
+// Comprehensive status color mapping based on semantic categories
+// NextUI Color Variants: default, primary, secondary, success, warning, danger
 const statusColorMap: Record<string, "default" | "primary" | "secondary" | "success" | "warning" | "danger"> = {
-  // Dutch status labels
-  'Nieuw': 'primary',
-  'In behandeling': 'warning',
-  'Wachten op klant': 'secondary',
-  'Gepland': 'primary',
-  'In uitvoering': 'warning',
-  'Voltooid': 'success',
-  'Geannuleerd': 'danger',
+  // 🔵 Blauw (primary) - Actieve processen
+  'in_progress': 'primary',
+  'open': 'primary', 
+  'active': 'primary',
+  'in_uitvoering': 'primary',
+  'bezig': 'primary',
+  'actief': 'primary',
+  'In uitvoering': 'primary',
+  'Actief': 'primary',
+  'Open': 'primary',
   
-  // English/API status labels
-  'new': 'primary',
+  // 🟡 Geel/Oranje (warning) - Voorbereidende fases en wacht statussen  
+  'draft': 'warning',
+  'ready': 'warning',
   'pending': 'warning',
+  'waiting': 'warning',
+  'on_hold': 'warning',
+  'paused': 'warning',
+  'concept': 'warning',
+  'klaar': 'warning',
+  'wachtend': 'warning',
+  'in_behandeling': 'warning',
+  'Nieuw': 'warning',
+  'In behandeling': 'warning',
+  'Concept': 'warning',
+  'Draft': 'warning',
+  'Pending': 'warning',
+  'quote_draft': 'warning',
+  'offerte_concept': 'warning',
+  
+  // 🟣 Paars/Secondary - Verzonden items en wachtende goedkeuringen
+  'quote_sent': 'secondary',
+  'sent': 'secondary',
+  'verstuurd': 'secondary',
+  'Offerte Concept': 'secondary',
+  'partner_akkoord': 'secondary',
+  'Partner Akkoord': 'secondary',
   'waiting_customer': 'secondary',
-  'scheduled': 'primary',
-  'in_progress': 'warning',
+  'Wachten op klant': 'secondary',
+  'awaiting_approval': 'secondary',
+  'submitted': 'secondary',
+  'Ingepland': 'secondary',
+  'Gepland': 'secondary',
+  
+  // 🟢 Groen (success) - Goedkeuringen en voltooide items
   'completed': 'success',
+  'approved': 'success', 
+  'delivered': 'success',
+  'installed': 'success',
+  'finished': 'success',
+  'done': 'success',
+  'voltooid': 'success',
+  'goedgekeurd': 'success',
+  'geleverd': 'success',
+  'geïnstalleerd': 'success',
+  'klant_akkoord': 'success',
+  'customer_approved': 'success',
+  'Voltooid': 'success',
+  'Klant Akkoord': 'success',
+  'Goedgekeurd': 'success',
+  'Geleverd': 'success',
+  'Completed': 'success',
+  'Approved': 'success',
+  
+  // 🔴 Rood (danger) - Geannuleerde of problematische statussen
   'cancelled': 'danger',
-  'active': 'warning',
-  'draft': 'default'
+  'rejected': 'danger',
+  'failed': 'danger',
+  'expired': 'danger',
+  'error': 'danger',
+  'geannuleerd': 'danger',
+  'afgewezen': 'danger',
+  'gefaald': 'danger',
+  'verlopen': 'danger',
+  'Geannuleerd': 'danger',
+  'Afgewezen': 'danger',
+  'Cancelled': 'danger',
+  'Rejected': 'danger',
+  'Failed': 'danger',
+  
+  // Default fallback
+  'unknown': 'default',
+  'onbekend': 'default',
+  'Onbekend': 'default'
 };
 
 
@@ -151,36 +218,55 @@ export default function OrdersPage() {
 
   // Get status color from API or fallback to mapping
   const getStatusColor = (order: OrderResponse): "default" | "primary" | "secondary" | "success" | "warning" | "danger" => {
-    const result = (() => {
-      // If API provides status_color (hex code), map to NextUI colors
-      if (order.status_color) {
-        const color = order.status_color.toLowerCase();
-        
-        // Map common hex colors to NextUI colors
-        if (color === '#22c55e' || color === '#10b981' || color === '#16a34a' || color.includes('green')) return 'success';
-        if (color === '#ef4444' || color === '#dc2626' || color === '#f87171' || color.includes('red')) return 'danger';
-        if (color === '#f59e0b' || color === '#eab308' || color === '#fbbf24' || color.includes('yellow') || color.includes('orange')) return 'warning';
-        if (color === '#3b82f6' || color === '#2563eb' || color === '#097bff' || color.includes('blue')) return 'primary';
-        if (color === '#6b7280' || color === '#9ca3af' || color.includes('gray') || color.includes('grey')) return 'secondary';
-        
-        // For any other hex color, use primary as default
-        if (color.startsWith('#')) return 'primary';
-      }
+    // Priority 1: Check if we have a direct status mapping (most reliable)
+    const statusKey = order.status_label || order.status_name || order.status;
+    if (statusKey && statusColorMap[statusKey]) {
+      const mappedColor = statusColorMap[statusKey];
+      console.log(`🎨 STATUS MAPPED for ${order.order_number}: ${statusKey} → ${mappedColor}`);
+      return mappedColor;
+    }
+    
+    // Priority 2: If API provides status_color (hex code), map to NextUI colors
+    if (order.status_color) {
+      const color = order.status_color.toLowerCase();
       
-      // Fallback to our mapping based on status text
-      return statusColorMap[order.status_label || order.status] || 'default';
-    })();
+      // Semantic color mapping from hex to NextUI variants
+      const hexColorMapping = (() => {
+        // Green variants → success
+        if (color.includes('#22c55e') || color.includes('#10b981') || color.includes('#16a34a') || 
+            color.includes('#059669') || color.includes('green')) return 'success';
+        
+        // Red variants → danger  
+        if (color.includes('#ef4444') || color.includes('#dc2626') || color.includes('#f87171') ||
+            color.includes('#b91c1c') || color.includes('red')) return 'danger';
+        
+        // Yellow/Orange variants → warning
+        if (color.includes('#f59e0b') || color.includes('#eab308') || color.includes('#fbbf24') ||
+            color.includes('#d97706') || color.includes('yellow') || color.includes('orange')) return 'warning';
+        
+        // Blue variants → primary
+        if (color.includes('#3b82f6') || color.includes('#2563eb') || color.includes('#097bff') ||
+            color.includes('#1d4ed8') || color.includes('#006fee') || color.includes('blue')) return 'primary';
+        
+        // Gray/Purple variants → secondary
+        if (color.includes('#6b7280') || color.includes('#9ca3af') || color.includes('#8b5cf6') ||
+            color.includes('gray') || color.includes('grey') || color.includes('purple')) return 'secondary';
+        
+        // Any other hex color defaults to primary
+        if (color.startsWith('#')) return 'primary';
+        
+        return null;
+      })();
+      
+      if (hexColorMapping) {
+        console.log(`🎨 STATUS HEX for ${order.order_number}: ${order.status_color} → ${hexColorMapping}`);
+        return hexColorMapping;
+      }
+    }
     
-    console.log(`🎨 STATUS COLOR for ${order.order_number}:`, {
-      status_color: order.status_color,
-      status_label: order.status_label,
-      status_name: order.status_name,
-      status: order.status,
-      computed_color: result,
-      hex_color_lowercase: order.status_color?.toLowerCase()
-    });
-    
-    return result;
+    // Priority 3: Fallback to default
+    console.log(`🎨 STATUS DEFAULT for ${order.order_number}: ${statusKey} → default (no mapping found)`);
+    return 'default';
   };
 
   // Debug status values
@@ -602,35 +688,14 @@ export default function OrdersPage() {
                         
                         <TableCell>
                           <div className="flex flex-col gap-1">
-                            {(() => {
-                              const statusColor = getStatusColor(order);
-                              
-                              // Create custom status chip with guaranteed colors
-                              const getStatusChipClasses = (color: string) => {
-                                const baseClasses = "inline-flex items-center justify-center px-2 py-1 rounded-md text-xs font-medium border transition-colors";
-                                
-                                switch (color) {
-                                  case 'success':
-                                    return `${baseClasses} bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800`;
-                                  case 'danger':
-                                    return `${baseClasses} bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800`;
-                                  case 'warning':
-                                    return `${baseClasses} bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800`;
-                                  case 'primary':
-                                    return `${baseClasses} bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800`;
-                                  case 'secondary':
-                                    return `${baseClasses} bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800`;
-                                  default:
-                                    return `${baseClasses} bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800`;
-                                }
-                              };
-                              
-                              return (
-                                <div className={getStatusChipClasses(statusColor)}>
-                                  {order.status_label || order.status}
-                                </div>
-                              );
-                            })()}
+                            <Chip 
+                              size="sm" 
+                              color={getStatusColor(order)} 
+                              variant="flat"
+                              className="text-xs h-5"
+                            >
+                              {order.status_label || order.status}
+                            </Chip>
                             {order.status_since && formatRelativeTime(order.status_since) && (
                               <span className="text-xs text-foreground-400">
                                 {formatRelativeTime(order.status_since)}

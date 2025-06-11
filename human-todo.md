@@ -12,6 +12,137 @@
 
 ## 🔥 High Priority
 
+### Backend Required: Customer Management API
+
+**Component**: `frontend/pages/customers.tsx`  
+**Required Endpoints**: 
+- `GET /api/customers` - Get filtered customers list
+- `GET /api/customers/{id}` - Get customer by ID
+- `POST /api/customers` - Create new customer
+- `PUT /api/customers/{id}` - Update customer
+- `DELETE /api/customers/{id}` - Delete customer
+- `GET /api/customers/metrics` - Get customer dashboard metrics
+
+**Request Schemas**:
+```typescript
+// Get Customers (GET /api/customers)
+{
+  search?: string;
+  contact_type?: 'person' | 'organization';
+  contact_subtype?: 'customer' | 'partner';
+  status?: 'active' | 'inactive' | 'prospect';
+  communication_preference?: 'email' | 'phone' | 'whatsapp' | 'portal';
+  parent_organization?: string;
+  page?: number;
+  per_page?: number;
+}
+
+// Create/Update Customer
+{
+  contact_type: 'person' | 'organization';
+  contact_subtype: 'customer' | 'partner';
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
+  display_name?: string;
+  parent_organization_id?: string;
+  job_title?: string;
+  department?: string;
+  whatsapp?: string;
+  preferred_communication?: 'email' | 'phone' | 'whatsapp' | 'portal';
+  vat_number?: string;
+  kvk_number?: string;
+  iban?: string;
+  status?: 'active' | 'inactive' | 'prospect';
+}
+```
+
+**Response Schemas**:
+```typescript
+// Customer Response
+{
+  id: string;
+  contact_type: 'person' | 'organization';
+  contact_subtype: 'customer' | 'partner';
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
+  display_name?: string;
+  parent_organization_id?: string;
+  parent_organization_name?: string;
+  is_primary?: boolean;
+  is_billing_contact?: boolean;
+  is_technical_contact?: boolean;
+  job_title?: string;
+  department?: string;
+  whatsapp?: string;
+  preferred_communication?: 'email' | 'phone' | 'whatsapp' | 'portal';
+  is_active?: boolean;
+  created_at?: number;
+  updated_at?: number;
+  vat_number?: string;
+  kvk_number?: string;
+  iban?: string;
+  total_orders?: number;
+  total_revenue?: number;
+  last_order_date?: number;
+  status?: 'active' | 'inactive' | 'prospect';
+}
+
+// Customer Metrics Response
+{
+  total_customers: number;
+  total_organizations: number;
+  total_partners: number;
+  active_customers: number;
+  new_this_month: number;
+  revenue_this_month: number;
+  customers_change: number; // percentage
+  revenue_change: number; // percentage
+}
+
+// List Response
+{
+  success: boolean;
+  data: {
+    items: CustomerResponse[];
+    page: number;
+    per_page: number;
+    found_count: number;
+    has_more_items: boolean;
+  };
+  error?: string;
+}
+```
+
+**Business Logic**: 
+- Unified contact model (persons AND organizations in one table)
+- Hierarchical organization structure (parent_organization_id)
+- Contact subtypes for customer vs partner distinction
+- Aggregated metrics (total orders, revenue from related orders)
+- Status management with lifecycle tracking
+- Communication preference management
+- Business data for organizations (VAT, KvK, IBAN)
+- Search across names, emails, organizations
+- Filter combinations for tab-based organization
+
+**UI Context**:
+- Tabbed interface: All Customers, Organizations, End Customers, Partners
+- Advanced search and filtering system
+- Dashboard metrics cards
+- CRUD operations with inline editing
+- Customer hierarchy display
+- Status and communication preference management
+
+**Database Schema Reference**: 
+Based on `contact` table (contact-centric architecture) with contact_type and contact_subtype fields
+
+**Priority**: HIGH  
+**Added**: 2025-01-09  
+**Estimated Effort**: Large
+
 ### Backend Required: Quote Builder Line Items Management
 
 **Component**: `frontend/pages/quotes/[id].tsx`  

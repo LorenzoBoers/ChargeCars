@@ -26,6 +26,10 @@ export const API_ENDPOINTS = {
   orderStatus: (id: string) => `/order/${id}/status`,
   orderTimeline: (id: string) => `/order/${id}/timeline`,
   contacts: '/contact',
+  contactById: (id: string) => `/contact/${id}`,
+  customers: '/customer',
+  customerById: (id: string) => `/customer/${id}`,
+  customerMetrics: '/customer/metrics',
   quotes: '/quote',
   businessEntities: '/business_entities',
 
@@ -138,6 +142,63 @@ export interface MeResponse {
   organization_id?: string;
   organization_name?: string;
   // Add other user fields based on actual API response
+}
+
+// Customer interfaces from customers.tsx
+export interface CustomerResponse {
+  id: string;
+  contact_type: 'person' | 'organization';
+  contact_subtype: 'customer' | 'partner';
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone?: string;
+  display_name?: string;
+  parent_organization_id?: string;
+  parent_organization_name?: string;
+  is_primary?: boolean;
+  is_billing_contact?: boolean;
+  is_technical_contact?: boolean;
+  job_title?: string;
+  department?: string;
+  whatsapp?: string;
+  preferred_communication?: 'email' | 'phone' | 'whatsapp' | 'portal';
+  is_active?: boolean;
+  created_at?: number;
+  updated_at?: number;
+  
+  // Organization specific fields
+  vat_number?: string;
+  kvk_number?: string;
+  iban?: string;
+  
+  // Aggregated metrics
+  total_orders?: number;
+  total_revenue?: number;
+  last_order_date?: number;
+  status?: 'active' | 'inactive' | 'prospect';
+}
+
+export interface CustomerFilters {
+  search?: string;
+  contact_type?: 'person' | 'organization';
+  contact_subtype?: 'customer' | 'partner';
+  status?: string;
+  communication_preference?: string;
+  parent_organization?: string;
+  page?: number;
+  per_page?: number;
+}
+
+export interface CustomerMetrics {
+  total_customers: number;
+  total_organizations: number;
+  total_partners: number;
+  active_customers: number;
+  new_this_month: number;
+  revenue_this_month: number;
+  customers_change: number;
+  revenue_change: number;
 }
 
 /**
@@ -379,6 +440,157 @@ class ApiClient {
     return this.request<{ order_id: string }>(API_ENDPOINTS.orderById(id), {
       method: 'DELETE',
     });
+  }
+
+  // ======================
+  // CUSTOMER METHODS
+  // ======================
+
+  /**
+   * Get customers with optional filters
+   * 
+   * @param filters - Optional filters for customers
+   * @returns Promise resolving to API response with customer array
+   */
+  async getCustomers(filters: CustomerFilters = {}): Promise<ApiResponse<CustomerResponse[]>> {
+    console.log('📋 API: Fetching customers with filters:', filters);
+    
+    const params = new URLSearchParams();
+    
+    // Add filters to query params
+    if (filters.search) params.append('search', filters.search);
+    if (filters.contact_type) params.append('contact_type', filters.contact_type);
+    if (filters.contact_subtype) params.append('contact_subtype', filters.contact_subtype);
+    if (filters.status) params.append('status', filters.status);
+    if (filters.communication_preference) params.append('communication_preference', filters.communication_preference);
+    if (filters.parent_organization) params.append('parent_organization', filters.parent_organization);
+    if (filters.page) params.append('page', filters.page.toString());
+    if (filters.per_page) params.append('per_page', filters.per_page.toString());
+    
+    const queryString = params.toString();
+    const endpoint = queryString ? `${API_ENDPOINTS.customers}?${queryString}` : API_ENDPOINTS.customers;
+    
+    const response = await this.request<XanoListResponse<CustomerResponse>>(endpoint);
+    
+    if (response.success && response.data) {
+      console.log('📋 API: Customers loaded successfully, count:', response.data.items?.length || 0);
+      
+      // Transform Xano response to our format
+      const items = response.data.items || [];
+      
+      return {
+        ...response,
+        data: items,
+        pagination: {
+          current_page: response.data.page || 1,
+          total_pages: Math.ceil((response.data.found_count || 0) / (response.data.per_page || 50)),
+          per_page: response.data.per_page || 50,
+          total_items: response.data.found_count || 0,
+          has_more_items: response.data.has_more_items || false
+        }
+      };
+    }
+    
+    return {
+      success: false,
+      data: [],
+      error: response.error
+    };
+  }
+
+  /**
+   * Get customer by ID
+   * 
+   * @param id - Customer ID
+   * @returns Promise resolving to API response with customer data
+   */
+  async getCustomerById(id: string): Promise<ApiResponse<CustomerResponse>> {
+    console.log('📋 API: Fetching customer by ID:', id);
+    
+    const response = await this.request<CustomerResponse>(API_ENDPOINTS.customerById(id));
+    
+    if (response.success) {
+      console.log('📋 API: Customer loaded successfully');
+    }
+    
+    return response;
+  }
+
+  /**
+   * Create a new customer
+   * 
+   * @param customerData - Customer data to create
+   * @returns Promise resolving to API response with created customer
+   */
+  async createCustomer(customerData: Partial<CustomerResponse>): Promise<ApiResponse<CustomerResponse>> {
+    console.log('📋 API: Creating customer:', customerData);
+    
+    const response = await this.request<CustomerResponse>(
+      API_ENDPOINTS.customers,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customerData)
+      }
+    );
+    
+    return response;
+  }
+
+  /**
+   * Update customer by ID
+   * 
+   * @param id - Customer ID
+   * @param customerData - Updated customer data
+   * @returns Promise resolving to API response with updated customer
+   */
+  async updateCustomer(id: string, customerData: Partial<CustomerResponse>): Promise<ApiResponse<CustomerResponse>> {
+    console.log('📋 API: Updating customer:', id, customerData);
+    
+    const response = await this.request<CustomerResponse>(
+      API_ENDPOINTS.customerById(id),
+      {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customerData)
+      }
+    );
+    
+    return response;
+  }
+
+  /**
+   * Delete customer by ID
+   * 
+   * @param id - Customer ID to delete
+   * @returns Promise resolving to API response with customer_id
+   */
+  async deleteCustomer(id: string): Promise<ApiResponse<{ customer_id: string }>> {
+    console.log('🗑️ API: Deleting customer:', id);
+    
+    const response = await this.request<{ customer_id: string }>(
+      API_ENDPOINTS.customerById(id),
+      { method: 'DELETE' }
+    );
+    
+    return response;
+  }
+
+  /**
+   * Get customer metrics/dashboard stats
+   * 
+   * @returns Promise resolving to customer metrics
+   */
+  async getCustomerMetrics(): Promise<ApiResponse<CustomerMetrics>> {
+    console.log('📊 API: Fetching customer metrics...');
+    
+    const response = await this.request<CustomerMetrics>(API_ENDPOINTS.customerMetrics);
+    
+    if (response.success) {
+      console.log('📊 API: Customer metrics loaded successfully');
+    }
+    
+    return response;
   }
 
   /**
