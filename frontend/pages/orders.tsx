@@ -175,7 +175,9 @@ export default function OrdersPage() {
       status_color: order.status_color,
       status_label: order.status_label,
       status_name: order.status_name,
-      computed_color: result
+      status: order.status,
+      computed_color: result,
+      hex_color_lowercase: order.status_color?.toLowerCase()
     });
     
     return result;
@@ -602,25 +604,31 @@ export default function OrdersPage() {
                           <div className="flex flex-col gap-1">
                             {(() => {
                               const statusColor = getStatusColor(order);
-                              const testColors = ['success', 'danger', 'warning', 'primary', 'secondary', 'default'];
+                              
+                              // Create custom status chip with guaranteed colors
+                              const getStatusChipClasses = (color: string) => {
+                                const baseClasses = "inline-flex items-center justify-center px-2 py-1 rounded-md text-xs font-medium border transition-colors";
+                                
+                                switch (color) {
+                                  case 'success':
+                                    return `${baseClasses} bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800`;
+                                  case 'danger':
+                                    return `${baseClasses} bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800`;
+                                  case 'warning':
+                                    return `${baseClasses} bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800`;
+                                  case 'primary':
+                                    return `${baseClasses} bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800`;
+                                  case 'secondary':
+                                    return `${baseClasses} bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800`;
+                                  default:
+                                    return `${baseClasses} bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800`;
+                                }
+                              };
                               
                               return (
-                                <Chip 
-                                  size="sm" 
-                                  color={statusColor}
-                                  variant="flat"
-                                  className="text-xs h-5"
-                                  data-testid={`status-chip-${statusColor}`}
-                                  style={
-                                    statusColor === 'success' ? { backgroundColor: '#22c55e20', color: '#22c55e', borderColor: '#22c55e40' } :
-                                    statusColor === 'danger' ? { backgroundColor: '#ef444420', color: '#ef4444', borderColor: '#ef444440' } :
-                                    statusColor === 'warning' ? { backgroundColor: '#f59e0b20', color: '#f59e0b', borderColor: '#f59e0b40' } :
-                                    statusColor === 'secondary' ? { backgroundColor: '#6b728020', color: '#6b7280', borderColor: '#6b728040' } :
-                                    undefined
-                                  }
-                                >
+                                <div className={getStatusChipClasses(statusColor)}>
                                   {order.status_label || order.status}
-                                </Chip>
+                                </div>
                               );
                             })()}
                             {order.status_since && formatRelativeTime(order.status_since) && (
