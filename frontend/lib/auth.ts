@@ -84,6 +84,15 @@ export const authAPI = {
 
 // Token management with cookie support
 export const tokenManager = {
+  // ChargeCars cookie naming constants
+  COOKIE_PREFIX: 'chargecars-',
+  COOKIE_NAMES: {
+    AUTH_TOKEN: 'chargecars-auth-token',
+    TOKEN_EXPIRY: 'chargecars-token-expiry',
+    REFRESH_TOKEN: 'chargecars-refresh-token',
+    USER_DATA: 'chargecars-user-data'
+  },
+
   // Cookie helper functions
   setCookie(name: string, value: string, days: number = 7): void {
     const expires = new Date();
@@ -111,41 +120,41 @@ export const tokenManager = {
   setAuthToken(token: string): void {
     // Store in both localStorage (for immediate access) and cookies (for security)
     localStorage.setItem('authToken', token);
-    this.setCookie('authToken', token, 7); // 7 days
+    this.setCookie(this.COOKIE_NAMES.AUTH_TOKEN, token, 7); // 7 days
   },
 
   getAuthToken(): string | null {
     // Try localStorage first, then cookies as fallback
-    return localStorage.getItem('authToken') || this.getCookie('authToken');
+    return localStorage.getItem('authToken') || this.getCookie(this.COOKIE_NAMES.AUTH_TOKEN);
   },
 
   setTokenExpiry(expiry: number): void {
     localStorage.setItem('tokenExpiry', expiry.toString());
-    this.setCookie('tokenExpiry', expiry.toString(), 7);
+    this.setCookie(this.COOKIE_NAMES.TOKEN_EXPIRY, expiry.toString(), 7);
   },
 
   getTokenExpiry(): number | null {
-    const expiry = localStorage.getItem('tokenExpiry') || this.getCookie('tokenExpiry');
+    const expiry = localStorage.getItem('tokenExpiry') || this.getCookie(this.COOKIE_NAMES.TOKEN_EXPIRY);
     return expiry ? parseInt(expiry) : null;
   },
 
   setRefreshToken(token: string): void {
     localStorage.setItem('refreshToken', token);
-    this.setCookie('refreshToken', token, 30); // 30 days for refresh token
+    this.setCookie(this.COOKIE_NAMES.REFRESH_TOKEN, token, 30); // 30 days for refresh token
   },
 
   getRefreshToken(): string | null {
-    return localStorage.getItem('refreshToken') || this.getCookie('refreshToken');
+    return localStorage.getItem('refreshToken') || this.getCookie(this.COOKIE_NAMES.REFRESH_TOKEN);
   },
 
   setUserData(user: User): void {
     const userData = JSON.stringify(user);
     localStorage.setItem('userData', userData);
-    this.setCookie('userData', userData, 7);
+    this.setCookie(this.COOKIE_NAMES.USER_DATA, userData, 7);
   },
 
   getUserData(): User | null {
-    const userData = localStorage.getItem('userData') || this.getCookie('userData');
+    const userData = localStorage.getItem('userData') || this.getCookie(this.COOKIE_NAMES.USER_DATA);
     return userData ? JSON.parse(userData) : null;
   },
 
@@ -161,16 +170,62 @@ export const tokenManager = {
   },
 
   clearAuth(): void {
-    // Clear from both localStorage and cookies
+    // Clear from localStorage
     localStorage.removeItem('authToken');
     localStorage.removeItem('tokenExpiry');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userData');
     
+    // Clear new ChargeCars prefixed cookies
+    this.deleteCookie(this.COOKIE_NAMES.AUTH_TOKEN);
+    this.deleteCookie(this.COOKIE_NAMES.TOKEN_EXPIRY);
+    this.deleteCookie(this.COOKIE_NAMES.REFRESH_TOKEN);
+    this.deleteCookie(this.COOKIE_NAMES.USER_DATA);
+    
+    // Clean up old cookies (migration cleanup)
     this.deleteCookie('authToken');
     this.deleteCookie('tokenExpiry');
     this.deleteCookie('refreshToken');
     this.deleteCookie('userData');
+  },
+
+  // Helper method to clear all ChargeCars cookies (for admin/debugging)
+  clearAllChargeCarsData(): void {
+    // Get all cookies and delete any that start with our prefix
+    const cookies = document.cookie.split(';');
+    
+    cookies.forEach(cookie => {
+      const cookieName = cookie.split('=')[0].trim();
+      if (cookieName.startsWith(this.COOKIE_PREFIX)) {
+        this.deleteCookie(cookieName);
+      }
+    });
+    
+    // Also clear localStorage
+    this.clearAuth();
+  },
+
+  // Debug helper to view all ChargeCars cookies
+  getChargeCarsData(): Record<string, any> {
+    return {
+      cookies: {
+        authToken: this.getCookie(this.COOKIE_NAMES.AUTH_TOKEN),
+        tokenExpiry: this.getCookie(this.COOKIE_NAMES.TOKEN_EXPIRY),
+        refreshToken: this.getCookie(this.COOKIE_NAMES.REFRESH_TOKEN),
+        userData: this.getCookie(this.COOKIE_NAMES.USER_DATA)
+      },
+      localStorage: {
+        authToken: localStorage.getItem('authToken'),
+        tokenExpiry: localStorage.getItem('tokenExpiry'),
+        refreshToken: localStorage.getItem('refreshToken'),
+        userData: localStorage.getItem('userData')
+      },
+      computed: {
+        isTokenValid: this.isTokenValid(),
+        tokenExpiryDate: this.getTokenExpiry() ? new Date(this.getTokenExpiry()!) : null,
+        currentUser: this.getUserData()
+      }
+    };
   }
 };
 
@@ -194,4 +249,28 @@ export const demoCredentials = [
     role: 'user',
     name: 'Lorenzo Monteur'
   }
-]; 
+];
+
+// Global debug helpers for development (accessible via browser console)
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  (window as any).chargeCarsDebug = {
+    auth: tokenManager,
+    viewData: () => {
+      console.table(tokenManager.getChargeCarsData());
+      return tokenManager.getChargeCarsData();
+    },
+    clearAll: () => {
+      tokenManager.clearAllChargeCarsData();
+      console.log('🧹 All ChargeCars data cleared');
+    },
+    listCookies: () => {
+      const cookies = document.cookie.split(';')
+        .map(cookie => cookie.trim())
+        .filter(cookie => cookie.startsWith('chargecars-'));
+      console.log('🍪 ChargeCars Cookies:', cookies);
+      return cookies;
+    }
+  };
+  
+  console.log('🔧 ChargeCars Debug available: window.chargeCarsDebug');
+} 
