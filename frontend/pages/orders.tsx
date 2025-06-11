@@ -19,11 +19,10 @@ import {
   Chip,
   Pagination,
   Spinner,
-
   Tooltip,
   Select,
   SelectItem
-} from "@nextui-org/react";
+} from "@heroui/react";
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
