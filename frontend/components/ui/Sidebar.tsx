@@ -26,7 +26,8 @@ import {
   ClockIcon
 } from "@heroicons/react/24/outline";
 import Logo from './Logo';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
+import { useUserProfile } from '../../hooks/useUser';
 
 /**
  * @component Sidebar
@@ -49,7 +50,53 @@ interface NavigationItem {
 
 export function Sidebar({ className = "" }: SidebarProps) {
   const router = useRouter();
-  const { user, logout } = useAuth();
+  
+  // Safely handle auth context - may not be available during SSG
+  let logout: (() => void) | null = null;
+  try {
+    const auth = useAuth();
+    logout = auth.logout;
+  } catch (error) {
+    // AuthProvider not available, fallback to null
+    console.log('Sidebar: AuthProvider not available during SSG');
+  }
+  
+  // Safely handle user profile - may not be available during SSG
+  let userProfileData = {
+    displayName: 'Gebruiker',
+    initials: 'G',
+    profileImageUrl: null as string | null,
+    roleLabel: 'Gebruiker',
+    email: '',
+    hasProfileImage: false,
+    isLoading: false
+  };
+  
+  try {
+    const userProfile = useUserProfile();
+    userProfileData = {
+      displayName: userProfile.displayName,
+      initials: userProfile.initials,
+      profileImageUrl: userProfile.profileImageUrl,
+      roleLabel: userProfile.roleLabel,
+      email: userProfile.email || '',
+      hasProfileImage: userProfile.hasProfileImage,
+      isLoading: userProfile.isLoading
+    };
+  } catch (error) {
+    // useUser hook not available during SSG
+    console.log('Sidebar: useUser hook not available during SSG');
+  }
+  
+  const { 
+    displayName, 
+    initials, 
+    profileImageUrl, 
+    roleLabel, 
+    email, 
+    hasProfileImage, 
+    isLoading: userLoading 
+  } = userProfileData;
 
   const navigationItems: NavigationItem[] = [
     {
@@ -114,8 +161,10 @@ export function Sidebar({ className = "" }: SidebarProps) {
   };
 
   const handleLogout = async () => {
-    await logout();
-    router.push('/auth/login');
+    if (logout) {
+      await logout();
+      router.push('/auth/login');
+    }
   };
 
   return (
@@ -169,21 +218,29 @@ export function Sidebar({ className = "" }: SidebarProps) {
               <Button
                 variant="light"
                 className="w-full justify-start p-2 h-auto"
+                isLoading={userLoading}
               >
                 <div className="flex items-center gap-3 w-full">
                   <Avatar
                     size="sm"
-                    name={user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'User'}
+                    src={hasProfileImage ? profileImageUrl! : undefined}
+                    name={initials}
                     className="text-tiny"
-                    color="primary"
+                    classNames={{
+                      base: "bg-gradient-to-br from-[#2563EB] to-[#1D4ED8]",
+                      name: "text-white font-medium"
+                    }}
                   />
                   <div className="flex-1 min-w-0 text-left">
                     <p className="text-sm font-medium text-foreground truncate">
-                      {user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'Gebruiker'}
+                      {displayName}
                     </p>
                     <p className="text-xs text-foreground-500 truncate">
-                      {user?.email || 'user@chargecars.nl'}
+                      {email || 'gebruiker@chargecars.nl'}
                     </p>
+                    <Chip size="sm" color="primary" variant="flat" className="text-xs w-fit mt-1">
+                      {roleLabel}
+                    </Chip>
                   </div>
                 </div>
               </Button>
