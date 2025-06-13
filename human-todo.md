@@ -519,6 +519,22 @@ interface Conversation {
 - **Status**: Completed
 - **Details**: Complete reorganization of project structure, documentation consolidation, cursor rules implementation
 
+### 2025-01-09 - User Profile Data Integration from /me Endpoint
+- **Components**: `frontend/lib/api.ts`, `frontend/hooks/useUser.ts`, `frontend/components/ui/Sidebar.tsx`, `frontend/pages/dashboard.tsx`
+- **Backend Integration**: Fixed /me endpoint response structure handling
+- **Status**: ✅ Completed - User Profile Data Now Displayed in UI
+- **Details**: 
+  - **API Response Structure**: Updated MeResponse interface to match actual API with nested _contact object
+  - **Data Extraction**: Enhanced useUser hook to properly extract user data from nested _contact structure
+  - **Display Names**: Smart display name fallback logic (display_name > full_name > first_name + last_name > email)
+  - **Initials Generation**: Proper initials extraction from contact first/last names with fallbacks
+  - **Profile Pictures**: Support for nested profile_picture structure from API response
+  - **Role Labels**: Enhanced role mapping with Dutch translations and contact_type fallbacks
+  - **Email Display**: Proper email extraction from _contact.email with legacy fallback
+  - **Sidebar Integration**: User profile now shows real contact data in navigation
+  - **Dashboard Integration**: User name in dashboard now uses real API data
+  - **Backward Compatibility**: Maintained support for legacy flat field structure
+
 ---
 
 ## 📋 Template voor Nieuwe Entries

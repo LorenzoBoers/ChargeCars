@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useAuth } from '../contexts/AuthContext';
 import { useProtectedRoute } from '../hooks/useProtectedRoute';
+import { useUserProfile } from '../hooks/useUser';
 import { AppLayout } from '../components/layouts/AppLayout';
 import {
   Card,
@@ -47,6 +48,7 @@ interface PartnerPerformance {
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
   const { isReady } = useProtectedRoute();
+  const { displayName } = useUserProfile();
   
   // 🎯 State for partner performance data
   const [topPartnersByRevenue, setTopPartnersByRevenue] = useState<PartnerPerformance[]>([]);
@@ -164,7 +166,7 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  const userName = user?.contact ? `${user.contact.first_name} ${user.contact.last_name}` : 'Gebruiker';
+  const userName = displayName;
 
   return (
     <>

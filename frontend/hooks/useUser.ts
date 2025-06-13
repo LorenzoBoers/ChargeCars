@@ -103,13 +103,26 @@ export const useUser = (): UseUserReturn => {
   const getDisplayName = useCallback((): string => {
     if (!user) return 'Gebruiker';
     
+    // Try different sources for display name
     if (user.display_name) return user.display_name;
+    if (user._contact?.display_name) return user._contact.display_name;
     if (user.full_name) return user.full_name;
+    
+    // Build from contact first/last name (primary source)
+    if (user._contact?.first_name && user._contact?.last_name) {
+      return `${user._contact.first_name} ${user._contact.last_name}`;
+    }
+    
+    // Fallback to flat fields for backward compatibility
     if (user.first_name && user.last_name) {
       return `${user.first_name} ${user.last_name}`;
     }
+    if (user._contact?.first_name) return user._contact.first_name;
     if (user.first_name) return user.first_name;
-    if (user.email) return user.email.split('@')[0];
+    
+    // Extract from email
+    const email = user._contact?.email || user.email;
+    if (email) return email.split('@')[0];
     
     return 'Gebruiker';
   }, [user]);
@@ -117,18 +130,33 @@ export const useUser = (): UseUserReturn => {
   const getInitials = useCallback((): string => {
     if (!user) return 'G';
     
+    // Try contact first/last name (primary source)
+    if (user._contact?.first_name && user._contact?.last_name) {
+      return `${user._contact.first_name[0]}${user._contact.last_name[0]}`.toUpperCase();
+    }
+    
+    // Fallback to flat fields
     if (user.first_name && user.last_name) {
       return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
     }
+    
+    // Single name sources
+    if (user._contact?.first_name) return user._contact.first_name[0].toUpperCase();
     if (user.first_name) return user.first_name[0].toUpperCase();
-    if (user.display_name) {
-      const parts = user.display_name.split(' ');
+    
+    // Display name parsing
+    const displayName = user._contact?.display_name || user.display_name;
+    if (displayName) {
+      const parts = displayName.split(' ');
       if (parts.length >= 2) {
         return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
       }
-      return user.display_name[0].toUpperCase();
+      return displayName[0].toUpperCase();
     }
-    if (user.email) return user.email[0].toUpperCase();
+    
+    // Email fallback
+    const email = user._contact?.email || user.email;
+    if (email) return email[0].toUpperCase();
     
     return 'G';
   }, [user]);
@@ -136,7 +164,12 @@ export const useUser = (): UseUserReturn => {
   const getProfileImageUrl = useCallback((): string | null => {
     if (!user) return null;
     
-    // Priority: profile_picture > avatar
+    // Check nested contact profile picture structure
+    if (user._contact?.profile_picture?.url) {
+      return user._contact.profile_picture.url;
+    }
+    
+    // Check flat profile picture fields
     if (user.profile_picture) return user.profile_picture;
     if (user.avatar) return user.avatar;
     
@@ -144,20 +177,38 @@ export const useUser = (): UseUserReturn => {
   }, [user]);
 
   const getRoleLabel = useCallback((): string => {
-    if (!user?.signup_type) return 'Gebruiker';
+    if (!user) return 'Gebruiker';
     
-    const roleLabels: Record<string, string> = {
-      'customer': 'Klant',
-      'internal': 'Medewerker', 
-      'external': 'Partner',
-      'technician': 'Technicus'
-    };
+    // Map signup_type to Dutch labels
+    if (user.signup_type) {
+      const roleLabels: Record<string, string> = {
+        'customer': 'Klant',
+        'internal': 'Medewerker', 
+        'external': 'Partner',
+        'technician': 'Technicus'
+      };
+      return roleLabels[user.signup_type] || user.signup_type;
+    }
     
-    return roleLabels[user.signup_type] || user.signup_type;
+    // Fallback based on contact type or access level
+    if (user._contact?.contact_type) {
+      const contactTypeLabels: Record<string, string> = {
+        'customer': 'Klant',
+        'internal': 'Medewerker',
+        'partner': 'Partner',
+        'technician': 'Technicus'
+      };
+      return contactTypeLabels[user._contact.contact_type] || user._contact.contact_type;
+    }
+    
+    return 'Gebruiker';
   }, [user]);
 
   const isInternalUser = useCallback((): boolean => {
-    return user?.signup_type === 'internal' || user?.signup_type === 'technician';
+    return user?.signup_type === 'internal' || 
+           user?.signup_type === 'technician' ||
+           user?._contact?.contact_type === 'internal' ||
+           user?._contact?.contact_type === 'technician';
   }, [user]);
 
   const hasPermission = useCallback((permission: string): boolean => {
@@ -240,7 +291,7 @@ export const useUserProfile = () => {
     initials: getInitials(),
     profileImageUrl: getProfileImageUrl(),
     roleLabel: getRoleLabel(),
-    email: user?.email,
+    email: user?._contact?.email || user?.email,
     hasProfileImage: !!getProfileImageUrl(),
   };
 };

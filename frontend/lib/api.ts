@@ -135,12 +135,51 @@ export interface LoginResponse {
 
 export interface MeResponse {
   id: string;
-  email: string;
+  created_at: number;
+  contact_id: string;
+  noloco_id?: number;
+  noloco_token?: string;
+  role_id: string;
+  scopes?: string;
+  email_verified: boolean;
+  last_login: number | null;
+  login_attempts?: number;
+  account_locked_until: number | null;
+  two_factor_enabled?: boolean;
+  is_active: boolean;
+  mollie_id?: string;
+  _contact: {
+    id: string;
+    email: string;
+    organization_id: string;
+    first_name: string;
+    last_name: string;
+    job_title: string | null;
+    is_active: boolean;
+    phone?: string;
+    display_name?: string;
+    contact_type?: string;
+    access_level?: string;
+    profile_picture?: {
+      meta?: {
+        width: number;
+        height: number;
+        size: number;
+        type: string;
+      };
+      name?: string;
+      path?: string;
+      size?: number;
+      type?: string;
+      url?: string;
+    };
+  };
+  // Legacy flat fields for backward compatibility
+  email?: string;
   first_name?: string;
   last_name?: string;
   full_name?: string;
   display_name?: string;
-  role_id?: string;
   organization_id?: string;
   organization_name?: string;
   profile_picture?: string;
@@ -148,9 +187,6 @@ export interface MeResponse {
   phone?: string;
   job_title?: string;
   department?: string;
-  is_active?: boolean;
-  last_login?: number;
-  created_at?: number;
   updated_at?: number;
   signup_type?: 'customer' | 'internal' | 'external' | 'technician';
   permissions?: string[];
