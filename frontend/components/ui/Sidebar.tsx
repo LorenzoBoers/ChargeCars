@@ -213,36 +213,66 @@ export function Sidebar({ className = "" }: SidebarProps) {
 
         {/* User Info */}
         <div className="p-4 border-t border-divider">
-          <Button
-            variant="light"
-            className="w-full justify-start p-2 h-auto"
-            isLoading={userLoading}
-            onPress={() => handleNavigation('/account')}
-          >
-            <div className="flex items-center gap-3 w-full">
-              <Avatar
-                size="sm"
-                src={hasProfileImage ? profileImageUrl! : undefined}
-                name={initials}
-                className="text-tiny"
-                classNames={{
-                  base: "bg-gradient-to-br from-[#2563EB] to-[#1D4ED8]",
-                  name: "text-white font-medium"
-                }}
-              />
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {displayName}
-                </p>
-                <p className="text-xs text-foreground-500 truncate">
-                  {email || 'gebruiker@chargecars.nl'}
-                </p>
-                <Chip size="sm" color="primary" variant="flat" className="text-xs w-fit mt-1">
-                  {roleLabel}
-                </Chip>
-              </div>
-            </div>
-          </Button>
+          <Dropdown placement="top-start">
+            <DropdownTrigger>
+              <Button
+                variant="light"
+                className="w-full justify-start p-2 h-auto"
+                isLoading={userLoading}
+              >
+                <div className="flex items-center gap-3 w-full">
+                  <Avatar
+                    size="sm"
+                    src={hasProfileImage ? profileImageUrl! : undefined}
+                    name={initials}
+                    className="text-tiny"
+                    classNames={{
+                      base: "bg-gradient-to-br from-[#2563EB] to-[#1D4ED8]",
+                      name: "text-white font-medium"
+                    }}
+                  />
+                  <div className="flex-1 min-w-0 text-left">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {displayName}
+                    </p>
+                    <p className="text-xs text-foreground-500 truncate">
+                      {email || 'gebruiker@chargecars.nl'}
+                    </p>
+                    <Chip size="sm" color="primary" variant="flat" className="text-xs w-fit mt-1">
+                      {roleLabel}
+                    </Chip>
+                  </div>
+                </div>
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu aria-label="Gebruiker menu">
+              <DropdownItem
+                key="profile"
+                startContent={<UserIcon className="h-4 w-4" />}
+                onPress={() => handleNavigation('/account')}
+                textValue="Mijn Profiel"
+              >
+                Mijn Profiel
+              </DropdownItem>
+              <DropdownItem
+                key="settings"
+                startContent={<CogIcon className="h-4 w-4" />}
+                onPress={() => handleNavigation('/settings')}
+                textValue="Instellingen"
+              >
+                Instellingen
+              </DropdownItem>
+              <DropdownItem
+                key="logout"
+                color="danger"
+                startContent={<ArrowRightOnRectangleIcon className="h-4 w-4" />}
+                onPress={handleLogout}
+                textValue="Uitloggen"
+              >
+                Uitloggen
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </div>
       </CardBody>
     </Card>

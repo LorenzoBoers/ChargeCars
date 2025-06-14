@@ -15,6 +15,7 @@ import { AppLayout } from '../components/layouts/AppLayout';
 import { useUserProfile } from '../hooks/useUser';
 import { useAuth } from '../hooks/useAuth';
 import { MeResponse } from '../lib/api';
+import { useRouter } from 'next/router';
 import { 
   UserIcon, 
   EnvelopeIcon, 
@@ -29,6 +30,8 @@ import {
  * @description User account page showing profile information from the /me endpoint
  */
 const AccountPage: NextPage = () => {
+  const router = useRouter();
+  
   // Safely handle auth context - may not be available during SSG
   let logout = () => {};
   let userProfileData = {
@@ -43,10 +46,24 @@ const AccountPage: NextPage = () => {
     hasProfileImage: false
   };
   
+  // Client-side only content
+  const [isMounted, setIsMounted] = React.useState(false);
+  
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
   // Use try-catch to handle SSG safely
   try {
     const auth = useAuth();
     logout = auth.logout;
+    
+    // Check if user is authenticated and redirect if not
+    React.useEffect(() => {
+      if (isMounted && !auth.isAuthenticated && !auth.isLoading) {
+        router.push('/dashboard');
+      }
+    }, [auth.isAuthenticated, auth.isLoading, isMounted]);
     
     const userProfile = useUserProfile();
     userProfileData = {
@@ -73,13 +90,6 @@ const AccountPage: NextPage = () => {
   const handleLogout = async () => {
     await logout();
   };
-
-  // Client-side only content
-  const [isMounted, setIsMounted] = React.useState(false);
-  
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
   
   // During SSG or if not mounted yet, show a simple loading state
   if (!isMounted) {
