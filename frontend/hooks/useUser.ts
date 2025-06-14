@@ -170,8 +170,13 @@ export const useUser = (): UseUserReturn => {
     }
     
     // Check flat profile picture fields
-    if (user.profile_picture) return user.profile_picture;
-    if (user.avatar) return user.avatar;
+    if (user.profile_picture) {
+      return user.profile_picture;
+    }
+    
+    if (user.avatar) {
+      return user.avatar;
+    }
     
     return null;
   }, [user]);
@@ -283,16 +288,18 @@ export const useUserProfile = () => {
     getRoleLabel 
   } = useUser();
   
+  const profileImageUrl = getProfileImageUrl();
+  
   return {
     user,
     isLoading,
     error,
     displayName: getDisplayName(),
     initials: getInitials(),
-    profileImageUrl: getProfileImageUrl(),
+    profileImageUrl,
     roleLabel: getRoleLabel(),
     email: user?._contact?.email || user?.email,
-    hasProfileImage: !!getProfileImageUrl(),
+    hasProfileImage: !!profileImageUrl,
   };
 };
 

@@ -59,10 +59,8 @@ export default function Logo({
 
   if (href) {
     return (
-      <Link href={href}>
-        <a className="inline-block transition-opacity hover:opacity-80" title="ChargeCars Portal - Dashboard">
-          {logoElement}
-        </a>
+      <Link href={href} className="inline-block transition-opacity hover:opacity-80" title="ChargeCars Portal - Dashboard">
+        {logoElement}
       </Link>
     );
   }

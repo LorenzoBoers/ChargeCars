@@ -244,11 +244,21 @@ export function Sidebar({ className = "" }: SidebarProps) {
                 <div className="flex items-center gap-3 w-full">
                   <Avatar
                     size="sm"
-                    src={hasProfileImage ? profileImageUrl! : undefined}
+                    src={profileImageUrl ? profileImageUrl : ""}
                     name={initials}
-                    className="text-tiny"
+                    showFallback
+                    imgProps={{
+                      loading: 'eager',
+                      referrerPolicy: 'no-referrer'
+                    }}
+                    fallback={
+                      <div className="text-tiny text-white font-medium">
+                        {initials}
+                      </div>
+                    }
+                    className={`text-tiny ${!profileImageUrl ? 'bg-gradient-to-br from-[#2563EB] to-[#1D4ED8]' : ''}`}
                     classNames={{
-                      base: "bg-gradient-to-br from-[#2563EB] to-[#1D4ED8]",
+                      base: profileImageUrl ? "" : "bg-gradient-to-br from-[#2563EB] to-[#1D4ED8]",
                       name: "text-white font-medium"
                     }}
                   />
