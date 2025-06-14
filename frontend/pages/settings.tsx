@@ -10,7 +10,7 @@ import {
   Divider
 } from '@nextui-org/react';
 import { AppLayout } from '../components/layouts/AppLayout';
-import { useProtectedRoute } from '../hooks/useProtectedRoute';
+import { withAuth } from '../hooks/withAuth';
 import { CogIcon } from '@heroicons/react/24/outline';
 
 /**
@@ -18,9 +18,6 @@ import { CogIcon } from '@heroicons/react/24/outline';
  * @description User settings page
  */
 const SettingsPage: NextPage = () => {
-  // Use the protected route hook to ensure authentication
-  const { isReady } = useProtectedRoute();
-  
   // Client-side only content
   const [isMounted, setIsMounted] = React.useState(false);
   
@@ -29,7 +26,7 @@ const SettingsPage: NextPage = () => {
   }, []);
   
   // During SSG or if not mounted yet, show a simple loading state
-  if (!isMounted || !isReady) {
+  if (!isMounted) {
     return (
       <AppLayout>
         <div className="flex items-center justify-center h-full">
@@ -97,4 +94,4 @@ export const getServerSideProps = async () => {
   };
 }
 
-export default SettingsPage; 
+export default withAuth(SettingsPage); 

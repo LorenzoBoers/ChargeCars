@@ -270,7 +270,11 @@ export function Sidebar({ className = "" }: SidebarProps) {
               <DropdownItem
                 key="profile"
                 startContent={<UserIcon className="h-4 w-4" />}
-                onPress={() => handleNavigation('/account')}
+                onPress={() => {
+                  if (typeof window !== 'undefined') {
+                    window.location.href = '/account';
+                  }
+                }}
                 textValue="Mijn Profiel"
               >
                 Mijn Profiel
@@ -278,7 +282,11 @@ export function Sidebar({ className = "" }: SidebarProps) {
               <DropdownItem
                 key="settings"
                 startContent={<CogIcon className="h-4 w-4" />}
-                onPress={() => handleNavigation('/settings')}
+                onPress={() => {
+                  if (typeof window !== 'undefined') {
+                    window.location.href = '/settings';
+                  }
+                }}
                 textValue="Instellingen"
               >
                 Instellingen

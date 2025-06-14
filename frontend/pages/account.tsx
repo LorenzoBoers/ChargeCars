@@ -24,7 +24,7 @@ import {
   ArrowRightOnRectangleIcon,
   CogIcon
 } from '@heroicons/react/24/outline';
-import { useProtectedRoute } from '../hooks/useProtectedRoute';
+import { withAuth } from '../hooks/withAuth';
 
 /**
  * @component AccountPage
@@ -32,8 +32,6 @@ import { useProtectedRoute } from '../hooks/useProtectedRoute';
  */
 const AccountPage: NextPage = () => {
   const router = useRouter();
-  // Use the protected route hook to ensure authentication
-  const { isReady } = useProtectedRoute();
   
   // Safely handle auth context - may not be available during SSG
   let logout = () => {};
@@ -109,7 +107,7 @@ const AccountPage: NextPage = () => {
   };
   
   // During SSG or if not mounted yet, show a simple loading state
-  if (!isMounted || !isReady) {
+  if (!isMounted) {
     return (
       <AppLayout>
         <div className="flex items-center justify-center h-full">
@@ -256,4 +254,5 @@ export const getServerSideProps = async () => {
   };
 }
 
-export default AccountPage; 
+// Wrap the component with the withAuth HOC to protect the route
+export default withAuth(AccountPage); 
