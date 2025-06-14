@@ -162,8 +162,12 @@ export function Sidebar({ className = "" }: SidebarProps) {
 
   const handleLogout = async () => {
     if (logout) {
-      await logout();
-      router.push('/auth/login');
+      try {
+        await logout();
+        router.push('/auth/login');
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
     }
   };
 

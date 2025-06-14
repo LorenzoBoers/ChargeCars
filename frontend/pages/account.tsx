@@ -13,7 +13,7 @@ import {
 } from '@nextui-org/react';
 import { AppLayout } from '../components/layouts/AppLayout';
 import { useUserProfile } from '../hooks/useUser';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth, withAuth } from '../hooks/useAuth';
 import { MeResponse } from '../lib/api';
 import { useRouter } from 'next/router';
 import { 
@@ -58,13 +58,6 @@ const AccountPage: NextPage = () => {
     const auth = useAuth();
     logout = auth.logout;
     
-    // Check if user is authenticated and redirect if not
-    React.useEffect(() => {
-      if (isMounted && !auth.isAuthenticated && !auth.isLoading) {
-        router.push('/dashboard');
-      }
-    }, [auth.isAuthenticated, auth.isLoading, isMounted]);
-    
     const userProfile = useUserProfile();
     userProfileData = {
       ...userProfile,
@@ -88,7 +81,12 @@ const AccountPage: NextPage = () => {
   } = userProfileData;
   
   const handleLogout = async () => {
-    await logout();
+    try {
+      await logout();
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
   
   // During SSG or if not mounted yet, show a simple loading state
@@ -234,4 +232,5 @@ export const getServerSideProps = async () => {
   };
 }
 
-export default AccountPage; 
+// Wrap the component with the withAuth HOC to protect the route
+export default withAuth(AccountPage); 
