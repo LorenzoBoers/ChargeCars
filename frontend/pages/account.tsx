@@ -13,7 +13,7 @@ import {
 } from '@nextui-org/react';
 import { AppLayout } from '../components/layouts/AppLayout';
 import { useUserProfile } from '../hooks/useUser';
-import { useAuth, withAuth } from '../hooks/useAuth';
+import { useAuth } from '../contexts/AuthContext';
 import { MeResponse } from '../lib/api';
 import { useRouter } from 'next/router';
 import { 
@@ -24,6 +24,7 @@ import {
   ArrowRightOnRectangleIcon,
   CogIcon
 } from '@heroicons/react/24/outline';
+import { useProtectedRoute } from '../hooks/useProtectedRoute';
 
 /**
  * @component AccountPage
@@ -31,6 +32,8 @@ import {
  */
 const AccountPage: NextPage = () => {
   const router = useRouter();
+  // Use the protected route hook to ensure authentication
+  const { isReady } = useProtectedRoute();
   
   // Safely handle auth context - may not be available during SSG
   let logout = () => {};
@@ -82,15 +85,31 @@ const AccountPage: NextPage = () => {
   
   const handleLogout = async () => {
     try {
+      // Wis lokale opslag eerst
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('tokenExpiry');
+        localStorage.removeItem('userRole');
+      }
+      
+      // Roep de logout functie aan
       await logout();
-      router.push('/auth/login');
+      
+      // Navigeer direct naar de login pagina
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/login';
+      }
     } catch (error) {
       console.error('Logout failed:', error);
+      // Bij een fout alsnog naar de login pagina navigeren
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/login';
+      }
     }
   };
   
   // During SSG or if not mounted yet, show a simple loading state
-  if (!isMounted) {
+  if (!isMounted || !isReady) {
     return (
       <AppLayout>
         <div className="flex items-center justify-center h-full">
@@ -232,5 +251,4 @@ export const getServerSideProps = async () => {
   };
 }
 
-// Wrap the component with the withAuth HOC to protect the route
-export default withAuth(AccountPage); 
+export default AccountPage; 

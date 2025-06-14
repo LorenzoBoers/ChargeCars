@@ -26,7 +26,7 @@ import {
   ClockIcon
 } from "@heroicons/react/24/outline";
 import Logo from './Logo';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 import { useUserProfile } from '../../hooks/useUser';
 
 /**
