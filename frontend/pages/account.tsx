@@ -205,6 +205,7 @@ const AccountPage: NextPage = () => {
               color="primary"
               variant="flat"
               startContent={<CogIcon className="h-4 w-4" />}
+              onPress={() => router.push('/settings')}
             >
               Profiel bewerken
             </Button>
@@ -232,7 +233,11 @@ const AccountPage: NextPage = () => {
             </p>
           </CardBody>
           <CardFooter>
-            <Button color="primary" variant="flat">
+            <Button 
+              color="primary" 
+              variant="flat"
+              onPress={() => router.push('/settings')}
+            >
               Instellingen beheren
             </Button>
           </CardFooter>
