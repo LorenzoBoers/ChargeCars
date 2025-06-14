@@ -124,17 +124,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (response.success && response.data) {
           // Convert MeResponse to User format based on actual API response
           const userFromAPI: User = {
-            id: response.data.id,
-            email: response.data.email,
-            role_id: response.data.role_id || 'user',
+            id: String(response.data.id || 'api_user'),
+            email: String(response.data.email || ''),
+            role_id: String(response.data.role_id || 'user'),
             contact: {
-              id: response.data.id,
-              first_name: response.data.first_name || '',
-              last_name: response.data.last_name || '',
+              id: String(response.data.contact_id || 'contact_id'),
+              first_name: String(response.data.first_name || ''),
+              last_name: String(response.data.last_name || ''),
             },
             organization: {
-              id: response.data.organization_id || 'default',
-              name: response.data.organization_name || 'Organization',
+              id: String(response.data.organization_id || 'default_org'),
+              name: String(response.data.organization_name || 'Default Organization'),
               type: 'business'
             }
           };
@@ -213,18 +213,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           }
           
           // Create user object from API response
+          const userData = response.data.user || {};
           const userFromAPI: User = {
-            id: response.data.user?.id || 'api_user',
-            email: response.data.user?.email || email,
-            role_id: response.data.user?.role_id || 'user',
+            id: String(userData.id || 'api_user'),
+            email: String(userData.email || email),
+            role_id: String(userData.role_id || 'user'),
             contact: {
-              id: response.data.user?.id || 'contact_id',
-              first_name: response.data.user?.first_name || 'User',
-              last_name: response.data.user?.last_name || '',
+              id: String(userData.contact_id || 'contact_id'),
+              first_name: String(userData.first_name || ''),
+              last_name: String(userData.last_name || ''),
             },
             organization: {
-              id: response.data.user?.organization_id || 'org_id',
-              name: response.data.user?.organization_name || 'Organization',
+              id: String(userData.organization_id || 'default_org'),
+              name: String(userData.organization_name || 'Default Organization'),
               type: 'business'
             }
           };
