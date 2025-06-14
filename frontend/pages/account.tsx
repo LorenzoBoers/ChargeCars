@@ -14,6 +14,7 @@ import {
 import { AppLayout } from '../components/layouts/AppLayout';
 import { useUserProfile } from '../hooks/useUser';
 import { useAuth } from '../hooks/useAuth';
+import { MeResponse } from '../lib/api';
 import { 
   UserIcon, 
   EnvelopeIcon, 
@@ -28,6 +29,35 @@ import {
  * @description User account page showing profile information from the /me endpoint
  */
 const AccountPage: NextPage = () => {
+  // Safely handle auth context - may not be available during SSG
+  let logout = () => {};
+  let userProfileData = {
+    user: null as MeResponse | null,
+    isLoading: false,
+    error: null as string | null,
+    displayName: 'Gebruiker',
+    initials: 'G',
+    profileImageUrl: null as string | null,
+    roleLabel: 'Gebruiker',
+    email: '',
+    hasProfileImage: false
+  };
+  
+  // Use try-catch to handle SSG safely
+  try {
+    const auth = useAuth();
+    logout = auth.logout;
+    
+    const userProfile = useUserProfile();
+    userProfileData = {
+      ...userProfile,
+      email: userProfile.email || ''
+    };
+  } catch (error) {
+    // Auth or UserProfile hooks not available during SSG
+    console.log('Account: Auth/UserProfile hooks not available during SSG');
+  }
+  
   const { 
     user,
     isLoading, 
@@ -38,13 +68,29 @@ const AccountPage: NextPage = () => {
     roleLabel,
     email,
     hasProfileImage
-  } = useUserProfile();
-  
-  const { logout } = useAuth();
+  } = userProfileData;
   
   const handleLogout = async () => {
     await logout();
   };
+
+  // Client-side only content
+  const [isMounted, setIsMounted] = React.useState(false);
+  
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
+  // During SSG or if not mounted yet, show a simple loading state
+  if (!isMounted) {
+    return (
+      <AppLayout>
+        <div className="flex items-center justify-center h-full">
+          <Spinner size="lg" color="primary" />
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (isLoading) {
     return (
@@ -68,6 +114,10 @@ const AccountPage: NextPage = () => {
       </AppLayout>
     );
   }
+
+  // Get phone and organization info safely
+  const phoneNumber = user._contact?.phone || (user as any).phone || 'Geen telefoonnummer beschikbaar';
+  const hasOrganization = user._contact?.organization_id ? true : false;
 
   return (
     <AppLayout>
@@ -109,7 +159,7 @@ const AccountPage: NextPage = () => {
                 <PhoneIcon className="h-5 w-5 text-default-500" />
                 <div>
                   <p className="text-sm text-default-500">Telefoonnummer</p>
-                  <p>{user._contact?.phone || user.phone || 'Geen telefoonnummer beschikbaar'}</p>
+                  <p>{phoneNumber}</p>
                 </div>
               </div>
               
@@ -117,7 +167,7 @@ const AccountPage: NextPage = () => {
                 <BuildingOfficeIcon className="h-5 w-5 text-default-500" />
                 <div>
                   <p className="text-sm text-default-500">Bedrijf</p>
-                  <p>{user._contact?.organization_id ? 'Verbonden aan organisatie' : 'Geen bedrijf beschikbaar'}</p>
+                  <p>{hasOrganization ? 'Verbonden aan organisatie' : 'Geen bedrijf beschikbaar'}</p>
                 </div>
               </div>
             </div>
@@ -164,5 +214,14 @@ const AccountPage: NextPage = () => {
     </AppLayout>
   );
 };
+
+// Add getServerSideProps to prevent static generation and ensure server-side rendering
+export const getServerSideProps = async () => {
+  return {
+    props: {
+      // Empty props, just to ensure this page is server-rendered
+    }
+  };
+}
 
 export default AccountPage; 

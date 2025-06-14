@@ -32,6 +32,14 @@ const nextConfig = {
   // Asset optimization
   compress: true,
   
+  // Exclude pages with getServerSideProps from export
+  exportPathMap: async function (defaultPathMap, { dev, dir, outDir, distDir, buildId }) {
+    // Remove account page from export
+    const pathMap = { ...defaultPathMap };
+    delete pathMap['/account'];
+    return pathMap;
+  },
+  
   // Performance optimizations
   // Disabled optimizeCss to avoid critters dependency issue
   // experimental: {
