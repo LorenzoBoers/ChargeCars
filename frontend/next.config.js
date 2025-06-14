@@ -34,9 +34,10 @@ const nextConfig = {
   
   // Exclude pages with getServerSideProps from export
   exportPathMap: async function (defaultPathMap, { dev, dir, outDir, distDir, buildId }) {
-    // Remove account page from export
+    // Remove account and settings pages from export
     const pathMap = { ...defaultPathMap };
     delete pathMap['/account'];
+    delete pathMap['/settings'];
     return pathMap;
   },
   
