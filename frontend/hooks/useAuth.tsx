@@ -201,17 +201,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
-    // Clear local storage
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('tokenExpiry');
-    localStorage.removeItem('userRole');
-    
-    // Clear state
-    setToken(null);
-    setUser(null);
-    
-    // Redirect to login
-    router.push('/auth/login');
+    try {
+      // Controleer of we in browser omgeving zijn (niet tijdens SSG)
+      if (typeof window !== 'undefined') {
+        // Clear local storage
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('tokenExpiry');
+        localStorage.removeItem('userRole');
+      }
+      
+      // Clear state
+      setToken(null);
+      setUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const refreshUser = async (): Promise<void> => {

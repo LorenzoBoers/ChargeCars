@@ -161,12 +161,29 @@ export function Sidebar({ className = "" }: SidebarProps) {
   };
 
   const handleLogout = async () => {
-    if (logout) {
-      try {
+    try {
+      // Controleer of we in browser omgeving zijn (niet tijdens SSG)
+      if (typeof window !== 'undefined') {
+        // Eerst lokale opslag wissen om te zorgen dat de gebruiker altijd wordt uitgelogd
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('tokenExpiry');
+        localStorage.removeItem('userRole');
+      }
+      
+      // Dan de logout functie aanroepen als deze beschikbaar is
+      if (logout) {
         await logout();
-        router.push('/auth/login');
-      } catch (error) {
-        console.error('Logout error:', error);
+      }
+      
+      // Expliciet naar login pagina navigeren
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/login';
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Bij een fout alsnog naar de login pagina navigeren
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth/login';
       }
     }
   };
