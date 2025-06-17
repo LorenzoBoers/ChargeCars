@@ -1,0 +1,43 @@
+﻿Bedrijfsnaam;organisatie uuid;business entity;Adres;E-mail algemeen;E-mail facturatie;Monteur hulplijn;Primaire Account manager;Soort organisatie;Telefoon algemeen
+LaderThuis.nl;65057c9f6fef36994cd8276d;LaderThuis;Melkrijder 21, Nijkerk, Gelderland, 3861 SG, Nederland;info@laderthuis.nl;;;Corné den Hartog;Opdrachtgever, Lead generator;+31 6 12345677
+ChargeCars;6505a0ec6f477e53910481b4;ChargeCars;Melkrijder 21, Nijkerk, Gelderland, 3861 SG, Nederland;info@chargecars.nl;;+31 85 130 6433;Lorenzo Boers;Opdrachtgever;+31 85 130 6433
+RatioShop.nl;6505a104e41d8bc97e37deb5;RatioShop;Melkrijder 21, Nijkerk, Gelderland, 3861 SG, Nederland;info@ratioshop.nl;;+31 85 130 6433;Corné den Hartog;Opdrachtgever, Lead generator;+31 85 130 6433
+MeterkastThuis.nl;6505a10ab2a9f7cfaefcc4c4;MeterkastThuis;Melkrijder 21, Nijkerk, Gelderland, 3861 SG, Nederland;info@meterkastthuis.nl;;+31 30 760 8844;Faber  Snaak;Opdrachtgever, Lead generator;+31 30 760 8844
+50five;6507f572e7d1fc2fe0f51cde;ChargeCars;;info@50five.com;;+31 24 808 0345;Lorenzo Boers;Opdrachtgever, Contractor;
+EV-company;6507f627b781347f89b4073b;ChargeCars;;planning@evcompany.nl;;+31 20 765 7003;Job van de Goede;Opdrachtgever, Contractor;+31 20 765 7000
+GS engineering;6507f631c7fab5bf908b1cdf;ChargeCars;;team@gsengineeringservices.nl;facturatie@gsengineeringservices.nl;+31 6 47551426;Job van de Goede;Opdrachtgever, Contractor;+31 6 45493822
+Awesems;6507f6355bb3a05f5b68c5cf;ChargeCars;;info@awesems.com;invoice@awesems.odoo.com;+31 6 19081964;Job van de Goede;Opdrachtgever, Contractor;+31 6 53609813
+Eneco;6507f63b0331e72674ba5edb;ChargeCars;;Support@eneco-emobility.com;; +31882022802;Faber  Snaak;Opdrachtgever, Energy;0882022802
+Essent;6507f63f8a99053c5b098504;ChargeCars;4 Willemsplein, 's-Hertogenbosch, Noord-Brabant, 5211 BN, Nederland;elektrischladen@essent.nl;;073 8501936;Faber  Snaak;Opdrachtgever, Energy;+31 73 850 1777
+Vandebron;6507f64418a237dc91c8ba50;ChargeCars;;elektrischrijden@vandebron.nl;facturen@vandebron.nl;+31 6 36536285;Faber  Snaak;Opdrachtgever, Energy;+31 20 323 0801
+Alva Charging;6507f64ae09084677d389062;ChargeCars;;support@alva-charging.nl;Facturen@alva-charging.nl;+31 85 016 3611;Faber  Snaak;Opdrachtgever, Contractor;+31 310658989729
+Lanova;6507f69c10c94e2ad2c0eb51;ChargeCars;;sales@lanovalaadpalen.nl;invoices@lanovalaadpalen.nl;+31 88 011 0301;Job van de Goede;Opdrachtgever, Leverancier;+31 88 011 0301
+Abel & Co;6507f6b70331e72674ba5edd;ChargeCars;;emobility@abelenco.nl;emobility@abelenco.nl;+31 13 581 0859;Job van de Goede;Opdrachtgever, Contractor;+31 318000232334
+Tibber;6507f6d0140ee90034238db0;ChargeCars;Looiersgracht 43, Amsterdam, Noord-Holland, 1016 VR, Netherlands;hello@tibber.com;;;Lars Straatman;Opdrachtgever, Energy, Lead generator; +31 20 809 8888
+Allego;6507f77e7fb181f68058c28b;ChargeCars;;service@allego.eu;accountspayable@allego.eu;+31 6 15076605;Job van de Goede;Opdrachtgever, Contractor;+31 6 15076605
+Baas B.V.;6507f78af0bdab792e37d335;ChargeCars;;thuisladen@ev-ready.info;thuisladen@ev-ready.info;;Corné den Hartog;Opdrachtgever, Contractor;088 222 70 00
+NXT Mobility;6507f79141848f34fe3cf745;ChargeCars;;sales@nxtmobility.nl;efactuurcs@nxtmobility.nl;088 472 04 72;Corné den Hartog;Opdrachtgever, Contractor;+31 6 50459035
+Reith Power;6507f7979393fd4899a132d7;ChargeCars;;info@reithpower.nl;;;Lorenzo Boers;Opdrachtgever, Contractor;088 603 3400
+Avia Volt;6507f79ab8bd5461de7b428c;ChargeCars;;info@aviavolt.nl;;+31 6 42322950;Lorenzo Boers;Opdrachtgever, Contractor;+31 88 134 4081
+Laadunie;650802a965c11e7f4ae95689;ChargeCars;;info@laadunie.nl;;;Job van de Goede;Opdrachtgever, Contractor;31 (0)10 669 0444
+Installatiewereld;650802bee66dd8fc6fd99bc9;ChargeCars;;info@installatiewereld.nl;info@installatiewereld.nl;+31 310641552931;Job van de Goede;Opdrachtgever, Contractor;+31 6 41552931
+Cube Charging;650802c778b8acc179d1a747;ChargeCars;;info@cubecharging.com;facturen@cubecharging.com;+31 85 004 4400;Job van de Goede;Opdrachtgever, Leverancier;+31 85 004 4400
+Media 73;650802ccad8473190eb9774d;ChargeCars;;redactiemedia73@gmail.com;;+31 251 748 743;Corné den Hartog;Opdrachtgever, Contractor;+31 251 748 743
+Soolutions;650802d0cbc72f0f028444d4;ChargeCars;;antenservice@soolutions.com;;;Lorenzo Boers;Opdrachtgever, Contractor;31 (0) 85 06 04 784
+Laadpaal Outlet;650802df5d85ed5d11be8e37;ChargeCars;;info@laadpaal-outlet.nl;info@laadpaal-outlet.nl;+31 36 203 4007;Job van de Goede;Opdrachtgever, Contractor;+31 36 203 4007
+Snel een laadpaal;650802e8ad8473190eb9774f;ChargeCars;;Michiel@sneleenlaadpaal.nl;Michiel@sneleenlaadpaal.nl;;Corné den Hartog;Opdrachtgever, Contractor;
+ChargeControl;650802ee5d85ed5d11be8e39;ChargeCars;;;;0886445533;Corné den Hartog;Opdrachtgever, Contractor;0886445533
+Aiways;650802ff52d360e308e046a8;ChargeCars;;info@aiways.nl;;;Lorenzo Boers;Opdrachtgever, Autofabrikant;0854444595
+Vattenfall;657837450547f31c0fed68b5;ChargeCars;;vattenfall@vattenfall.nl;;;Lorenzo Boers;Opdrachtgever, Energy;020 89 20 255
+Myenergi;658c437a027536dca18f6a04;ChargeCars;Fregatweg 60, Maastricht, 6222 NZ, Netherlands;benelux.support@myenergi.com;;+31 85 400 5522;Corné den Hartog;Producent, Opdrachtgever, Lead generator;+31 85 400 5522
+Z-Energy;659e4e00e6cf3e2e97402a88;ChargeCars;;info@z-energy.nl;;;Corné den Hartog;Opdrachtgever, Automotive;+31 88 055 3902
+Groendus;65a84964f7620d6897cb0a6c;ChargeCars;;thuisladen@groendus.nl;;+31 85 029 0148;Yairo Jacobs;Opdrachtgever, Energy;+31 85 029 0148
+Peblar;65d30acff4e7dbe6de11bd0e;ChargeCars;;;;;Lorenzo Boers;Opdrachtgever, Leverancier;
+Ford;65e3cf65c05452e2ee74efbd;ChargeCars;;esalesnl@ford.com;;;Vasko Gasteovski;Opdrachtgever, Autofabrikant, Automotive;31 70 7703 777
+Tesla;65e3d16935435e614bcb92d8;ChargeCars;;eupress@tesla.com;;;Corné den Hartog;Opdrachtgever, Autofabrikant, Automotive;013 799 9525
+Volvo;65e3d4beb879eceb886c0ca3;ChargeCars;;marcel.pesselse@volvocars.com;marcel.pesselse@volvocars.com;;Vasko Gasteovski;Autofabrikant, Opdrachtgever, Automotive;0345 688352
+Schouten Energy;65e8642423f9c778ff12fbc0;ChargeCars;;info@schoutenenergy.nl;;;Corné den Hartog;Opdrachtgever;(0172) 423200
+EV-solutions;65eb0a0bef271439b1851dea;ChargeCars;;info@ev-solutions.nl;;+31 85 401 9175;Faber  Snaak;Opdrachtgever, Contractor;
+Kia;6632006879544acb5fa59490;ChargeCars;;B.niesing@kia.nl;;;Vasko Gasteovski;Opdrachtgever, Autofabrikant, Automotive;+31 0346 753 824
+Van Mossel Energie;664731241be462833ef2b7c9;ChargeCars;;energie@vanmossel.nl;;;Vasko Gasteovski;Opdrachtgever, Automotive, Dealer groep;0416 820712  
+ZaptecShop;67af3b2fc492bcece4de6e87;;Melkrijder 21, Nijkerk, Gelderland, 3861 SG, Netherlands;info@zaptecshop.nl;info@zaptecshop.nl;;Lorenzo Boers;Opdrachtgever, Lead generator;030 401 0465

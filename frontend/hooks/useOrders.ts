@@ -17,7 +17,8 @@
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { apiClient, OrderResponse, OrderFilters, DashboardStats, handleApiError } from '../lib/api';
+import { apiClient, handleApiError } from '../lib/api';
+import { OrderResponse, OrderFilters, DashboardStats } from '@/types';
 
 /**
  * Return type for the useOrders hook
@@ -145,8 +146,6 @@ export const useOrders = (initialFilters?: OrderFilters): UseOrdersReturn => {
   const [itemsPerPage, setItemsPerPage] = useState(initialFilters?.per_page || 10);
   const [totalItems, setTotalItems] = useState(0);
 
-
-
   // Single unified effect for all data fetching to prevent multiple calls
   useEffect(() => {
     let isActive = true; // Prevent race conditions
@@ -248,19 +247,22 @@ export const useOrders = (initialFilters?: OrderFilters): UseOrdersReturn => {
     let filtered = orders;
 
     if (searchValue && !filtered.some(order => 
-      order.order_number.toLowerCase().includes(searchValue.toLowerCase()) ||
-      order.customer_name?.toLowerCase().includes(searchValue.toLowerCase())
+      // Zoek in verschillende velden
+      (order.order_number?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      order.customer_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      order.customer_first_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      order.customer_last_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      order.business_entity?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      order.account?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      order.order_number?.toLowerCase().includes(searchValue.toLowerCase()) ||
+      order.status?.toLowerCase().includes(searchValue.toLowerCase()))
     )) {
-      // If API doesn't return filtered results, do client-side filtering
-      filtered = orders.filter(order =>
-        order.order_number.toLowerCase().includes(searchValue.toLowerCase()) ||
-        order.customer_name?.toLowerCase().includes(searchValue.toLowerCase()) ||
-        order.partner_name?.toLowerCase().includes(searchValue.toLowerCase())
-      );
+      // Als geen resultaten, toon lege lijst
+      return [];
     }
 
     return filtered;
-  }, [orders, searchValue]);
+  }, [orders, searchValue, selectedBusinessEntity, selectedOrderType, selectedStatus, selectedPriority]);
 
   // Calculate pagination
   const pagination = useMemo(() => ({
@@ -306,35 +308,47 @@ export const useOrders = (initialFilters?: OrderFilters): UseOrdersReturn => {
   // CRUD operations
   const createOrder = useCallback(async (orderData: Partial<OrderResponse>): Promise<boolean> => {
     try {
-      const response = await apiClient.createOrder(orderData);
+      setLoading(true);
+      const response = await apiClient.createOrder(orderData as any);
+      
       if (response.success) {
-        await refreshOrders(); // Refresh list
+        // Refresh orders
+        refreshOrders();
         return true;
       } else {
-        setError(handleApiError(response));
+        setError(response.error?.message || 'Failed to create order');
         return false;
       }
     } catch (err) {
       setError(handleApiError(err));
       return false;
+    } finally {
+      setLoading(false);
     }
   }, [refreshOrders]);
 
   const updateOrder = useCallback(async (id: string, orderData: Partial<OrderResponse>): Promise<boolean> => {
     try {
-      const response = await apiClient.updateOrder(id, orderData);
+      setLoading(true);
+      const response = await apiClient.updateOrder(id, orderData as any);
+      
       if (response.success) {
-        await refreshOrders(); // Refresh list
+        // Update order in local state
+        setOrders(orders.map(order => 
+          order.id === id ? { ...order, ...response.data } : order
+        ));
         return true;
       } else {
-        setError(handleApiError(response));
+        setError(response.error?.message || 'Failed to update order');
         return false;
       }
     } catch (err) {
       setError(handleApiError(err));
       return false;
+    } finally {
+      setLoading(false);
     }
-  }, [refreshOrders]);
+  }, [refreshOrders, orders]);
 
   const deleteOrder = useCallback(async (id: string): Promise<boolean> => {
     try {
@@ -351,8 +365,6 @@ export const useOrders = (initialFilters?: OrderFilters): UseOrdersReturn => {
       return false;
     }
   }, [refreshOrders]);
-
-
 
   return {
     orders,

@@ -1,202 +1,133 @@
-# ChargeCars Frontend - Order Management System
+# ChargeCars Frontend
 
-A modern, dark-themed React order management interface built with NextUI and Tailwind CSS, designed specifically for ChargeCars' charging station installations business.
+Frontend applicatie voor het ChargeCars platform, gebouwd met Next.js, TypeScript en NextUI.
 
-## 🎨 **ChargeCars Branding**
+## 📋 Inhoudsopgave
 
-### **Color Palette**
-- **Primary Blue**: `#0ea5e9` - Professional charging technology brand
-- **Electric Green**: `#22c55e` - Sustainable energy accent  
-- **Dark Background**: `#0a0a0a` - Modern dark interface
-- **Content Areas**: `#111111`, `#1a1a1a`, `#222222` - Layered depth
+- [Overzicht](#overzicht)
+- [Installatie](#installatie)
+- [Ontwikkeling](#ontwikkeling)
+- [Componenten](#componenten)
+- [Documentatie](#documentatie)
+- [Backend Integratie](#backend-integratie)
 
-### **Design Philosophy**
-- **Professional & Technical**: Reflecting ChargeCars' expertise in electrical installations
-- **Sustainable Focus**: Green accents emphasizing clean energy
-- **Efficiency-Driven**: Clean layouts for operational workflows
-- **Dark Theme**: Reduces eye strain for extended use
+## 🚀 Overzicht
 
-## 🚀 **Quick Start**
+ChargeCars is een platform voor het beheren van laadpaal installaties, onderhoud en service. De frontend applicatie biedt een gebruiksvriendelijke interface voor het beheren van orders, klanten, partners en meer.
 
-### 1. Install Dependencies
+Belangrijkste features:
+- Order management
+- Klantbeheer
+- Partner management
+- Rapportages en dashboards
+- Gebruikersbeheer en authenticatie
+
+## 💻 Installatie
+
+### Vereisten
+
+- Node.js 16+
+- npm of yarn
+
+### Setup
 
 ```bash
+# Clone de repository
+git clone https://github.com/chargecars/frontend.git
+cd frontend
+
+# Installeer dependencies
 npm install
-```
+# of
+yarn install
 
-### 2. Required Dependencies
-
-The component uses these key dependencies:
-- **NextUI v2.6.11**: Modern React UI library with dark theme
-- **Heroicons v2.1.1**: Beautiful hand-crafted SVG icons
-- **Tailwind CSS v3.4.0**: Utility-first CSS framework
-- **Framer Motion v11.5.6**: Animation library (required by NextUI)
-
-### 3. Development Server
-
-```bash
+# Start de development server
 npm run dev
+# of
+yarn dev
 ```
 
-Open [http://localhost:3000/orders](http://localhost:3000/orders) to view the order management interface.
+De applicatie is nu beschikbaar op `http://localhost:3000`.
 
-## 📱 **Component Features**
+## 🛠️ Ontwikkeling
 
-### ✅ **Sidebar Navigation**
-- Dashboard, Orders, Quotes, Installations, Customers, Communication, Analytics, Settings
-- ChargeCars logo with electric bolt icon
-- User profile section
-- Active state highlighting
+### Mappenstructuur
 
-### ✅ **Metrics Dashboard**
-- **Total Orders**: 3,905 (+12%)
-- **Active Orders**: 247 (+5%) 
-- **Monthly Revenue**: €2.4M (+18%)
-- **Completion Rate**: 94% (-2%)
-- Color-coded trend indicators
-
-### ✅ **Advanced Filtering**
-- Search by name/reference number
-- Filter dropdowns for Status, Owner, Organization
-- "More Filters" expandable options
-
-### ✅ **Modern Data Table**
-- Order status with color-coded chips
-- Customer and organization information
-- Order values in ChargeCars styling
-- Owner assignments with avatars
-- Quick action buttons (view, edit, schedule, contact)
-
-### ✅ **Status Management**
-- **Nieuwe lead** (New lead) - Primary blue
-- **In behandeling** (In progress) - Warning orange
-- **Planning** (Scheduled) - Secondary purple  
-- **Geïnstalleerd** (Installed) - Success green
-- **Wacht op onderdelen** (Waiting for parts) - Default gray
-
-### ✅ **Professional UX**
-- Hover effects and smooth transitions
-- Responsive design for different screen sizes
-- Pagination with ChargeCars styling
-- Consistent spacing and typography
-
-## 🛠️ **Technical Stack**
-
-### **Frontend Framework**
-```json
-{
-  "framework": "Next.js 14",
-  "ui-library": "NextUI 2.6.11", 
-  "styling": "Tailwind CSS 3.4",
-  "icons": "Heroicons 2.1.1",
-  "animations": "Framer Motion 11.5.6"
-}
 ```
-
-### **File Structure**
-```
-03-frontend/
+frontend/
 ├── components/
-│   └── OrderManagement.tsx    # Main order management component
-├── pages/
-│   ├── _app.tsx              # Next.js app with NextUI provider
-│   └── orders.tsx            # Orders page
+│   ├── ui/           # Herbruikbare UI componenten
+│   ├── features/     # Feature-specifieke componenten
+│   └── layouts/      # Layout componenten
+├── pages/            # Next.js pagina's
+├── lib/
+│   ├── api/         # API client functies
+│   ├── hooks/       # Custom React hooks
+│   └── utils/       # Utility functies
 ├── styles/
-│   └── globals.css           # Global styles with ChargeCars theme
-├── tailwind.config.js        # ChargeCars color palette config
-├── postcss.config.js         # PostCSS configuration
-└── package.json              # Dependencies
+│   └── globals.css  # Globale CSS
+├── public/
+│   └── images/      # Statische afbeeldingen
+└── documentation/   # Project documentatie
 ```
 
-## 🎯 **Usage Examples**
+### Scripts
 
-### **Basic Implementation**
-```tsx
-import OrderManagement from '../components/OrderManagement'
-
-export default function OrdersPage() {
-  return (
-    <div className="min-h-screen bg-black">
-      <OrderManagement />
-    </div>
-  )
-}
-```
-
-### **Custom Styling**
-```tsx
-// Use ChargeCars brand colors in your components
-<Button color="primary">        {/* #0ea5e9 */}
-<Button color="secondary">      {/* #22c55e */}
-<Card className="bg-content1">  {/* #111111 */}
-```
-
-## 🔧 **Customization**
-
-### **Brand Colors**
-Update `tailwind.config.js` to modify the ChargeCars color palette:
-
-```js
-colors: {
-  chargecars: {
-    500: '#0ea5e9', // Primary brand blue
-    // ... other shades
-  },
-  electric: {
-    500: '#22c55e', // Electric green
-    // ... other shades  
-  }
-}
-```
-
-### **Dark Theme**
-The component is built for dark mode by default. Light mode support can be added by extending the NextUI theme configuration.
-
-## 📋 **Features Roadmap**
-
-### **Current (Static Data)**
-- ✅ Modern dark-themed interface
-- ✅ ChargeCars branding integration
-- ✅ Responsive order table
-- ✅ Status filtering and search
-- ✅ Professional UX/UI
-
-### **Future Enhancements**
-- 🔄 Dynamic data loading from ChargeCars API
-- 🔄 Real-time order status updates
-- 🔄 Advanced filtering and sorting
-- 🔄 Bulk actions for orders
-- 🔄 Export functionality
-- 🔄 Mobile-optimized views
-
-## 🎨 **ChargeCars Brand Alignment**
-
-This interface reflects ChargeCars' position as:
-- **Technical Experts**: Clean, professional interface design
-- **Efficiency Leaders**: Streamlined workflows and clear data presentation  
-- **Sustainable Focus**: Green accent colors and electric bolt iconography
-- **Customer-Centric**: Easy-to-use order management tools
-
-The dark theme reduces eye strain during extended use while the blue/green color palette maintains the technical yet sustainable brand identity that ChargeCars represents in the electric vehicle charging market.
-
-## 🚀 **Deployment**
-
-### **Build for Production**
 ```bash
-npm run build
-npm run start
+# Development
+npm run dev         # Start development server
+
+# Type checking
+npm run type-check  # Controleer TypeScript types
+
+# Linting
+npm run lint        # Run ESLint
+
+# Building
+npm run build       # Bouw voor productie
+npm start           # Start productieserver
 ```
 
-### **Static Export**
-```bash
-npm run build
-npm run export
-```
+## 🧩 Componenten
 
-## 📝 **License**
+De applicatie gebruikt een componentenbibliotheek gebaseerd op NextUI. Zie [documentatie/components.md](./documentation/components.md) voor een volledig overzicht van alle beschikbare componenten.
 
-Built for ChargeCars.nl - Professional charging station installation services.
+### UI Componenten
 
----
+Basis UI componenten zoals:
+- Button
+- StatusBadge
+- Card
+- Input
+- etc.
 
-**🔗 Ready to integrate with your existing ChargeCars backend APIs!** 
+### Feature Componenten
+
+Feature-specifieke componenten zoals:
+- OrderCard
+- OrderGrid
+- OrdersTable
+- OrderFilters
+- DashboardStats
+- etc.
+
+## 📚 Documentatie
+
+Uitgebreide documentatie is beschikbaar in de `documentation` map:
+
+- [Code Guidelines](./documentation/code-guidelines.md)
+- [Component Library](./documentation/components.md)
+- [Design System](./documentation/design-system.md)
+- [API Integration](./documentation/api-integration.md)
+
+## 🔄 Backend Integratie
+
+De frontend communiceert met de backend API via de functies in `lib/api`. Alle API endpoints zijn gedocumenteerd in `human-todo.md`.
+
+### Benodigde Backend Endpoints
+
+Zie [human-todo.md](./human-todo.md) voor een overzicht van alle benodigde backend endpoints.
+
+## 📝 Licentie
+
+Copyright © 2023 ChargeCars B.V. Alle rechten voorbehouden. 

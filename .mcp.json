@@ -1,0 +1,65 @@
+{
+    "mcpServers": {
+      "github": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"]
+      },
+      "playwright": {
+        "command": "npx",
+        "args": [
+          "@playwright/mcp@0.0.20",
+          "--config",
+          "/Users/Test/Documents/Coding/MCP_tools/playwright/config.json",
+          "--vision"
+        ]
+      },
+      "playwright_test": {
+        "command": "npx",
+        "args": [
+          "@playwright/mcp@0.0.20",
+          "--config",
+          "/Users/Test/Documents/Coding/MCP_tools/playwright/config.json"
+        ]
+      },
+      "browsermcp": {
+        "command": "npx",
+        "args": ["@browsermcp/mcp@latest"]
+      },
+      "a2a Docs": {
+        "url": "https://gitmcp.io/google/a2a"
+      },
+      "xano": {
+        "command": "npx",
+        "args": [
+          "mcp-remote",
+          "https://api.chargecars.nl/x2/mcp/meta/mcp/sse",
+          "--header",
+          "Authorization:${AUTH_TOKEN}"
+        ],
+        "env": {
+          "AUTH_TOKEN": "eyJhbGciOiJSUzI1NiJ9.eyJ4YW5vIjp7ImRibyI6Im1hc3Rlcjp1c2VyIiwiaWQiOjEwNzI5OSwiYWNjZXNzX3Rva2VuIjp7ImtleWlkIjoiODBhNGE3ZjUtNmU2YS00YjAyLWJlZmQtY2I5OGM0NTJhNWFjIiwic2NvcGUiOnsidGVuYW50X2NlbnRlcjpiYWNrdXAiOjAsInRlbmFudF9jZW50ZXI6ZGVwbG95IjowLCJ0ZW5hbnRfY2VudGVyOmltcGVyc29uYXRlIjowLCJ0ZW5hbnRfY2VudGVyOmxvZyI6MCwidGVuYW50X2NlbnRlcjpyYmFjIjowLCJ0ZW5hbnRfY2VudGVyOnNlY3JldHMiOjAsInRlbmFudF9jZW50ZXIiOjAsIndvcmtzcGFjZTphZGRvbiI6MTUsIndvcmtzcGFjZTphcGkiOjE1LCJ3b3Jrc3BhY2U6Y29udGVudCI6MTUsIndvcmtzcGFjZTpkYXRhYmFzZSI6MTUsIndvcmtzcGFjZTpkYXRhc291cmNlOmxpdmUiOjE1LCJ3b3Jrc3BhY2U6ZmlsZSI6MTUsIndvcmtzcGFjZTpmdW5jdGlvbiI6MTUsIndvcmtzcGFjZTpsb2ciOjE1LCJ3b3Jrc3BhY2U6bWlkZGxld2FyZSI6MTUsIndvcmtzcGFjZTpyZXF1ZXN0aGlzdG9yeSI6MTUsIndvcmtzcGFjZTp0YXNrIjoxNSwid29ya3NwYWNlOnRvb2wiOjE1fX0sImV4cGlyZXNfYXQiOiIyMDI2LTA2LTE0IDE0OjQ0OjM1KzAwMDAifSwiaWF0IjoxNzQ5OTEyMjc1LCJuYmYiOjE3NDk5MTIyNzUsImF1ZCI6Inhhbm86bWV0YSJ9.LtepCkCv3EQFknX8VZR_A49J4Uz3x4Og1tpEtxOiODgz7zlaPbVwGJ5QBEUi2xLQ01rl_PsSi05EIIW9ElXOfoSUDZmH8zar2BJbYWTICk7RMqjIVuj40YML4l4bvu3sV01Bdf7RoFcLfBcLZf-_-apOlByqTrFWf8j-1vnEOpTQJVKOGMFTDC1Bi0AKUupPWR2HuKHPrNBw1kXA8L6c-uF7YhZ-O_cHOiAhYSFyXvEer5sSPEXIwuED1N3Yd61GWLlhSI2ZYWDPJAqfXIns8LD-mdz9cYbDDpLavbCs-EN5XQh7ZF-0q6U6G97hYS_tDIU6ld01biFZqb8YkT_jDB0UM1v_xdfpnhDhnwWwhAvkkh9HZg6bCzYcyFpIM0_-Y8x3QfZ-i1k5wLGYQCZHAiQckicgVe0elATZJx1bow6wI7RLHIwV6JzQniyAo_7ZCFZ7VxCxEFhWt_xcJPI2BVEFgdD5vljhBYvRsVbiaUZdtFwkNJ_zgjzKU1iTuqRsmfqxDpH3OqkV6z8gT8kxic0OUu2emCkk7GmjBy1nvZZy-dWcE3D0ZnEXJymr58pWcJOYtNRPhRCB7teQk4jcXT7_MkKQkFMbcGsbJBBNXzsx5q6hTzrAu8vavrw4lxhq-9xYfI01JYZK6cVTi1nqqlQnwr4i6jq0jC6wpqQUnBo"
+        }
+      },
+      "fillout": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-fillout"
+        ],
+        "env": {
+          "FILLOUT_API_KEY": "sk_prod_Ot4xSgrEy4m7l6SaZLDt1RNahth2Gc9aZ7mgLh3X6Os20E5cpj2rJ9u9a6tc04l0d9OoxXe24PEFMSO4duOQOgKefGwDfoa6MCt_21956"
+        }
+      },
+      "smartsuite": {
+          "command": "node",
+          "args": [
+              "C:/Users/Test/Documents/Coding/MCP_tools/smartsuite/index.js"
+          ],
+          "env": {
+              "SMARTSUITE_API_KEY": "d99cf9b32aeaa64bdebb86e05da1d50e951246d6",
+              "SMARTSUITE_WORKSPACE_ID": "suhw2iz6",
+              "PORT": "3001"
+          }
+      }
+    }
+  }

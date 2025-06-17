@@ -30,8 +30,12 @@ export const API_ENDPOINTS = {
   customers: '/customer',
   customerById: (id: string) => `/customer/${id}`,
   customerMetrics: '/customer/metrics',
+  customerLookup: '/customer/lookup',
+  endCustomer: '/end_customer',
+  endCustomerById: (id: string) => `/end_customer/${id}`,
   quotes: '/quote',
-  businessEntities: '/business_entities',
+  businessEntities: '/business_entity',
+  businessEntityById: (id: string) => `/business_entity/${id}`,
 
   
   // Auth endpoints (different API group)
@@ -733,6 +737,142 @@ class ApiClient {
       method: 'POST',
       body: JSON.stringify({ refresh_token: refreshToken }),
     }, true);
+  }
+
+  /**
+   * ===== BUSINESS ENTITY METHODS =====
+   * Methods for managing business entities
+   */
+
+  /**
+   * Get all business entities
+   * 
+   * @returns Promise resolving to API response with business entities
+   */
+  async getBusinessEntities(): Promise<ApiResponse<any[]>> {
+    console.log('🏢 API: Fetching business entities...');
+    
+    const response = await this.request<XanoListResponse<any>>(API_ENDPOINTS.businessEntities);
+    
+    if (response.success && response.data) {
+      console.log('🏢 API: Business entities loaded successfully, count:', response.data.items?.length || 0);
+      
+      return {
+        ...response,
+        data: response.data.items || [],
+      };
+    }
+    
+    return {
+      success: false,
+      data: [],
+      error: response.error
+    };
+  }
+
+  /**
+   * Get business entity by ID
+   * 
+   * @param id - Business entity ID
+   * @returns Promise resolving to API response with business entity
+   */
+  async getBusinessEntityById(id: string): Promise<ApiResponse<any>> {
+    console.log('🏢 API: Fetching business entity by ID:', id);
+    
+    return this.request<any>(API_ENDPOINTS.businessEntityById(id));
+  }
+
+  /**
+   * ===== END CUSTOMER METHODS =====
+   * Methods for creating and managing end customers
+   */
+
+  /**
+   * Create a new end customer
+   * 
+   * @param customerData - Customer data to create
+   * @returns Promise resolving to API response with created customer
+   */
+  async createEndCustomer(customerData: any): Promise<ApiResponse<any>> {
+    console.log('👤 API: Creating end customer:', customerData);
+    
+    const response = await this.request<any>(
+      API_ENDPOINTS.endCustomer,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(customerData)
+      }
+    );
+    
+    if (response.success) {
+      console.log('👤 API: End customer created successfully');
+    }
+    
+    return response;
+  }
+
+  /**
+   * Get end customer by ID
+   * 
+   * @param id - End customer ID
+   * @returns Promise resolving to API response with customer
+   */
+  async getEndCustomerById(id: string): Promise<ApiResponse<any>> {
+    console.log('👤 API: Fetching end customer by ID:', id);
+    
+    return this.request<any>(API_ENDPOINTS.endCustomerById(id));
+  }
+
+  /**
+   * Lookup customer by email
+   * 
+   * @param email - Customer email to lookup
+   * @returns Promise resolving to API response with customer lookup result
+   */
+  async lookupCustomerByEmail(email: string): Promise<ApiResponse<any>> {
+    console.log('🔍 API: Looking up customer by email:', email);
+    
+    const params = new URLSearchParams({ email });
+    const endpoint = `${API_ENDPOINTS.customerLookup}?${params.toString()}`;
+    
+    const response = await this.request<any>(endpoint);
+    
+    if (response.success) {
+      console.log('🔍 API: Customer lookup completed');
+    }
+    
+    return response;
+  }
+
+  /**
+   * ===== ORDER CREATION METHODS =====
+   * Enhanced order creation with customer handling
+   */
+
+  /**
+   * Create order with integrated customer creation
+   * 
+   * @param orderData - Complete order data including customer information
+   * @returns Promise resolving to API response with created order and customer
+   */
+  async createOrderWithCustomer(orderData: any): Promise<ApiResponse<any>> {
+    console.log('📝 API: Creating order with customer:', orderData);
+    
+    const response = await this.request<any>(
+      API_ENDPOINTS.orders,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      }
+    );
+    
+    if (response.success) {
+      console.log('📝 API: Order created successfully');
+    }
+    
+    return response;
   }
 }
 

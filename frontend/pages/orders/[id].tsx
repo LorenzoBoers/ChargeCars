@@ -22,7 +22,10 @@ import {
   Badge,
   Switch,
   Tabs,
-  Tab
+  Tab,
+  Spinner,
+  Breadcrumbs,
+  BreadcrumbItem
 } from "@nextui-org/react";
 import {
   ArrowLeftIcon,
@@ -50,9 +53,13 @@ import {
   CloudArrowUpIcon,
   PhotoIcon,
   TableCellsIcon,
-  PresentationChartBarIcon
+  PresentationChartBarIcon,
+  TrashIcon,
+  DocumentDuplicateIcon
 } from "@heroicons/react/24/outline";
 import { AppLayout } from '../../components/layouts/AppLayout';
+import StatusBadge from '@/components/ui/StatusBadge';
+import { formatCurrency, formatDate } from '@/lib/utils/dateUtils';
 
 // Mock data interfaces
 interface OrderStatus {
@@ -251,16 +258,66 @@ const OrderDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showInternalNotes, setShowInternalNotes] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock loading state
-  if (!id) {
+  // Simulate loading
+  React.useEffect(() => {
+    if (id) {
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [id]);
+
+  const handleBack = () => {
+    router.push('/orders');
+  };
+  
+  const handleEdit = () => {
+    router.push(`/orders/edit/${id}`);
+  };
+  
+  const handleDelete = () => {
+    // Show confirmation dialog and delete
+    console.log('Delete order:', id);
+  };
+  
+  const handleDuplicate = () => {
+    // Duplicate order logic
+    console.log('Duplicate order:', id);
+  };
+
+  if (loading) {
     return (
       <AppLayout>
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <div className="w-8 h-8 bg-primary rounded animate-pulse mx-auto mb-4" />
-            <p className="text-foreground-500">Loading order...</p>
+        <div className="flex justify-center items-center h-[calc(100vh-200px)]">
+          <Spinner size="lg" />
           </div>
+      </AppLayout>
+    );
+  }
+  
+  if (error) {
+    return (
+      <AppLayout>
+        <div className="flex justify-center items-center h-[calc(100vh-200px)]">
+          <Card>
+            <CardBody>
+              <p className="text-danger">{error}</p>
+              <Button
+                color="primary"
+                variant="light"
+                startContent={<ArrowLeftIcon className="h-4 w-4" />}
+                onPress={handleBack}
+                className="mt-4"
+              >
+                Terug naar Orders
+              </Button>
+            </CardBody>
+          </Card>
         </div>
       </AppLayout>
     );
@@ -362,573 +419,195 @@ const OrderDetailPage: React.FC = () => {
   return (
     <>
       <Head>
-        <title>Order {order.orderNumber} - ChargeCars Portal</title>
+        <title>{order.orderNumber} - ChargeCars Portal</title>
+        <meta name="description" content={`Order details voor ${order.orderNumber}`} />
       </Head>
 
       <AppLayout>
         <div className="p-4 space-y-4">
-          {/* Header with Actions */}
-          <div className="flex items-center justify-between">
+          {/* Breadcrumbs */}
+          <Breadcrumbs size="sm">
+            <BreadcrumbItem href="/orders">Orders</BreadcrumbItem>
+            <BreadcrumbItem>{order.orderNumber}</BreadcrumbItem>
+          </Breadcrumbs>
+          
+          {/* Header */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <Button
                 isIconOnly
                 variant="light"
-                size="sm"
-                onPress={() => router.back()}
+                onPress={handleBack}
+                className="h-8 w-8"
               >
                 <ArrowLeftIcon className="h-4 w-4" />
               </Button>
               <div>
-                <h1 className="text-xl font-bold text-foreground">Order {order.orderNumber}</h1>
-                <p className="text-sm text-foreground-600">{order.customerName} • {order.partnerName}</p>
+                <h1 className="text-xl font-bold text-foreground">
+                  {order.orderNumber}
+                </h1>
+                <div className="flex items-center gap-2">
+                  <StatusBadge 
+                    statusColor={order.statuses[order.statuses.length - 1].color} 
+                    label={order.statuses[order.statuses.length - 1].name}
+                  />
+                  <span className="text-xs text-foreground-500">
+                    Aangemaakt op {formatDate(order.createdAt)}
+                  </span>
+                </div>
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
-              <Button color="primary" size="sm" startContent={<PencilIcon className="h-4 w-4" />}>
+            <div className="flex gap-2">
+              <Button
+                color="default"
+                variant="bordered"
+                size="sm"
+                startContent={<DocumentDuplicateIcon className="h-4 w-4" />}
+                onPress={handleDuplicate}
+              >
+                Dupliceren
+              </Button>
+              <Button
+                color="default"
+                variant="bordered"
+                size="sm"
+                startContent={<PencilIcon className="h-4 w-4" />}
+                onPress={handleEdit}
+              >
                 Bewerken
               </Button>
-              <Button variant="bordered" size="sm" startContent={<PrinterIcon className="h-4 w-4" />}>
-                Print
+              <Button
+                color="danger"
+                variant="bordered"
+                size="sm"
+                startContent={<TrashIcon className="h-4 w-4" />}
+                onPress={handleDelete}
+              >
+                Verwijderen
               </Button>
-              <Button variant="bordered" size="sm" startContent={<ShareIcon className="h-4 w-4" />}>
-                Delen
-              </Button>
-              <Dropdown>
-                <DropdownTrigger>
-                  <Button isIconOnly variant="bordered">
-                    <EllipsisVerticalIcon className="h-4 w-4" />
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu>
-                  <DropdownItem key="duplicate">Dupliceren</DropdownItem>
-                  <DropdownItem key="archive">Archiveren</DropdownItem>
-                  <DropdownItem key="delete" className="text-danger" color="danger">
-                    Verwijderen
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
             </div>
           </div>
 
-          {/* Status Timeline */}
-          <Card>
-            <CardHeader className="pb-2">
-              <h2 className="text-base font-semibold">Order Status</h2>
+          {/* Order Details */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Main Info */}
+            <Card className="lg:col-span-2">
+              <CardHeader className="pb-0">
+                <h2 className="text-lg font-semibold">Order Informatie</h2>
             </CardHeader>
-            <CardBody className="pt-0">
-              <div className="flex items-center justify-between w-full overflow-x-auto pb-2">
-                {order.statuses.map((status, index) => (
-                  <React.Fragment key={status.id}>
-                    <div className="flex flex-col items-center min-w-[100px]">
-                      <div className={`
-                        w-8 h-8 rounded-full flex items-center justify-center border-2 mb-2 transition-all duration-200
-                        ${status.completed 
-                          ? 'bg-success border-success text-white shadow-md' 
-                          : status.current 
-                            ? 'border-primary bg-primary/10 text-primary ring-2 ring-primary/20' 
-                            : 'border-default-300 bg-default-100 text-default-400'
-                        }
-                      `}>
-                        {status.completed ? (
-                          <CheckCircleIcon className="h-4 w-4" />
-                        ) : status.current ? (
-                          <div className="w-2 h-2 rounded-full bg-primary" />
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-current opacity-50" />
-                        )}
-                      </div>
-                      <Chip
-                        size="sm"
-                        color={status.completed ? 'success' : status.current ? 'primary' : 'default'}
-                        variant={status.current ? 'solid' : status.completed ? 'flat' : 'light'}
-                        className="mb-1 text-xs"
-                      >
-                        {status.name}
-                      </Chip>
-                      {status.date && (
-                        <span className="text-xs text-foreground-500">{status.date}</span>
-                      )}
-                    </div>
-                    {index < order.statuses.length - 1 && (
-                      <div className="flex items-center justify-center flex-1 mx-1">
-                        <div className={`
-                          h-0.5 flex-1 rounded-full transition-colors duration-300
-                          ${status.completed ? 'bg-success' : 'bg-default-200'}
-                        `} />
-                        <ChevronRightIcon className={`
-                          h-4 w-4 mx-1 transition-colors duration-300
-                          ${status.completed ? 'text-success' : 'text-default-300'}
-                        `} />
-                      </div>
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
-
-          {/* Main Content Grid */}
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Left Column - Order Details */}
-            <div className="xl:col-span-2 space-y-6">
-              {/* Order Overview */}
-              <Card>
-                <CardHeader>
-                  <h3 className="text-lg font-semibold">Order Overzicht</h3>
-                </CardHeader>
-                <CardBody className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CardBody>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
                     <div>
-                      <p className="text-sm text-foreground-600">Order Type</p>
+                      <p className="text-xs text-foreground-500">Order Type</p>
                       <p className="font-medium">{order.orderType}</p>
                     </div>
+                    
                     <div>
-                      <p className="text-sm text-foreground-600">Business Entity</p>
-                      <Chip size="sm" color="secondary" variant="flat">{order.businessEntity}</Chip>
+                      <p className="text-xs text-foreground-500">Bedrag</p>
+                      <p className="font-medium">{formatCurrency(order.totalAmount)}</p>
                     </div>
+                    
                     <div>
-                      <p className="text-sm text-foreground-600">Totaal Bedrag</p>
-                      <p className="font-semibold text-lg">€{order.totalAmount.toLocaleString('nl-NL', { minimumFractionDigits: 2 })}</p>
+                      <p className="text-xs text-foreground-500">Business Entity</p>
+                      <p className="font-medium">{order.businessEntity}</p>
                     </div>
+                    
                     <div>
-                      <p className="text-sm text-foreground-600">Verwachte Levering</p>
-                      <p className="font-medium">{order.expectedDelivery}</p>
+                      <p className="text-xs text-foreground-500">Partner</p>
+                      <p className="font-medium">{order.partnerName}</p>
                     </div>
                   </div>
-                </CardBody>
-              </Card>
-
-              {/* Customer & Partner Details - 3 Cards Layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {/* Customer Details */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <h3 className="text-base font-semibold flex items-center gap-2">
-                      <UserIcon className="h-4 w-4" />
-                      Eindklant
-                    </h3>
-                  </CardHeader>
-                  <CardBody className="pt-0">
-                    <div 
-                      className="flex items-start gap-3 p-2 rounded-lg hover:bg-content2 transition-colors cursor-pointer"
-                      onClick={() => router.push(`/contacts/${order.customer.id}`)}
-                    >
-                      <Avatar name={order.customer.name} size="md" />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-sm text-primary hover:text-primary-600 transition-colors truncate">{order.customer.name}</h4>
-                        <p className="text-foreground-600 text-xs mb-2">{order.customer.role}</p>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1">
-                            <EnvelopeIcon className="h-3 w-3 text-foreground-500 flex-shrink-0" />
-                            <span className="text-xs truncate">{order.customer.email}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <PhoneIcon className="h-3 w-3 text-foreground-500 flex-shrink-0" />
-                            <span className="text-xs">{order.customer.phone}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="self-center flex-shrink-0">
-                        <ChevronRightIcon className="h-4 w-4 text-foreground-400" />
-                      </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-xs text-foreground-500">Verwachte Levering</p>
+                      <p className="font-medium">{order.expectedDelivery}</p>
                     </div>
-                  </CardBody>
-                </Card>
-
-                {/* Partner Details */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <h3 className="text-base font-semibold flex items-center gap-2">
-                      <BuildingOfficeIcon className="h-4 w-4" />
-                      Opdrachtgever
-                    </h3>
-                  </CardHeader>
-                  <CardBody className="pt-0">
-                    <div className="flex items-start gap-3 p-2">
-                      <Avatar name={order.partner.name} size="md" color="secondary" />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-sm truncate">{order.partnerName}</h4>
-                        <p className="text-foreground-600 text-xs mb-2 truncate">{order.partner.name} • {order.partner.role}</p>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1">
-                            <EnvelopeIcon className="h-3 w-3 text-foreground-500 flex-shrink-0" />
-                            <span className="text-xs truncate">{order.partner.email}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <PhoneIcon className="h-3 w-3 text-foreground-500 flex-shrink-0" />
-                            <span className="text-xs">{order.partner.phone}</span>
-                          </div>
+                    
+                    <div>
+                      <p className="text-xs text-foreground-500">Aangemaakt op</p>
+                      <p className="font-medium">{formatDate(order.createdAt)}</p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-xs text-foreground-500">Laatst bijgewerkt</p>
+                      <p className="font-medium">{formatDate(order.createdAt)}</p>
                         </div>
                       </div>
                     </div>
                   </CardBody>
                 </Card>
 
-                {/* Additional Contacts */}
+            {/* Customer Info */}
                 <Card>
-                  <CardHeader className="pb-2">
-                    <h3 className="text-base font-semibold">Overige Contacten</h3>
+              <CardHeader className="pb-0">
+                <h2 className="text-lg font-semibold">Klant Informatie</h2>
                   </CardHeader>
-                  <CardBody className="pt-0">
-                    <div className="space-y-2">
-                      {order.additionalContacts.length > 0 ? (
-                        order.additionalContacts.map((contact) => (
-                          <div key={contact.id} className="flex items-center gap-2 p-2 bg-content2/50 rounded-lg">
-                            <Avatar name={contact.name} size="sm" className="w-6 h-6 text-xs" />
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-xs truncate">{contact.name}</p>
-                              <p className="text-xs text-foreground-600 truncate">{contact.role}</p>
-                            </div>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-xs text-foreground-500 italic">Geen extra contacten</p>
-                      )}
-                      <Button 
-                        size="sm" 
-                        variant="light" 
-                        color="primary" 
-                        className="w-full text-xs h-6"
-                        startContent={<UserIcon className="h-3 w-3" />}
-                      >
-                        Contact Toevoegen
-                      </Button>
+              <CardBody>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <UserIcon className="h-5 w-5 text-primary" />
                     </div>
-                  </CardBody>
-                </Card>
-              </div>
-
-              {/* Addresses with Mock Images per Card */}
-              <div className="space-y-4">
-                <h3 className="text-base font-semibold flex items-center gap-2">
-                  <MapPinIcon className="h-4 w-4" />
-                  Adressen
-                </h3>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {order.addresses.map((address, index) => (
-                    <Card key={index}>
-                      <CardBody className="p-0">
-                        <div className="flex">
-                          {/* Address Info */}
-                          <div className="flex-1 p-4">
-                            <div className="flex items-center justify-between mb-3">
-                              <Chip 
-                                size="sm" 
-                                color={address.type === 'installation' ? 'primary' : 'secondary'} 
-                                variant="flat"
-                                className="text-xs"
-                              >
-                                {address.type === 'installation' ? 'Installatie' : 'Factuur'}
-                              </Chip>
-                              <Button
-                                size="sm"
-                                variant="light"
-                                isIconOnly
-                                className="h-6 w-6"
-                              >
-                                <PencilIcon className="h-3 w-3" />
-                              </Button>
-                            </div>
-                            <div className="space-y-2">
-                              <p className="font-medium text-sm">{address.street}</p>
-                              <p className="text-sm text-foreground-600">{address.zipCode} {address.city}</p>
-                              <p className="text-xs text-foreground-500">{address.country}</p>
+                    <div>
+                      <p className="text-xs text-foreground-500">Naam</p>
+                      <p className="font-medium">{order.customerName}</p>
                             </div>
                           </div>
                           
-                          {/* Mock Map Image */}
-                          <div className="relative w-[150px] h-32 bg-content2 rounded-r-lg overflow-hidden flex-shrink-0">
-                            <img
-                              src="/images/Schermafbeelding 2025-06-10 022658.png"
-                              alt="Kaart weergave"
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute top-2 right-2">
-                              <Button
-                                size="sm"
-                                variant="flat"
-                                color="primary"
-                                className="text-xs h-6"
-                                startContent={<MapPinIcon className="h-3 w-3" />}
-                              >
-                                Route
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </CardBody>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-
-              {/* Grouped Related Items */}
-              <Card>
-                <CardHeader>
-                  <h3 className="text-lg font-semibold">Gerelateerde Items</h3>
-                </CardHeader>
-                <CardBody>
-                  <div className="space-y-6">
-                    {Object.entries(groupedRelatedItems).map(([type, items]) => (
-                      <div key={type}>
-                        <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                          {getRelatedItemIcon(type)}
-                          {getGroupTitle(type)}
-                          <Chip size="sm" color="primary" variant="flat">{items.length}</Chip>
-                        </h4>
-                        <div className="space-y-2">
-                          {type === 'quote' && (
-                            <div className="space-y-2">
-                              {items.map((item) => (
-                                <div key={item.id} className="flex items-center justify-between p-3 bg-content2 rounded-lg hover:bg-content3 transition-colors cursor-pointer">
+                  <Divider />
+                  
                                   <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-primary/10 rounded-lg">
-                                      {getRelatedItemIcon(item.type)}
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <BuildingOfficeIcon className="h-5 w-5 text-primary" />
                                     </div>
                                     <div>
-                                      <p className="font-medium">{item.title}</p>
-                                      <p className="text-sm text-foreground-600">{item.date}</p>
+                      <p className="text-xs text-foreground-500">Bedrijf</p>
+                      <p className="font-medium">{order.businessEntity}</p>
                                     </div>
                                   </div>
+                  
+                  <Divider />
+                  
                                   <div className="flex items-center gap-3">
-                                    {item.amount && (
-                                      <span className="font-semibold">€{item.amount.toLocaleString('nl-NL')}</span>
-                                    )}
-                                    <Chip size="sm" color={getRelatedItemColor(item.status)} variant="flat">
-                                      {item.status}
-                                    </Chip>
-                                    <div className="flex gap-1">
-                                      <Button 
-                                        size="sm" 
-                                        variant="light"
-                                        onPress={() => router.push(`/quotes/${item.id}`)}
-                                      >
-                                        Bekijken
-                                      </Button>
-                                      <Button 
-                                        size="sm" 
-                                        color="primary" 
-                                        variant="flat"
-                                        onPress={() => router.push(`/quotes/${item.id}`)}
-                                      >
-                                        Bewerken
-                                      </Button>
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {type !== 'quote' && (
-                            <div className="space-y-2">
-                              {items.map((item) => (
-                                <div key={item.id} className="flex items-center justify-between p-3 bg-content2 rounded-lg hover:bg-content3 transition-colors cursor-pointer">
-                                  <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-primary/10 rounded-lg">
-                                      {getRelatedItemIcon(item.type)}
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <EnvelopeIcon className="h-5 w-5 text-primary" />
                                     </div>
                                     <div>
-                                      <p className="font-medium">{item.title}</p>
-                                      <p className="text-sm text-foreground-600">{item.date}</p>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-3">
-                                    {item.amount && (
-                                      <span className="font-semibold">€{item.amount.toLocaleString('nl-NL')}</span>
-                                    )}
-                                    <Chip size="sm" color={getRelatedItemColor(item.status)} variant="flat">
-                                      {item.status}
-                                    </Chip>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardBody>
-              </Card>
-            </div>
-
-            {/* Right Column - Timeline */}
-            <div className="space-y-6">
-              {/* Timeline Section */}
-              <Card className="h-[800px] flex flex-col">
-                <CardHeader className="pb-3 flex-shrink-0">
-                  <div className="flex items-center justify-between w-full">
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                      <ChatBubbleLeftRightIcon className="h-5 w-5" />
-                      Activiteiten
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        size="sm"
-                        isSelected={showInternalNotes}
-                        onValueChange={setShowInternalNotes}
-                        startContent={<EyeSlashIcon className="h-3 w-3" />}
-                        endContent={<EyeIcon className="h-3 w-3" />}
-                      />
-                      <span className="text-sm text-foreground-600">Intern</span>
+                      <p className="text-xs text-foreground-500">Email</p>
+                      <p className="font-medium">{order.customer.email}</p>
                     </div>
                   </div>
-                </CardHeader>
-
-                {/* Timeline Messages */}
-                <CardBody className="flex-1 overflow-y-auto p-0">
-                  <div className="p-6 space-y-4">
-                    {sortedTimeline.map((item) => (
-                      <div key={item.id} className="flex gap-3">
-                        {item.type !== 'audit' && (
-                          <Avatar 
-                            name={item.avatar || item.author} 
-                            size="sm" 
-                          />
-                        )}
-                        {item.type === 'audit' && (
-                          <div className="w-8 h-8 flex items-center justify-center">
-                            <div className="w-2 h-2 bg-default-400 rounded-full" />
-                          </div>
-                        )}
-                        <div className="flex-1">
-                          {item.type === 'audit' ? (
-                            // System events - simple text without background
-                            <div className="pt-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs text-foreground-500">{formatTimestamp(item.timestamp)}</span>
-                                <Chip size="sm" color="default" variant="flat" className="text-xs">
-                                  Systeem
-                                </Chip>
-                              </div>
-                              <p className="text-sm text-foreground-600 italic">{item.content}</p>
-                            </div>
-                          ) : (
-                            // Regular comments and internal notes
-                            <div className={`
-                              p-3 rounded-lg
-                              ${item.type === 'internal' 
-                                ? 'bg-warning/10 border border-warning/20' 
-                                : 'bg-content2'
-                              }
-                            `}>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-medium text-sm">{item.author}</span>
-                                <span className="text-xs text-foreground-500">{formatTimestamp(item.timestamp)}</span>
-                                {item.isInternal && (
-                                  <Chip size="sm" color="warning" variant="flat" className="text-xs">
-                                    Intern
-                                  </Chip>
-                                )}
-                              </div>
-                              <p className="text-sm">{item.content}</p>
-                              
-                              {/* Files */}
-                              {item.files && item.files.length > 0 && (
-                                <div className="mt-3 space-y-2">
-                                  {item.files.map((file, index) => (
-                                    <div key={index} className="flex items-center gap-2 p-2 bg-content1 rounded border border-divider">
-                                      <div className="flex-shrink-0">{getFileIcon(file.type)}</div>
-                                      <span className="text-sm flex-1">{file.name}</span>
-                                      <span className="text-xs text-foreground-500">{file.size}</span>
-                                      <Button size="sm" variant="light" className="text-xs">
-                                        Download
-                                      </Button>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardBody>
-                
-                {/* Add Comment Section - Moved to bottom */}
-                <div className="px-6 py-4 flex-shrink-0 border-t border-divider">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        size="sm"
-                        isSelected={isInternal}
-                        onValueChange={setIsInternal}
-                      />
-                      <span className="text-sm text-foreground-600">
-                        {isInternal ? 'Interne notitie' : 'Publieke opmerking'}
-                      </span>
+                  
+                  <Divider />
+                  
+                  <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <PhoneIcon className="h-5 w-5 text-primary" />
                     </div>
-                    
-                    <Textarea
-                      placeholder={isInternal ? "Voeg een interne notitie toe..." : "Voeg een opmerking toe..."}
-                      value={newComment}
-                      onValueChange={setNewComment}
-                      minRows={2}
-                      maxRows={4}
-                      classNames={{
-                        input: isInternal ? "bg-warning/5 border-warning/20" : ""
-                      }}
-                    />
-                    
-                    {/* File Upload */}
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="file"
-                        id="file-upload"
-                        multiple
-                        onChange={handleFileSelect}
-                        className="hidden"
-                      />
-                      <Button
-                        size="sm"
-                        variant="flat"
-                        startContent={<PaperClipIcon className="h-4 w-4" />}
-                        onPress={() => document.getElementById('file-upload')?.click()}
-                      >
-                        Bestanden
-                      </Button>
-                      
-                      <Button
-                        color="primary"
-                        size="sm"
-                        onPress={handleAddComment}
-                        isLoading={isLoading}
-                        isDisabled={!newComment.trim()}
-                        className="ml-auto"
-                      >
-                        {isInternal ? 'Notitie Toevoegen' : 'Toevoegen'}
-                      </Button>
+                    <div>
+                      <p className="text-xs text-foreground-500">Telefoon</p>
+                      <p className="font-medium">{order.customer.phone}</p>
                     </div>
-                    
-                    {/* Selected Files */}
-                    {selectedFiles.length > 0 && (
-                      <div className="space-y-2">
-                        {selectedFiles.map((file, index) => (
-                          <div key={index} className="flex items-center gap-2 p-2 bg-content2 rounded-lg">
-                            <div className="flex-shrink-0">{getFileIcon(file.type)}</div>
-                            <span className="text-sm flex-1 truncate">{file.name}</span>
-                            <span className="text-xs text-foreground-500">{(file.size / 1024 / 1024).toFixed(1)} MB</span>
-                            <Button
-                              size="sm"
-                              isIconOnly
-                              variant="light"
-                              onPress={() => removeFile(index)}
-                            >
-                              ×
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 </div>
+              </CardBody>
               </Card>
-            </div>
           </div>
+          
+          {/* Timeline and Notes (placeholder) */}
+          <Card>
+            <CardHeader className="pb-0">
+              <h2 className="text-lg font-semibold">Tijdlijn & Notities</h2>
+            </CardHeader>
+            <CardBody>
+              <p className="text-foreground-500 text-sm">
+                Hier komt de tijdlijn en notities voor deze order.
+              </p>
+            </CardBody>
+          </Card>
         </div>
       </AppLayout>
     </>
